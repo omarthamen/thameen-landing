@@ -73,7 +73,7 @@
       const open = learnReveal.classList.toggle("open");
       learnToggle.setAttribute("aria-expanded", open ? "true" : "false");
       const label = learnToggle.querySelector("span:first-child");
-      if (label) label.textContent = open ? "إخفاء القائمة" : "شنو راح تتعلّم؟ افتح القائمة الكاملة";
+      if (label) label.textContent = open ? "إخفاء القائمة" : "شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة";
     });
   }
 

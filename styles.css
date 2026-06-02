@@ -559,6 +559,14 @@ body {
   font-weight: 500;
 }
 
+/* عنوان فرعي داخل القائمة المكشوفة */
+.reveal-subtitle {
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  margin: 30px 0 16px;
+}
+
 /* داخل كل دورة */
 .inside-course {
   display: flex;
