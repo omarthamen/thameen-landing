@@ -203,8 +203,7 @@
   const marquee = document.querySelector(".reviews-marquee");
   const track = marquee && marquee.querySelector(".reviews-track");
   if (marquee && track) {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SPEED = 0.3; // تمرير تلقائي خفيف
+    const SPEED = 0.55; // تمرير تلقائي خفيف وواضح
     let hovered = false, isDown = false, moved = false;
     let startX = 0, startScroll = 0;
     let vel = 0, lastX = 0, lastT = 0, inertia = false;
@@ -262,7 +261,7 @@
       }
       requestAnimationFrame(step);
     }
-    if (!reduce) requestAnimationFrame(step);
+    requestAnimationFrame(step);
   }
 
   // ---- زر تشغيل الفيديو المخصّص ----
