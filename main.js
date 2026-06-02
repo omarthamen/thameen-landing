@@ -5,27 +5,29 @@
   const grid = document.getElementById("gallery-grid");
   const images = Array.isArray(window.GALLERY) ? window.GALLERY : [];
 
-  // ---- بناء شبكة المعرض ----
-  if (!images.length) {
-    grid.innerHTML =
-      '<div class="gallery-empty">ضع صورك في <b>assets/images/</b> ثم شغّل <b>update-gallery.command</b> وحدّث الصفحة.</div>';
-  } else {
-    images.forEach((src, i) => {
-      const item = document.createElement("button");
-      item.className = "gallery-item";
-      item.type = "button";
-      item.setAttribute("aria-label", "عرض الصورة " + (i + 1));
+  // ---- بناء شبكة المعرض (إن وُجد القسم) ----
+  if (grid) {
+    if (!images.length) {
+      grid.innerHTML =
+        '<div class="gallery-empty">ضع صورك في <b>assets/images/</b> ثم شغّل <b>update-gallery.command</b> وحدّث الصفحة.</div>';
+    } else {
+      images.forEach((src, i) => {
+        const item = document.createElement("button");
+        item.className = "gallery-item";
+        item.type = "button";
+        item.setAttribute("aria-label", "عرض الصورة " + (i + 1));
 
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "صورة " + (i + 1);
-      img.loading = "lazy";
-      img.decoding = "async";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "صورة " + (i + 1);
+        img.loading = "lazy";
+        img.decoding = "async";
 
-      item.appendChild(img);
-      item.addEventListener("click", () => openLightbox(i));
-      grid.appendChild(item);
-    });
+        item.appendChild(img);
+        item.addEventListener("click", () => openLightbox(i));
+        grid.appendChild(item);
+      });
+    }
   }
 
   // ---- Lightbox ----
