@@ -83,8 +83,8 @@
 
   // ====== الشهادات + بوكس إضافة تعليق ======
   // إعداد Supabase (اختياري) — لمّا يجهّز عمر المشروع يحط القيمتين هنا:
-  const SUPABASE_URL = ""; // مثال: https://xxxx.supabase.co
-  const SUPABASE_KEY = ""; // anon public key
+  const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
   const SB_TABLE = "reviews";
   const sbReady = !!(SUPABASE_URL && SUPABASE_KEY);
   const sbHeaders = (extra) =>
