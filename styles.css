@@ -379,34 +379,36 @@ body {
 /* ---------- جدار الشهادات ---------- */
 .reviews-marquee {
   position: relative;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  overflow-x: auto;
+  overflow-y: hidden;
+  direction: ltr;            /* تمرير متوقّع؛ نص البطاقات يبقى RTL */
+  cursor: grab;
+  scrollbar-width: none;     /* إخفاء شريط التمرير (فايرفوكس) */
+  -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
+.reviews-marquee::-webkit-scrollbar { display: none; } /* إخفاء (كروم/سفاري) */
+.reviews-marquee:active { cursor: grabbing; }
 .reviews-track {
   display: flex;
   gap: 16px;
   width: max-content;
-  animation: reviews-scroll 48s linear infinite;
-}
-@keyframes reviews-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  padding: 4px 0;
 }
 .review {
   flex: 0 0 320px;
   margin: 0;
+  direction: rtl;
   background: var(--bg-panel);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 22px 22px 20px;
+  user-select: none;
 }
 .review .stars { color: #ffc24b; letter-spacing: 2px; font-size: 15px; margin-bottom: 12px; }
 .review p { color: var(--text-muted); font-size: 15.5px; line-height: 1.7; }
 .review figcaption { margin-top: 14px; font-weight: 700; color: var(--text); font-size: 15px; }
-@media (prefers-reduced-motion: reduce) {
-  .reviews-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; }
-}
 
 /* ---------- قسم دمج الأدوات (بارز) ---------- */
 .stack-card {
