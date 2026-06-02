@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111118"/>
+      <stop offset="1" stop-color="#0a0a0d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.7" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#2C8DD0" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#2C8DD0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect width="800" height="600" fill="url(#glow)"/>
+  <text x="400" y="270" text-anchor="middle" font-family="SF Arabic, Tajawal, sans-serif" font-size="70" fill="#5BB8E8">◆</text>
+  <text x="400" y="360" text-anchor="middle" font-family="SF Arabic, Tajawal, sans-serif" font-size="48" font-weight="800" fill="#ffffff">التطبيق</text>
+  <text x="400" y="410" text-anchor="middle" font-family="SF Arabic, Tajawal, sans-serif" font-size="22" fill="rgba(255,255,255,0.5)">صورة مؤقتة — استبدلها بصورتك</text>
+</svg>
