@@ -228,47 +228,181 @@ body {
   border-radius: 16px;
 }
 
-/* ---------- كروت المهارات ---------- */
-.features-grid {
+/* ---------- كروت الدورات ---------- */
+.course-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 18px;
+  align-items: start;
 }
-.feature-card {
-  background:
-    radial-gradient(120% 100% at 100% 0%, rgba(44,141,208,0.12), transparent 60%),
-    var(--bg-panel);
+.course-card {
+  background: var(--bg-panel);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  padding: 28px 24px;
+  border-radius: 20px;
+  padding: 26px 24px;
   transition: transform 0.3s var(--ease-out), border-color 0.3s, box-shadow 0.3s;
 }
-.feature-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(91,184,232,0.4);
-  box-shadow: 0 24px 50px rgba(0,0,0,0.5);
+.course-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px rgba(0,0,0,0.5); }
+.course-card--featured {
+  border-color: rgba(91,184,232,0.45);
+  box-shadow: 0 0 0 1px rgba(91,184,232,0.25), 0 30px 60px rgba(0,0,0,0.5);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(44,141,208,0.16), transparent 55%),
+    var(--bg-panel);
 }
-.feature-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  font-size: 28px;
-  background: rgba(91,184,232,0.12);
-  border: 1px solid rgba(91,184,232,0.25);
+.course-head {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 16px;
   margin-bottom: 16px;
 }
-.feature-card h3 {
-  font-size: 20px;
-  font-weight: 800;
-  margin-bottom: 8px;
+.course-tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-soft);
+  background: rgba(91,184,232,0.12);
+  border: 1px solid rgba(91,184,232,0.25);
+  border-radius: 999px;
+  padding: 4px 14px;
+  margin-bottom: 12px;
 }
-.feature-card p {
+.course-head h3 { font-size: 23px; font-weight: 800; }
+.course-meta { color: var(--text-subtle); font-size: 14px; margin-top: 6px; }
+.topic-list { list-style: none; display: grid; gap: 10px; }
+.topic-list li {
+  position: relative;
+  padding-inline-start: 28px;
   color: var(--text-muted);
   font-size: 15.5px;
+  line-height: 1.55;
+}
+.topic-list li::before {
+  content: "✓";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 1px;
+  color: var(--primary-light);
+  font-weight: 800;
+}
+
+/* ---------- الهدايا ---------- */
+.bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+}
+.bonus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: var(--text-muted);
+  font-size: 15.5px;
+}
+.bonus span { font-size: 22px; flex: none; }
+.bonus-note { color: var(--text-subtle); font-size: 13px; text-align: center; margin-top: 16px; }
+
+/* ---------- العرض / السعر ---------- */
+.offer {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 28px;
+  padding: clamp(36px, 7vw, 64px) clamp(24px, 6vw, 50px);
+  background:
+    radial-gradient(90% 130% at 50% 0%, rgba(44,141,208,0.3), transparent 65%),
+    var(--bg-panel);
+  border: 1px solid rgba(91,184,232,0.3);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.55);
+}
+.offer-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--primary-soft);
+  background: rgba(91,184,232,0.14);
+  border: 1px solid rgba(91,184,232,0.3);
+  border-radius: 999px;
+  padding: 6px 18px;
+  margin-bottom: 18px;
+}
+.offer-title { font-size: clamp(24px, 5vw, 36px); font-weight: 900; }
+.offer-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 16px;
+  margin: 22px 0 6px;
+  direction: ltr;
+}
+.price-old {
+  color: var(--text-subtle);
+  font-size: clamp(26px, 6vw, 36px);
+  font-weight: 700;
+  text-decoration: line-through;
+  text-decoration-color: rgba(255,107,107,0.85);
+}
+.price-now {
+  font-size: clamp(48px, 12vw, 80px);
+  font-weight: 900;
+  background: var(--grad-title);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.offer-save {
+  color: #7ee0a0;
+  font-weight: 700;
+  font-size: clamp(15px, 3.4vw, 18px);
+  margin-bottom: 28px;
+}
+.offer-quote {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-top: 22px;
   line-height: 1.7;
+}
+
+/* ---------- الأسئلة الشائعة ---------- */
+.faq { max-width: 760px; margin: 0 auto; display: grid; gap: 12px; }
+.faq details {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.faq details[open] { border-color: rgba(91,184,232,0.35); }
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 22px;
+  font-weight: 700;
+  font-size: 16.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+";
+  color: var(--primary-light);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+  transition: transform 0.25s var(--ease-out);
+  flex: none;
+}
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p {
+  padding: 0 22px 20px;
+  color: var(--text-muted);
+  font-size: 15.5px;
+  line-height: 1.8;
 }
 
 /* ---------- CTA ---------- */
