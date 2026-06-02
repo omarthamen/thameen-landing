@@ -655,6 +655,7 @@ body {
 .learn-reveal.open .course-card:nth-child(3) { transition-delay: 0.24s; }
 
 /* ---------- الأسئلة الشائعة ---------- */
+.faq-toggle-wrap { text-align: center; }
 .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 12px; }
 .faq details {
   background: var(--bg-panel);

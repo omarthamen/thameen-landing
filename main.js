@@ -65,17 +65,19 @@
     else if (e.key === "ArrowLeft") show(current - 1);
   });
 
-  // ---- كشف "شنو راح تتعلّم" بأنميشن ----
-  const learnToggle = document.getElementById("learnToggle");
-  const learnReveal = document.getElementById("learnReveal");
-  if (learnToggle && learnReveal) {
-    learnToggle.addEventListener("click", () => {
-      const open = learnReveal.classList.toggle("open");
-      learnToggle.setAttribute("aria-expanded", open ? "true" : "false");
-      const label = learnToggle.querySelector("span:first-child");
-      if (label) label.textContent = open ? "إخفاء القائمة" : "شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة";
+  // ---- أزرار الكشف بأنميشن (قائمة التعلّم + الأسئلة) ----
+  document.querySelectorAll(".js-toggle").forEach((btn) => {
+    const target = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!target) return;
+    const label = btn.querySelector(".js-toggle-label");
+    btn.addEventListener("click", () => {
+      const open = target.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (label) {
+        label.textContent = open ? btn.dataset.openText : btn.dataset.closeText;
+      }
     });
-  }
+  });
 
   // سحب أفقي على الجوال للتنقّل
   let touchX = null;

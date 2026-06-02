@@ -30,7 +30,7 @@
       <span class="brand-diamond" aria-hidden="true">◆</span>
       <span class="brand-name">ثَمين</span>
     </a>
-    <a class="topbar-cta" href="https://thameen.shop" target="_blank" rel="noopener">المتجر</a>
+    <a class="topbar-cta" href="https://wa.me/9647518838203?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%20%D8%A7%D9%86%D8%A7%20%D8%AC%D8%A7%D9%87%D8%B2%20%D9%84%D8%AA%D8%AD%D8%AF%D9%8A%20%D9%A9%D9%A0%20%D9%8A%D9%88%D9%85%20%D9%84%D8%A7%D8%AD%D8%AA%D8%B1%D8%A7%D9%81%20%D8%A7%D9%84%D9%85%D9%88%D9%86%D8%AA%D8%A7%D8%AC" target="_blank" rel="noopener">احجز مكانك</a>
   </header>
 
   <!-- البطل -->
@@ -212,8 +212,8 @@
       </div>
 
       <!-- زر يكشف "شنو راح تتعلّم" بأنميشن -->
-      <button type="button" class="learn-toggle" id="learnToggle" aria-expanded="false" aria-controls="learnReveal">
-        <span>شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة</span>
+      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="learnReveal" data-open-text="إخفاء القائمة" data-close-text="شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة">
+        <span class="js-toggle-label">شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة</span>
         <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
       </button>
 
@@ -320,7 +320,15 @@
   <!-- الأسئلة الشائعة -->
   <section id="faq" class="section">
     <h2 class="section-title">أسئلة شائعة</h2>
-    <div class="faq">
+    <div class="faq-toggle-wrap">
+      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="faqReveal" data-open-text="إخفاء الأسئلة" data-close-text="افتح الأسئلة الشائعة">
+        <span class="js-toggle-label">افتح الأسئلة الشائعة</span>
+        <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
+      </button>
+    </div>
+    <div class="learn-reveal" id="faqReveal">
+      <div class="learn-reveal-inner">
+        <div class="faq">
       <details>
         <summary>شنو اللي راح أتعلمه من الدورة؟</summary>
         <p>كل شي من الصفر للاحتراف: القص والمزامنة، الزومات والقرافات، الألوان والإضاءة، الصوت والموسيقى، وحتى الـ 3D في أفتر إفكتس — ٣ دورات كاملة بمكان واحد.</p>
@@ -365,6 +373,8 @@
         <summary>هل أحتاج إلى بلوقنات خارجية؟</summary>
         <p>لا، ما تحتاج أي إضافات خارجية (PLUG-IN). بس انتبه يكون عندك أفتر إفكتس نسخة ٢٤ أو أحدث لقسم الـ 3D.</p>
       </details>
+        </div>
+      </div>
     </div>
   </section>
 
