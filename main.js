@@ -81,32 +81,30 @@
     });
   });
 
-  // ---- سلايدر الشهادات: تمرير بطيء + إيقاف + سحب ----
+  // ---- سلايدر الشهادات: تمرير خفيف + سحب انسيابي (inertia) ----
   const marquee = document.querySelector(".reviews-marquee");
   const track = marquee && marquee.querySelector(".reviews-track");
   if (marquee && track) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let paused = false;
-    let resumeTimer;
-    const pause = () => { paused = true; clearTimeout(resumeTimer); };
-    const scheduleResume = () => {
-      clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => { paused = false; }, 1800);
+    const SPEED = 0.3; // تمرير تلقائي خفيف
+    let hovered = false, isDown = false, moved = false;
+    let startX = 0, startScroll = 0;
+    let vel = 0, lastX = 0, lastT = 0, inertia = false;
+
+    const wrap = () => {
+      const half = track.scrollWidth / 2;
+      if (half <= 0) return;
+      if (marquee.scrollLeft >= half) marquee.scrollLeft -= half;
+      else if (marquee.scrollLeft < 0) marquee.scrollLeft += half;
     };
 
-    // إيقاف عند المرور أو اللمس، واستئناف بعد توقّف التفاعل
-    marquee.addEventListener("mouseenter", pause);
-    marquee.addEventListener("mouseleave", scheduleResume);
-    ["touchstart", "wheel"].forEach((ev) =>
-      marquee.addEventListener(ev, () => { pause(); scheduleResume(); }, { passive: true })
-    );
+    marquee.addEventListener("mouseenter", () => { hovered = true; });
+    marquee.addEventListener("mouseleave", () => { hovered = false; });
 
-    // سحب بالماوس/الإصبع لتصفّح التعليقات
-    let isDown = false, startX = 0, startScroll = 0, moved = false;
     marquee.addEventListener("pointerdown", (e) => {
-      isDown = true; moved = false;
-      startX = e.clientX; startScroll = marquee.scrollLeft;
-      pause();
+      isDown = true; moved = false; inertia = false; vel = 0;
+      startX = lastX = e.clientX; startScroll = marquee.scrollLeft;
+      lastT = e.timeStamp || 0;
       try { marquee.setPointerCapture(e.pointerId); } catch (_) {}
     });
     marquee.addEventListener("pointermove", (e) => {
@@ -114,19 +112,35 @@
       const dx = e.clientX - startX;
       if (Math.abs(dx) > 3) moved = true;
       marquee.scrollLeft = startScroll - dx;
+      const dt = (e.timeStamp || 0) - lastT;
+      if (dt > 0) vel = (lastX - e.clientX) / dt; // بكسل/مللي ثانية
+      lastX = e.clientX; lastT = e.timeStamp || 0;
     });
-    const endDrag = () => { if (isDown) { isDown = false; scheduleResume(); } };
+    const endDrag = () => {
+      if (!isDown) return;
+      isDown = false;
+      // انسيابية بعد رفع الإصبع تتلاشى بنعومة
+      if (Math.abs(vel) > 0.02) {
+        inertia = true;
+        const glide = () => {
+          if (!inertia) return;
+          marquee.scrollLeft += vel * 16;
+          wrap();
+          vel *= 0.92; // تباطؤ سموث
+          if (Math.abs(vel) > 0.02) requestAnimationFrame(glide);
+          else inertia = false;
+        };
+        requestAnimationFrame(glide);
+      }
+    };
     marquee.addEventListener("pointerup", endDrag);
     marquee.addEventListener("pointercancel", endDrag);
-    // امنع فتح الرابط لو كان السحب فعليًا
     marquee.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
 
-    // التمرير التلقائي البطيء (نصف بكسل بالفريم ≈ قراءة مريحة)
     function step() {
-      if (!paused && !isDown) {
-        marquee.scrollLeft += 0.4;
-        const half = track.scrollWidth / 2;
-        if (half > 0 && marquee.scrollLeft >= half) marquee.scrollLeft -= half;
+      if (!hovered && !isDown && !inertia) {
+        marquee.scrollLeft += SPEED;
+        wrap();
       }
       requestAnimationFrame(step);
     }
