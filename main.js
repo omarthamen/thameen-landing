@@ -116,13 +116,24 @@
   }
   rebuildReviews();
 
+  // عدّاد المراجعات (المتجر + تعليقات الزوّار)
+  const ratingCountEl = document.getElementById("ratingCount");
+  const BASE_REVIEWS = 27; // مراجعات المتجر الحقيقية
+  let reviewCount = BASE_REVIEWS;
+  const setRatingCount = () => { if (ratingCountEl) ratingCountEl.textContent = reviewCount + " مراجعة"; };
+  setRatingCount();
+
   // جلب تعليقات المستخدمين من Supabase (إن وُجد) لتظهر للجميع
   if (sbReady) {
     fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?select=name,comment,stars&order=created_at.desc&limit=60`,
       { headers: sbHeaders() })
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
-        if (Array.isArray(rows) && rows.length) { allReviews = rows.concat(storeReviews); rebuildReviews(); }
+        if (Array.isArray(rows)) {
+          if (rows.length) { allReviews = rows.concat(storeReviews); rebuildReviews(); }
+          reviewCount = BASE_REVIEWS + rows.length;
+          setRatingCount();
+        }
       })
       .catch(() => {});
   }
@@ -178,6 +189,7 @@
           addLocal(obj);
         }
         allReviews.unshift(obj); rebuildReviews(); bumpCount();
+        reviewCount++; setRatingCount();
         setMsg("تم نشر تعليقك، شكرًا لك! 🎉", "ok");
         form.reset(); paintStars(5);
         setTimeout(close, 1300);
