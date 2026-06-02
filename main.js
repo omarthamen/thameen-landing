@@ -138,6 +138,47 @@
       .catch(() => {});
   }
 
+  // ---- عدّ تصاعدي للأرقام (0 ← الرقم) عند ظهورها ----
+  const arDigits = (s) => s.replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[+d]);
+  function countTo(el, to, o) {
+    o = o || {};
+    const dec = o.decimals || 0, prefix = o.prefix || "", suffix = o.suffix || "";
+    const ar = !!o.arabic, dur = o.duration || 1500, from = o.from || 0;
+    const fmt = (v) => { let t = v.toFixed(dec); if (ar) t = arDigits(t); return prefix + t + suffix; };
+    let s = null;
+    function frame(t) {
+      if (s === null) s = t;
+      const p = Math.min(1, (t - s) / dur);
+      const e = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      el.textContent = fmt(from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = fmt(to);
+    }
+    requestAnimationFrame(frame);
+  }
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach((en) => {
+        if (!en.isIntersecting || en.target.dataset.counted) return;
+        en.target.dataset.counted = "1";
+        const el = en.target;
+        if (el.id === "ratingCount") {
+          countTo(el, reviewCount, { suffix: " مراجعة" });
+        } else {
+          countTo(el, parseFloat(el.dataset.to), {
+            decimals: parseInt(el.dataset.decimals || "0", 10),
+            prefix: el.dataset.prefix || "",
+            suffix: el.dataset.suffix || "",
+            arabic: el.dataset.arabic === "true",
+          });
+        }
+        io.unobserve(el);
+      });
+    }, { threshold: 0.6 });
+    document.querySelectorAll(".countup").forEach((el) => io.observe(el));
+    if (ratingCountEl) io.observe(ratingCountEl);
+  }
+
   // ---- بوكس إضافة تعليق ----
   const modal = document.getElementById("reviewModal");
   const openBtn = document.getElementById("openReview");
