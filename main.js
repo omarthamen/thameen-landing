@@ -254,10 +254,15 @@
     marquee.addEventListener("pointercancel", endDrag);
     marquee.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
 
+    let pos = marquee.scrollLeft;
     function step() {
       if (!hovered && !isDown && !inertia) {
-        marquee.scrollLeft += SPEED;
-        wrap();
+        const half = track.scrollWidth / 2;
+        pos += SPEED;
+        if (half > 0 && pos >= half) pos -= half;
+        marquee.scrollLeft = pos; // تعيين مباشر (يتجاوز تقريب Safari)
+      } else {
+        pos = marquee.scrollLeft; // مزامنة أثناء السحب/التوقّف
       }
       requestAnimationFrame(step);
     }
