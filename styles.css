@@ -294,6 +294,19 @@ body {
   .ba-arrow { transform: rotate(-90deg); justify-self: center; }
 }
 
+/* ---------- تقييم مجمّع ---------- */
+.rating-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: -16px 0 30px;
+}
+.rating-stars { color: #ffc24b; letter-spacing: 3px; font-size: 22px; }
+.rating-score { font-size: 26px; font-weight: 900; }
+.rating-count { color: var(--text-subtle); font-size: 15px; }
+
 /* ---------- جدار الشهادات ---------- */
 .reviews-marquee {
   position: relative;
