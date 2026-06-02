@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
 
@@ -51,6 +51,7 @@
   <section id="video" class="section">
     <div class="video-frame">
       <video
+        id="mainVideo"
         controls
         preload="metadata"
         playsinline
@@ -59,6 +60,13 @@
         <source src="assets/video/main.mp4?v=6" type="video/mp4" />
         متصفحك لا يدعم تشغيل الفيديو. <a href="assets/video/main.mp4">حمّل الفيديو</a>.
       </video>
+      <button class="video-play" id="videoPlay" type="button" aria-label="تشغيل الفيديو">
+        <span class="vp-ring" aria-hidden="true"></span>
+        <span class="vp-ring vp-ring2" aria-hidden="true"></span>
+        <span class="vp-btn" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        </span>
+      </button>
     </div>
   </section>
 
@@ -405,6 +413,6 @@
   </div>
 
   <script src="gallery.js?v=2"></script>
-  <script src="main.js?v=5"></script>
+  <script src="main.js?v=7"></script>
 </body>
 </html>

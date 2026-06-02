@@ -81,6 +81,15 @@
     });
   });
 
+  // ---- زر تشغيل الفيديو المخصّص ----
+  const mainVideo = document.getElementById("mainVideo");
+  const videoPlay = document.getElementById("videoPlay");
+  if (mainVideo && videoPlay) {
+    videoPlay.addEventListener("click", () => mainVideo.play());
+    mainVideo.addEventListener("play", () => videoPlay.classList.add("hidden"));
+    mainVideo.addEventListener("ended", () => videoPlay.classList.remove("hidden"));
+  }
+
   // ---- توهّج يتبع المؤشّر على الكروت ----
   const glowSelector =
     ".course-card, .stack-card, .offer, .review, .hl, .bonus, .ba-col, #faq details";
