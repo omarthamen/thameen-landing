@@ -395,7 +395,7 @@ body {
 
 /* ---------- العرض / السعر ---------- */
 .offer {
-  max-width: 680px;
+  max-width: 900px;
   margin: 0 auto;
   text-align: center;
   border-radius: 28px;
@@ -454,6 +454,70 @@ body {
   margin-top: 22px;
   line-height: 1.7;
 }
+
+/* مزايا الباقة المهمة */
+.offer-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 28px 0 8px;
+}
+.hl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: start;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(91,184,232,0.2);
+  border-radius: 14px;
+  padding: 16px;
+}
+.hl > span { font-size: 26px; flex: none; }
+.hl b { display: block; font-size: 15.5px; font-weight: 800; }
+.hl small { color: var(--text-subtle); font-size: 12.5px; line-height: 1.4; }
+@media (max-width: 680px) {
+  .offer-highlights { grid-template-columns: 1fr; }
+}
+
+/* زر كشف "شنو راح تتعلّم" */
+.learn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  background: rgba(91,184,232,0.10);
+  border: 1px solid rgba(91,184,232,0.35);
+  border-radius: 999px;
+  padding: 13px 26px;
+  transition: background 0.25s, border-color 0.25s;
+}
+.learn-toggle:hover { background: rgba(91,184,232,0.18); border-color: rgba(91,184,232,0.6); }
+.learn-toggle-arrow { font-size: 14px; color: var(--primary-light); transition: transform 0.3s var(--ease-out); }
+.learn-toggle[aria-expanded="true"] .learn-toggle-arrow { transform: rotate(180deg); }
+
+/* منطقة الكشف بأنميشن */
+.learn-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s var(--ease-out);
+  text-align: start;
+}
+.learn-reveal.open { grid-template-rows: 1fr; margin-top: 24px; }
+.learn-reveal-inner { overflow: hidden; min-height: 0; }
+/* ظهور متدرّج للكروت عند الفتح */
+.learn-reveal .course-card {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+.learn-reveal.open .course-card { opacity: 1; transform: none; }
+.learn-reveal.open .course-card:nth-child(2) { transition-delay: 0.12s; }
+.learn-reveal.open .course-card:nth-child(3) { transition-delay: 0.24s; }
 
 /* ---------- الأسئلة الشائعة ---------- */
 .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 12px; }

@@ -65,6 +65,18 @@
     else if (e.key === "ArrowLeft") show(current - 1);
   });
 
+  // ---- كشف "شنو راح تتعلّم" بأنميشن ----
+  const learnToggle = document.getElementById("learnToggle");
+  const learnReveal = document.getElementById("learnReveal");
+  if (learnToggle && learnReveal) {
+    learnToggle.addEventListener("click", () => {
+      const open = learnReveal.classList.toggle("open");
+      learnToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      const label = learnToggle.querySelector("span:first-child");
+      if (label) label.textContent = open ? "إخفاء القائمة" : "شنو راح تتعلّم؟ افتح القائمة الكاملة";
+    });
+  }
+
   // سحب أفقي على الجوال للتنقّل
   let touchX = null;
   box.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
