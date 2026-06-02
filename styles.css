@@ -366,6 +366,81 @@ body {
 /* ---------- تقييم مجمّع ---------- */
 .add-review-wrap { text-align: center; margin-bottom: 28px; }
 
+/* ---------- بوكس إضافة تعليق ---------- */
+.rmodal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+}
+.rmodal.open { display: flex; }
+.rmodal-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(44,141,208,0.18), transparent 60%),
+    var(--bg-panel);
+  border: 1px solid rgba(91,184,232,0.3);
+  border-radius: 22px;
+  padding: 32px 26px 26px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+  text-align: center;
+}
+.rmodal-close {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.rmodal-close:hover { background: rgba(255,255,255,0.14); }
+.rmodal-title { font-size: 24px; font-weight: 900; }
+.rmodal-sub { color: var(--text-muted); font-size: 15px; margin: 8px 0 22px; }
+.rform { display: grid; gap: 14px; }
+.rfield {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15.5px;
+  color: var(--text);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+.rfield::placeholder { color: var(--text-subtle); }
+.rfield:focus { outline: none; border-color: var(--primary-light); background: rgba(255,255,255,0.08); }
+.rstars { display: flex; justify-content: center; gap: 6px; direction: ltr; }
+.rstars button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1;
+  color: rgba(255,255,255,0.25);
+  transition: color 0.15s, transform 0.15s;
+  padding: 0 2px;
+}
+.rstars button:hover { transform: scale(1.15); }
+.rstars button.on { color: #ffc24b; }
+.rhoney { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.rform .btn { width: 100%; margin-top: 4px; }
+.rform-msg { font-size: 14px; min-height: 18px; margin: 0; }
+.rform-msg.ok { color: #7ee0a0; }
+.rform-msg.err { color: #ff8f8f; }
+
 .rating-bar {
   display: flex;
   align-items: center;

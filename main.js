@@ -81,23 +81,110 @@
     });
   });
 
-  // ---- بناء بطاقات الشهادات من reviews.js ----
+  // ====== الشهادات + بوكس إضافة تعليق ======
+  // إعداد Supabase (اختياري) — لمّا يجهّز عمر المشروع يحط القيمتين هنا:
+  const SUPABASE_URL = ""; // مثال: https://xxxx.supabase.co
+  const SUPABASE_KEY = ""; // anon public key
+  const SB_TABLE = "reviews";
+  const sbReady = !!(SUPABASE_URL && SUPABASE_KEY);
+  const sbHeaders = (extra) =>
+    Object.assign({ apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY }, extra || {});
+
+  const LS_LOCAL = "thameen_user_reviews";
+  const LS_COUNT = "thameen_review_count";
+  const getLocal = () => { try { return JSON.parse(localStorage.getItem(LS_LOCAL) || "[]"); } catch (_) { return []; } };
+  const addLocal = (r) => { const a = getLocal(); a.unshift(r); localStorage.setItem(LS_LOCAL, JSON.stringify(a.slice(0, 5))); };
+  const getCount = () => parseInt(localStorage.getItem(LS_COUNT) || "0", 10) || 0;
+  const bumpCount = () => localStorage.setItem(LS_COUNT, String(getCount() + 1));
+
+  const esc = (s) =>
+    String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function card(r, hidden) {
+    const n = Math.max(1, Math.min(5, r.stars || 5));
+    return `<figure class="review"${hidden ? ' aria-hidden="true"' : ""}>` +
+      `<div class="stars">${"★".repeat(n)}</div>` +
+      `<p>${esc(r.comment)}</p><figcaption>${esc(r.name)}</figcaption></figure>`;
+  }
   const reviewsTrack = document.getElementById("reviewsTrack");
-  const REVIEWS = Array.isArray(window.REVIEWS) ? window.REVIEWS : [];
-  if (reviewsTrack && REVIEWS.length) {
-    const esc = (s) =>
-      String(s).replace(/[&<>"]/g, (c) =>
-        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
-      );
-    const card = (r, hidden) =>
-      `<figure class="review"${hidden ? ' aria-hidden="true"' : ""}>` +
-      `<div class="stars">${"★".repeat(Math.max(1, Math.min(5, r.stars || 5)))}</div>` +
-      `<p>${esc(r.comment)}</p>` +
-      `<figcaption>${esc(r.name)}</figcaption></figure>`;
-    // نسختان للّف المستمر السلس
-    reviewsTrack.innerHTML =
-      REVIEWS.map((r) => card(r, false)).join("") +
-      REVIEWS.map((r) => card(r, true)).join("");
+  const storeReviews = Array.isArray(window.REVIEWS) ? window.REVIEWS : [];
+  let allReviews = (sbReady ? [] : getLocal()).concat(storeReviews);
+  function rebuildReviews() {
+    if (!reviewsTrack) return;
+    const a = allReviews.map((r) => card(r, false)).join("");
+    const b = allReviews.map((r) => card(r, true)).join("");
+    reviewsTrack.innerHTML = a + b;
+  }
+  rebuildReviews();
+
+  // جلب تعليقات المستخدمين من Supabase (إن وُجد) لتظهر للجميع
+  if (sbReady) {
+    fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?select=name,comment,stars&order=created_at.desc&limit=60`,
+      { headers: sbHeaders() })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        if (Array.isArray(rows) && rows.length) { allReviews = rows.concat(storeReviews); rebuildReviews(); }
+      })
+      .catch(() => {});
+  }
+
+  // ---- بوكس إضافة تعليق ----
+  const modal = document.getElementById("reviewModal");
+  const openBtn = document.getElementById("openReview");
+  if (modal && openBtn) {
+    const closeBtn = document.getElementById("reviewClose");
+    const form = document.getElementById("reviewForm");
+    const nameI = document.getElementById("rName");
+    const commentI = document.getElementById("rComment");
+    const honey = document.getElementById("rHoney");
+    const msg = document.getElementById("rMsg");
+    const submitBtn = document.getElementById("rSubmit");
+    const starsWrap = document.getElementById("rStars");
+    let stars = 5;
+    const paintStars = (v) => { stars = v; Array.from(starsWrap.children).forEach((b, i) => b.classList.toggle("on", i < v)); };
+    if (starsWrap) {
+      paintStars(5);
+      starsWrap.addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) paintStars(parseInt(b.dataset.v, 10)); });
+    }
+    const setMsg = (t, kind) => { msg.textContent = t; msg.className = "rform-msg " + (kind || ""); };
+
+    const open = () => {
+      modal.classList.add("open"); modal.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden";
+      if (getCount() >= 2) { setMsg("وصلت الحد الأقصى (تعليقين). شكرًا لك! 🙏", "err"); submitBtn.disabled = true; }
+      else { setMsg("", ""); submitBtn.disabled = false; }
+      setTimeout(() => nameI && nameI.focus(), 100);
+    };
+    const close = () => { modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; };
+    openBtn.addEventListener("click", open);
+    closeBtn && closeBtn.addEventListener("click", close);
+    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.classList.contains("open")) close(); });
+
+    form && form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (honey && honey.value) { close(); return; } // فخّ للبوتات
+      if (getCount() >= 2) { setMsg("وصلت الحد الأقصى (تعليقين).", "err"); return; }
+      const name = (nameI.value || "").trim();
+      const comment = (commentI.value || "").trim();
+      if (name.length < 2) { setMsg("اكتب اسمك من فضلك.", "err"); return; }
+      if (comment.length < 5) { setMsg("اكتب تعليقك من فضلك.", "err"); return; }
+      const obj = { name: name, comment: comment, stars: stars };
+      submitBtn.disabled = true; setMsg("جارٍ النشر…", "");
+      try {
+        if (sbReady) {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}`,
+            { method: "POST", headers: sbHeaders({ "Content-Type": "application/json", "Prefer": "return=minimal" }), body: JSON.stringify(obj) });
+          if (!res.ok) throw new Error("insert failed");
+        } else {
+          addLocal(obj);
+        }
+        allReviews.unshift(obj); rebuildReviews(); bumpCount();
+        setMsg("تم نشر تعليقك، شكرًا لك! 🎉", "ok");
+        form.reset(); paintStars(5);
+        setTimeout(close, 1300);
+      } catch (_) {
+        setMsg("صار خطأ، حاول مرة ثانية.", "err"); submitBtn.disabled = false;
+      }
+    });
   }
 
   // ---- سلايدر الشهادات: تمرير خفيف + سحب انسيابي (inertia) ----

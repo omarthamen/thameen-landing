@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
 
@@ -155,12 +155,11 @@
     </div>
 
     <div class="add-review-wrap">
-      <a class="btn btn-ghost" href="https://www.thameen.shop" target="_blank" rel="noopener">أضف تعليقك على المتجر ✍️</a>
+      <button type="button" class="btn btn-ghost" id="openReview">أضف تعليقك ✍️</button>
     </div>
 
     <div class="reviews-marquee">
       <div class="reviews-track" id="reviewsTrack"></div>
-    </div>
     </div>
   </section>
 
@@ -362,6 +361,29 @@
     <p class="footer-muted">© جميع الحقوق محفوظة</p>
   </footer>
 
+  <!-- بوكس إضافة تعليق -->
+  <div id="reviewModal" class="rmodal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="rmodal-card">
+      <button class="rmodal-close" id="reviewClose" type="button" aria-label="إغلاق">✕</button>
+      <h3 class="rmodal-title">أضف تعليقك</h3>
+      <p class="rmodal-sub">بدون حساب — بس اكتب اسمك ورأيك 🙏</p>
+      <form id="reviewForm" class="rform" novalidate>
+        <input type="text" id="rName" class="rfield" maxlength="40" placeholder="اسمك" autocomplete="name" required />
+        <textarea id="rComment" class="rfield" maxlength="300" rows="4" placeholder="اكتب تجربتك مع الدورة…" required></textarea>
+        <div class="rstars" id="rStars" role="radiogroup" aria-label="التقييم">
+          <button type="button" data-v="1" aria-label="نجمة">★</button>
+          <button type="button" data-v="2" aria-label="نجمتان">★</button>
+          <button type="button" data-v="3" aria-label="٣ نجوم">★</button>
+          <button type="button" data-v="4" aria-label="٤ نجوم">★</button>
+          <button type="button" data-v="5" aria-label="٥ نجوم">★</button>
+        </div>
+        <input type="text" id="rHoney" class="rhoney" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="btn btn-primary" id="rSubmit">نشر التعليق</button>
+        <p class="rform-msg" id="rMsg" role="status"></p>
+      </form>
+    </div>
+  </div>
+
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
     <button class="lightbox-close" aria-label="إغلاق">✕</button>
@@ -372,6 +394,6 @@
 
   <script src="gallery.js?v=2"></script>
   <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=10"></script>
+  <script src="main.js?v=11"></script>
 </body>
 </html>
