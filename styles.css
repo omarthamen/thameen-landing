@@ -792,6 +792,26 @@ body {
   .lightbox-nav { width: 44px; height: 44px; font-size: 26px; }
 }
 
+/* ---------- توهّج يتبع المؤشّر (Light sweep) ---------- */
+.glow { position: relative; isolation: isolate; }
+.glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(91, 184, 232, 0.22),
+    rgba(91, 184, 232, 0.08) 35%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out);
+  pointer-events: none;
+  z-index: -1;
+}
+.glow:hover::after { opacity: 1; }
+
 /* تقليل الحركة لمن يفضّل ذلك */
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }

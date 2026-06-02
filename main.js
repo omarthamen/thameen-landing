@@ -81,6 +81,18 @@
     });
   });
 
+  // ---- توهّج يتبع المؤشّر على الكروت ----
+  const glowSelector =
+    ".course-card, .stack-card, .offer, .review, .hl, .bonus, .ba-col, #faq details";
+  document.querySelectorAll(glowSelector).forEach((el) => {
+    el.classList.add("glow");
+    el.addEventListener("pointermove", (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--mx", e.clientX - r.left + "px");
+      el.style.setProperty("--my", e.clientY - r.top + "px");
+    });
+  });
+
   // سحب أفقي على الجوال للتنقّل
   let touchX = null;
   box.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
