@@ -364,6 +364,8 @@ body {
 }
 
 /* ---------- تقييم مجمّع ---------- */
+.add-review-wrap { text-align: center; margin-bottom: 28px; }
+
 .rating-bar {
   display: flex;
   align-items: center;

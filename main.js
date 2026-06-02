@@ -81,6 +81,25 @@
     });
   });
 
+  // ---- بناء بطاقات الشهادات من reviews.js ----
+  const reviewsTrack = document.getElementById("reviewsTrack");
+  const REVIEWS = Array.isArray(window.REVIEWS) ? window.REVIEWS : [];
+  if (reviewsTrack && REVIEWS.length) {
+    const esc = (s) =>
+      String(s).replace(/[&<>"]/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
+      );
+    const card = (r, hidden) =>
+      `<figure class="review"${hidden ? ' aria-hidden="true"' : ""}>` +
+      `<div class="stars">${"★".repeat(Math.max(1, Math.min(5, r.stars || 5)))}</div>` +
+      `<p>${esc(r.comment)}</p>` +
+      `<figcaption>${esc(r.name)}</figcaption></figure>`;
+    // نسختان للّف المستمر السلس
+    reviewsTrack.innerHTML =
+      REVIEWS.map((r) => card(r, false)).join("") +
+      REVIEWS.map((r) => card(r, true)).join("");
+  }
+
   // ---- سلايدر الشهادات: تمرير خفيف + سحب انسيابي (inertia) ----
   const marquee = document.querySelector(".reviews-marquee");
   const track = marquee && marquee.querySelector(".reviews-track");
