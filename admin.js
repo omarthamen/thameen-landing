@@ -48,8 +48,6 @@ const loginView = $("loginView"), dashView = $("dashView");
 function showDash(on) { loginView.hidden = on; dashView.hidden = !on; if (on) loadAll(); }
 function logout() {
   TOKEN = null;
-  localStorage.removeItem("thameen_admin_token");
-  localStorage.removeItem("thameen_admin_exp");
   showDash(false);
 }
 
@@ -68,9 +66,7 @@ $("loginForm").addEventListener("submit", async (e) => {
       const m = data.msg || data.error_description || data.error || "بيانات غير صحيحة";
       setMsg($("loginMsg"), "فشل الدخول: " + m, false); btn.disabled = false; return;
     }
-    TOKEN = data.access_token;
-    localStorage.setItem("thameen_admin_token", TOKEN);
-    localStorage.setItem("thameen_admin_exp", String(Date.now() + (data.expires_in || 3600) * 1000));
+    TOKEN = data.access_token;            // في الذاكرة فقط — يضيع عند الإغلاق/التحديث
     setMsg($("loginMsg"), "", true);
     showDash(true);
   } catch (err) {
@@ -81,11 +77,10 @@ $("loginForm").addEventListener("submit", async (e) => {
 
 $("logoutBtn").addEventListener("click", logout);
 
-// استعادة الجلسة المحفوظة
-(function restore() {
-  const t = localStorage.getItem("thameen_admin_token");
-  const exp = parseInt(localStorage.getItem("thameen_admin_exp") || "0", 10);
-  if (t && exp > Date.now()) { TOKEN = t; showDash(true); } else { showDash(false); }
+// لا حفظ للجلسة — يطلب كلمة السر كل مرة (أقصى حماية)
+(function noPersist() {
+  try { localStorage.removeItem("thameen_admin_token"); localStorage.removeItem("thameen_admin_exp"); } catch (_) {}
+  showDash(false);
 })();
 
 // ====== التبويبات ======
