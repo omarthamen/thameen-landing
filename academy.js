@@ -104,10 +104,13 @@ async function loadAcademy() {
       const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0];
       openCourse(firstSec.id);
     } else {
-      wrap.innerHTML = '<p class="hint" style="padding:14px">لا توجد دورات بعد.</p>';
+      const dbg = `توكن:${TOKEN ? "موجود ✓" : "مفقود ✗"} · أقسام:${SECTIONS.length} · دروس:${LESSONS.length}`;
+      wrap.innerHTML = `<p class="hint" style="padding:14px">لا توجد دورات.<br><b style="color:#ffb84d">${dbg}</b></p>`;
+      $("lTitle").textContent = "تشخيص v8 — " + dbg;
     }
   } catch (e) {
-    wrap.innerHTML = `<p class="hint" style="padding:14px">خطأ بالتحميل:<br>${esc(e.message)}</p>`;
+    wrap.innerHTML = `<p class="hint" style="padding:14px">خطأ التحميل:<br><b style="color:#ff8f8f">${esc(e.message)}</b></p>`;
+    $("lTitle").textContent = "خطأ v8 — توكن:" + (TOKEN ? "موجود" : "مفقود");
   }
 }
 
