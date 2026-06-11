@@ -125,13 +125,14 @@
 
   // جلب تعليقات المستخدمين من Supabase (إن وُجد) لتظهر للجميع
   if (sbReady) {
-    fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?select=name,comment,stars&order=created_at.desc&limit=60`,
+    fetch(`${SUPABASE_URL}/rest/v1/${SB_TABLE}?select=name,comment,stars,hidden&order=created_at.desc&limit=80`,
       { headers: sbHeaders() })
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         if (Array.isArray(rows)) {
-          if (rows.length) { allReviews = rows.concat(storeReviews); rebuildReviews(); }
-          reviewCount = BASE_REVIEWS + rows.length;
+          const visible = rows.filter((r) => !r.hidden);   // المخفيّة من الداشبورد ما تظهر
+          if (visible.length) { allReviews = visible.concat(storeReviews); rebuildReviews(); }
+          reviewCount = BASE_REVIEWS + visible.length;
           setRatingCount();
         }
       })
@@ -313,7 +314,7 @@
   // ---- مشغّل الفيديو المخصّص + فصول داخل الفيديو ----
   // عدّل التوقيتات والعناوين هنا لمّا يجي الفيديو الطويل.
   // t = ثانية البداية. الفصل يمتد حتى بداية الفصل اللي بعده (أو نهاية الفيديو).
-  const CHAPTERS = [
+  let CHAPTERS = [
     { t: 0,  label: "الانترو" },
     { t: 5,  label: "المحتوى" },
     { t: 10, label: "ابدأ" },
@@ -396,46 +397,64 @@
       else if (el.requestFullscreen) el.requestFullscreen();
       else if (mainVideo.webkitEnterFullscreen) mainVideo.webkitEnterFullscreen(); // iOS
     });
+
+    // تحميل الفيديو/الغلاف/الفصول من لوحة التحكّم (إن وُجدت)
+    if (sbReady) {
+      fetch(`${SUPABASE_URL}/rest/v1/site_content?key=eq.video&select=value`, { headers: sbHeaders() })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((rows) => {
+          const v = rows && rows[0] && rows[0].value;
+          if (!v) return;
+          if (Array.isArray(v.chapters) && v.chapters.length) CHAPTERS = v.chapters;
+          if (v.poster) mainVideo.poster = v.poster;
+          if (v.url) { mainVideo.pause(); mainVideo.src = v.url; mainVideo.load(); }
+          if (mainVideo.readyState >= 1) { buildBar(); update(); }
+        })
+        .catch(() => {});
+    }
   }
 
-  // ---- إثبات بصري: قنوات اشتغل معها + نماذج شغل ----
-  // أضف صورك هنا وراح يظهرون تلقائيًا. حط الملفات في assets/proof/
-  // CHANNELS: { img: "assets/proof/channel1.jpg", name: "اسم القناة" }
-  const CHANNELS = [];
-  // WORKS: { thumb: "assets/proof/work1.jpg", views: "2.3M مشاهدة" }
-  //   أو فيديو: { video: "assets/proof/work1.mp4", views: "..." }
-  const WORKS = [];
-
+  // ---- إثبات بصري من لوحة التحكّم: قنوات + نماذج شغل ----
   const channelsRow = document.getElementById("channelsRow");
-  if (channelsRow && CHANNELS.length) {
-    CHANNELS.forEach((c) => {
-      const d = document.createElement("div");
-      d.className = "channel";
-      d.innerHTML =
-        `<img src="${c.img}" alt="${c.name || ""}" loading="lazy" />` +
-        (c.name ? `<span>${c.name}</span>` : "");
-      channelsRow.appendChild(d);
-    });
-    document.getElementById("proofChannels").hidden = false;
-  }
-
   const worksGrid = document.getElementById("worksGrid");
-  if (worksGrid && WORKS.length) {
-    WORKS.forEach((w) => {
+  const renderChannels = (list) => {
+    if (!channelsRow || !list.length) return;
+    channelsRow.innerHTML = list.map((c) =>
+      `<div class="channel"><img src="${c.url}" alt="${esc(c.title || "")}" loading="lazy" />` +
+      (c.title ? `<span>${esc(c.title)}</span>` : "") + `</div>`).join("");
+    const blk = document.getElementById("proofChannels"); if (blk) blk.hidden = false;
+  };
+  const renderWorks = (list) => {
+    if (!worksGrid || !list.length) return;
+    worksGrid.innerHTML = "";
+    list.forEach((w) => {
+      const isVid = /\.(mp4|webm|mov)$/i.test(w.url);
       const d = document.createElement("div");
       d.className = "work";
-      const media = w.video
-        ? `<video src="${w.video}" muted loop playsinline preload="metadata"></video>`
-        : `<img src="${w.thumb}" alt="" loading="lazy" />`;
-      d.innerHTML = media + (w.views ? `<span class="work-views">▶ ${w.views}</span>` : "");
-      if (w.video) {
+      d.innerHTML =
+        (isVid
+          ? `<video src="${w.url}" muted loop playsinline preload="metadata"></video>`
+          : `<img src="${w.url}" alt="" loading="lazy" />`) +
+        (w.meta ? `<span class="work-views">▶ ${esc(w.meta)}</span>` : "");
+      if (isVid) {
         const v = d.querySelector("video");
         d.addEventListener("mouseenter", () => v.play().catch(() => {}));
         d.addEventListener("mouseleave", () => { v.pause(); v.currentTime = 0; });
       }
       worksGrid.appendChild(d);
     });
-    document.getElementById("proofWorks").hidden = false;
+    const blk = document.getElementById("proofWorks"); if (blk) blk.hidden = false;
+  };
+  if (sbReady) {
+    fetch(`${SUPABASE_URL}/rest/v1/media?select=kind,url,title,meta,sort&order=sort.asc,created_at.asc`,
+      { headers: sbHeaders() })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        if (!Array.isArray(rows)) return;
+        renderChannels(rows.filter((m) => m.kind === "channel"));
+        renderWorks(rows.filter((m) => m.kind === "work"));
+      })
+      .catch(() => {});
   }
 
   // ---- توهّج يتبع المؤشّر على الكروت ----

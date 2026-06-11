@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>لوحة تحكّم ثَمين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css?v=1" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ====== شاشة الدخول ====== -->
+  <section id="loginView" class="login-wrap">
+    <form id="loginForm" class="login-card">
+      <span class="brand-diamond">◆</span>
+      <h1>لوحة تحكّم ثَمين</h1>
+      <p class="login-sub">سجّل دخولك للمتابعة</p>
+      <input type="email" id="email" class="fld" placeholder="الإيميل" autocomplete="username" required />
+      <input type="password" id="password" class="fld" placeholder="كلمة السر" autocomplete="current-password" required />
+      <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
+      <p class="msg" id="loginMsg" role="status"></p>
+    </form>
+  </section>
+
+  <!-- ====== الداشبورد ====== -->
+  <section id="dashView" hidden>
+    <header class="topbar">
+      <div class="brand"><span class="brand-diamond">◆</span><b>لوحة تحكّم ثَمين</b></div>
+      <div class="topbar-actions">
+        <a class="ghost-link" href="./" target="_blank" rel="noopener">عرض الموقع ↗</a>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">خروج</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab on" data-tab="comments">💬 التعليقات</button>
+      <button class="tab" data-tab="video">🎬 الفيديو</button>
+      <button class="tab" data-tab="images">🖼️ الصور</button>
+    </nav>
+
+    <main class="dash">
+      <!-- التعليقات -->
+      <section class="panel on" id="tab-comments">
+        <div class="panel-head">
+          <h2>التعليقات</h2>
+          <span class="hint" id="commentsCount">…</span>
+        </div>
+        <p class="hint">المخفيّة ما تظهر بالموقع. الحذف نهائي.</p>
+        <div class="rows" id="commentsRows"></div>
+      </section>
+
+      <!-- الفيديو -->
+      <section class="panel" id="tab-video" hidden>
+        <div class="panel-head"><h2>الفيديو الرئيسي</h2></div>
+
+        <div class="card">
+          <h3>الفيديو الحالي</h3>
+          <video id="videoPreview" controls preload="metadata" class="vid-preview"></video>
+          <p class="hint" id="videoUrlNow">—</p>
+        </div>
+
+        <div class="card">
+          <h3>تغيير الفيديو</h3>
+          <label class="lbl">ارفع ملف فيديو جديد</label>
+          <input type="file" id="videoFile" accept="video/*" class="fld" />
+          <div class="or">أو</div>
+          <label class="lbl">الصق رابط فيديو مباشر (mp4)</label>
+          <input type="url" id="videoUrl" class="fld" placeholder="https://…/video.mp4" />
+          <button class="btn btn-primary" id="saveVideoBtn">حفظ الفيديو</button>
+          <p class="msg" id="videoMsg" role="status"></p>
+        </div>
+
+        <div class="card">
+          <h3>صورة الغلاف (Poster)</h3>
+          <img id="posterPreview" class="poster-preview" alt="" hidden />
+          <input type="file" id="posterFile" accept="image/*" class="fld" />
+          <button class="btn btn-primary" id="savePosterBtn">حفظ الغلاف</button>
+          <p class="msg" id="posterMsg" role="status"></p>
+        </div>
+
+        <div class="card">
+          <h3>فصول الفيديو</h3>
+          <p class="hint">عنوان + ثانية البداية لكل فصل. تظهر داخل الفيديو على شريط التقدّم.</p>
+          <div id="chaptersRows"></div>
+          <button class="btn btn-ghost btn-sm" id="addChapterBtn">+ فصل</button>
+          <button class="btn btn-primary" id="saveChaptersBtn">حفظ الفصول</button>
+          <p class="msg" id="chaptersMsg" role="status"></p>
+        </div>
+      </section>
+
+      <!-- الصور -->
+      <section class="panel" id="tab-images" hidden>
+        <div class="panel-head"><h2>الصور والإثبات</h2></div>
+
+        <div class="card">
+          <h3>قنوات اشتغلت معها</h3>
+          <p class="hint">صورة دائرية + اسم القناة. تظهر بقسم الخبرة.</p>
+          <div class="add-media">
+            <input type="file" id="channelFile" accept="image/*" class="fld" />
+            <input type="text" id="channelTitle" class="fld" placeholder="اسم القناة (اختياري)" />
+            <button class="btn btn-primary btn-sm" id="addChannelBtn">إضافة</button>
+          </div>
+          <p class="msg" id="channelMsg" role="status"></p>
+          <div class="media-grid" id="channelsGrid"></div>
+        </div>
+
+        <div class="card">
+          <h3>نماذج من شغلك</h3>
+          <p class="hint">صورة/ثَمنيل + عدد المشاهدات (اختياري). تظهر بقسم الخبرة.</p>
+          <div class="add-media">
+            <input type="file" id="workFile" accept="image/*,video/*" class="fld" />
+            <input type="text" id="workMeta" class="fld" placeholder="عدد المشاهدات مثلاً 2.3M (اختياري)" />
+            <button class="btn btn-primary btn-sm" id="addWorkBtn">إضافة</button>
+          </div>
+          <p class="msg" id="workMsg" role="status"></p>
+          <div class="media-grid" id="worksGrid"></div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script type="module" src="admin.js?v=1"></script>
+</body>
+</html>
