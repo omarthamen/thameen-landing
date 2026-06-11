@@ -363,6 +363,46 @@
     setActive();
   }
 
+  // ---- إثبات بصري: قنوات اشتغل معها + نماذج شغل ----
+  // أضف صورك هنا وراح يظهرون تلقائيًا. حط الملفات في assets/proof/
+  // CHANNELS: { img: "assets/proof/channel1.jpg", name: "اسم القناة" }
+  const CHANNELS = [];
+  // WORKS: { thumb: "assets/proof/work1.jpg", views: "2.3M مشاهدة" }
+  //   أو فيديو: { video: "assets/proof/work1.mp4", views: "..." }
+  const WORKS = [];
+
+  const channelsRow = document.getElementById("channelsRow");
+  if (channelsRow && CHANNELS.length) {
+    CHANNELS.forEach((c) => {
+      const d = document.createElement("div");
+      d.className = "channel";
+      d.innerHTML =
+        `<img src="${c.img}" alt="${c.name || ""}" loading="lazy" />` +
+        (c.name ? `<span>${c.name}</span>` : "");
+      channelsRow.appendChild(d);
+    });
+    document.getElementById("proofChannels").hidden = false;
+  }
+
+  const worksGrid = document.getElementById("worksGrid");
+  if (worksGrid && WORKS.length) {
+    WORKS.forEach((w) => {
+      const d = document.createElement("div");
+      d.className = "work";
+      const media = w.video
+        ? `<video src="${w.video}" muted loop playsinline preload="metadata"></video>`
+        : `<img src="${w.thumb}" alt="" loading="lazy" />`;
+      d.innerHTML = media + (w.views ? `<span class="work-views">▶ ${w.views}</span>` : "");
+      if (w.video) {
+        const v = d.querySelector("video");
+        d.addEventListener("mouseenter", () => v.play().catch(() => {}));
+        d.addEventListener("mouseleave", () => { v.pause(); v.currentTime = 0; });
+      }
+      worksGrid.appendChild(d);
+    });
+    document.getElementById("proofWorks").hidden = false;
+  }
+
   // ---- توهّج يتبع المؤشّر على الكروت ----
   const glowSelector =
     ".course-card, .stack-card, .offer, .review, .hl, .bonus, .ba-col, #faq details";

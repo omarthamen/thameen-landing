@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="stylesheet" href="styles.css?v=16" />
 </head>
 <body>
 
@@ -158,24 +158,25 @@
   <section id="proof" class="section">
     <div class="proof-card glow">
       <span class="proof-badge">خبرة حقيقية مو كلام نظري</span>
-      <h2 class="proof-title">البرنامج مبني من <span>٨ سنوات</span> داخل المجال</h2>
-      <p class="proof-lead">
-        أنا ما بنيت هذا البرنامج من فراغ. بعد ٨ سنوات في المونتاج، اشتغلت مع كبار
-        اليوتيوبرز وصنعنا فيديوهات حقّقت ملايين المشاهدات — وخلال دوراتي السابقة ساعدت
-        أكثر من +٣٥٠ متدرّب يطوّرون مهارتهم.
-      </p>
+      <h2 class="proof-title">٨ سنوات خبرة وراء <span>كل درس</span></h2>
 
       <div class="proof-stats">
-        <div class="pstat"><b class="countup" data-to="8">8</b><i>+</i><small>سنوات خبرة</small></div>
-        <div class="pstat"><b class="countup" data-to="350">350</b><i>+</i><small>متدرّب</small></div>
-        <div class="pstat"><b>ملايين</b><small>مشاهدات</small></div>
+        <div class="pstat"><span class="pstat-ic" aria-hidden="true">🗓️</span><b class="countup" data-to="8">8</b><i>+</i><small>سنوات خبرة</small></div>
+        <div class="pstat"><span class="pstat-ic" aria-hidden="true">🎬</span><b>ملايين</b><small>مشاهدات</small></div>
+        <div class="pstat"><span class="pstat-ic" aria-hidden="true">👥</span><b class="countup" data-to="350">350</b><i>+</i><small>متدرّب</small></div>
       </div>
 
-      <p class="proof-close">
-        فهمت شغلة مهمة: المبتدئ ما يحتاج فيديو يوتيوب جديد — يحتاج <b>مسار واضح، تطبيق
-        عملي، وتصحيح لما يغلط</b>. ولهذا جمعت لك كل الخبرة والدورات والملفات والدعم
-        والجلسات داخل برنامج واحد.
-      </p>
+      <!-- قنوات اشتغل معها — تُملأ من CHANNELS في main.js -->
+      <div class="proof-block" id="proofChannels" hidden>
+        <p class="proof-block-title">اشتغلت مع قنوات يتابعها الملايين</p>
+        <div class="channels-row" id="channelsRow"></div>
+      </div>
+
+      <!-- نماذج شغل — تُملأ من WORKS في main.js -->
+      <div class="proof-block" id="proofWorks" hidden>
+        <p class="proof-block-title">نماذج من شغلي</p>
+        <div class="works-grid" id="worksGrid"></div>
+      </div>
     </div>
   </section>
 
@@ -466,6 +467,6 @@
 
   <script src="gallery.js?v=2"></script>
   <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=18"></script>
+  <script src="main.js?v=19"></script>
 </body>
 </html>
