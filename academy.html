@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=3" />
-  <link rel="stylesheet" href="academy.css?v=3" />
+  <link rel="stylesheet" href="admin.css?v=4" />
+  <link rel="stylesheet" href="academy.css?v=4" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -21,7 +21,7 @@
       <span class="brand-diamond">◆</span>
       <h1>أكاديمية ثَمين</h1>
       <p class="login-sub">دخول المشتركين — تحدّي ٩٠ يوم</p>
-      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ١ ✅</p>
+      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ٢ ✅</p>
       <input type="email" id="email" class="fld" placeholder="الإيميل" autocomplete="username" required />
       <input type="password" id="password" class="fld" placeholder="كلمة السر" autocomplete="current-password" required />
       <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
@@ -32,32 +32,44 @@
 
   <!-- ====== المنصّة ====== -->
   <section id="appView" hidden>
-    <header class="topbar">
-      <div class="brand"><span class="brand-diamond">◆</span><b>أكاديمية ثَمين</b></div>
-      <div class="topbar-actions">
-        <span class="me-name" id="meName"></span>
-        <button class="btn btn-ghost btn-sm" id="logoutBtn">خروج</button>
+    <header class="acad-nav">
+      <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين</a>
+      <div class="nav-right">
+        <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
+        <span class="nav-stat">مكالماتك <b id="callsLeft">3</b></span>
+        <span class="nav-name" id="meName"></span>
+        <button class="btn-logout" id="logoutBtn">تسجيل الخروج</button>
       </div>
     </header>
 
-    <!-- شريط التقدّم العام -->
-    <div class="prog-hero">
-      <div class="prog-stat">
-        <span class="prog-pct" id="progPct">0%</span>
-        <span class="prog-lbl">نسبة إنجازك</span>
+    <div class="acad-grid" id="acadGrid">
+      <!-- دوراتي (يمين) -->
+      <aside class="col courses-col">
+        <h3 class="col-h">دوراتي</h3>
+        <div id="coursesCol"></div>
+      </aside>
+
+      <!-- المشغّل (وسط) -->
+      <div class="col center-col">
+        <h2 class="lesson-title" id="lTitle">—</h2>
+        <div class="player-box"><div id="playerHost"></div></div>
+        <button class="btn btn-primary" id="markDoneBtn">✓ أكملت هذا الدرس</button>
+        <div class="lesson-desc" id="lDesc"></div>
       </div>
-      <div class="prog-bar"><span id="progFill"></span></div>
-      <div class="prog-stat">
-        <span class="prog-pct" id="callsLeft">3</span>
-        <span class="prog-lbl">مكالمات متبقّية</span>
-      </div>
+
+      <!-- دروس القسم (يسار) -->
+      <aside class="col lessons-col">
+        <h3 class="col-h">دروس</h3>
+        <div id="plList"></div>
+      </aside>
     </div>
 
-    <main class="academy" id="academyMain">
-      <p class="hint" style="text-align:center;padding:40px">جارٍ تحميل الدورة…</p>
-    </main>
+    <footer class="acad-footer">
+      <div class="foot-socials" id="footSocials"></div>
+      <p class="foot-copy">◆ أكاديمية ثَمين — جميع الحقوق محفوظة</p>
+    </footer>
   </section>
 
-  <script src="academy.js?v=4"></script>
+  <script src="academy.js?v=5"></script>
 </body>
 </html>

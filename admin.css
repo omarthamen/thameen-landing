@@ -112,3 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .add-lesson summary{cursor:pointer;font-weight:700;color:var(--primary-soft);padding:6px 0}
 .add-lesson .fld{margin-top:10px}
 .add-lesson textarea{font-family:inherit}
+.sec-cover-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sec-cover-img{width:90px;height:56px;border-radius:10px;object-fit:cover;flex:none;background:#000}
+.sec-cover-row .fld{flex:1;min-width:140px;margin-bottom:0}
+.sec-cover-msg{font-size:13px;width:100%}

@@ -285,6 +285,12 @@ async function loadCourses() {
       const ls = lessons.filter((l) => l.section_id === sec.id);
       return `<div class="card sec-card" data-sid="${sec.id}">
         <div class="sec-head"><h3>${esc(sec.title)}</h3><button class="btn btn-danger btn-sm sec-del">حذف القسم</button></div>
+        <div class="sec-cover-row">
+          ${sec.cover_url ? `<img src="${esc(sec.cover_url)}" class="sec-cover-img" alt="">` : `<div class="sec-cover-img empty-thumb">📚</div>`}
+          <input type="file" class="fld sec-cover-file" accept="image/*" />
+          <button class="btn btn-ghost btn-sm sec-cover-btn">حفظ غلاف الدورة</button>
+          <span class="msg sec-cover-msg"></span>
+        </div>
         <div class="lessons">${ls.map((l) => `<div class="lesson-row" data-lid="${l.id}">
           ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">🎬</div>`}
           <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}</small></div>
@@ -308,6 +314,18 @@ async function loadCourses() {
       card.querySelector(".sec-del").addEventListener("click", async () => {
         if (!confirm("حذف القسم وكل دروسه؟")) return;
         try { await dbSend("DELETE", `sections?id=eq.${sid}`); loadCourses(); } catch (x) { alert("خطأ: " + x.message); }
+      });
+      const cvBtn = card.querySelector(".sec-cover-btn");
+      cvBtn.addEventListener("click", async () => {
+        const msg = card.querySelector(".sec-cover-msg");
+        const file = card.querySelector(".sec-cover-file").files[0];
+        if (!file) { setMsg(msg, "اختر صورة.", false); return; }
+        cvBtn.disabled = true; setMsg(msg, "جارٍ الرفع…", true);
+        try {
+          const url = await uploadFile(file);
+          await dbSend("PATCH", `sections?id=eq.${sid}`, { cover_url: url });
+          loadCourses();
+        } catch (x) { setMsg(msg, "خطأ: " + x.message, false); cvBtn.disabled = false; }
       });
       card.querySelectorAll(".lesson-row").forEach((row) => {
         row.querySelector(".lesson-del").addEventListener("click", async () => {

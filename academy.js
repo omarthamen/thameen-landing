@@ -71,11 +71,22 @@ async function refresh(rt) {
   else { showApp(false); }
 })();
 
-// ====== تحميل الدورة ======
+// ====== الفوتر: روابط التواصل (عدّل الروابط هنا) ======
+const SOCIALS = [
+  { n: "واتساب", u: "https://wa.me/9647518838203" },
+  { n: "إنستقرام", u: "#" }, { n: "تيك توك", u: "#" }, { n: "يوتيوب", u: "#" },
+  { n: "سناب شات", u: "#" }, { n: "ديسكورد", u: "#" }, { n: "X", u: "#" },
+];
+function renderSocials() {
+  const el = $("footSocials"); if (!el) return;
+  el.innerHTML = SOCIALS.map((s) => `<a href="${s.u}"${s.u !== "#" ? ' target="_blank" rel="noopener"' : ""}>${s.n}</a>`).join("");
+}
+
+// ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 async function loadAcademy() {
-  const main = $("academyMain");
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
+  renderSocials();
   try {
     const safe = (p) => p.then((v) => v).catch(() => null);
     const [sections, lessons, progress, members] = await Promise.all([
@@ -84,70 +95,52 @@ async function loadAcademy() {
       safe(dbGet("progress?select=lesson_id")),
       safe(dbGet("members?select=calls_total,calls_used")),
     ]);
-    if (sections === null && lessons === null) {
-      main.innerHTML = '<p class="empty" style="margin:40px">لم يتم تجهيز قاعدة بيانات المنصّة بعد.</p>'; return;
-    }
     SECTIONS = sections || []; LESSONS = lessons || [];
     DONE = new Set((progress || []).map((p) => p.lesson_id));
     const m = members && members[0];
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
-    renderHome();
-  } catch (e) { main.innerHTML = `<p class="empty" style="margin:40px">خطأ: ${esc(e.message)}</p>`; }
+    renderCourses();
+    if (SECTIONS.length) {
+      const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0];
+      openCourse(firstSec.id);
+    }
+  } catch (e) { $("plList").innerHTML = `<p class="hint" style="padding:14px">خطأ: ${esc(e.message)}</p>`; }
 }
 
 function renderProgress() {
   const total = LESSONS.length || 1;
-  const pct = Math.round((DONE.size / total) * 100);
-  $("progPct").textContent = pct + "%";
-  $("progFill").style.width = pct + "%";
+  $("progPct").textContent = Math.round((DONE.size / total) * 100) + "%";
 }
 
-// ====== الصفحة الرئيسية: قائمة الدورات ======
-function renderHome() {
-  CURSEC = null; CURLESSON = null;
-  const main = $("academyMain");
-  if (!SECTIONS.length) { main.innerHTML = '<p class="empty" style="margin:40px">لا توجد دورات بعد 🚀</p>'; return; }
-  main.innerHTML = `<div class="course-list">` + SECTIONS.map((sec) => {
+// ====== عمود دوراتي ======
+function renderCourses() {
+  const wrap = $("coursesCol");
+  if (!SECTIONS.length) { wrap.innerHTML = '<p class="hint">لا دورات بعد.</p>'; return; }
+  wrap.innerHTML = SECTIONS.map((sec) => {
     const ls = LESSONS.filter((l) => l.section_id === sec.id);
     const done = ls.filter((l) => DONE.has(l.id)).length;
     const pct = ls.length ? Math.round((done / ls.length) * 100) : 0;
-    return `<button class="course-row" data-sid="${sec.id}">
-      <div class="cr-icon">📚</div>
-      <div class="cr-info">
+    const full = ls.length && done === ls.length;
+    const cover = sec.cover_url ? `<img src="${esc(sec.cover_url)}" alt="">` : `<span class="crs-ph">📚</span>`;
+    return `<button class="crs-card ${sec.id === CURSEC ? "on" : ""}" data-sid="${sec.id}">
+      <div class="crs-cover">${cover}${full ? '<span class="crs-badge full">✓</span>' : ""}</div>
+      <div class="crs-info">
         <b>${esc(sec.title)}</b>
-        <small>${ls.length} درس · ${done}/${ls.length} مكتمل</small>
-        <div class="cr-bar"><span style="width:${pct}%"></span></div>
+        <div class="crs-line">🎬 ${ls.length} درس · ${done}/${ls.length} مكتمل</div>
+        <div class="crs-bar"><span style="width:${pct}%"></span></div>
       </div>
-      <span class="cr-arrow">‹</span>
     </button>`;
-  }).join("") + `</div>`;
-  main.querySelectorAll(".course-row").forEach((b) => b.addEventListener("click", () => openCourse(b.dataset.sid)));
+  }).join("");
+  wrap.querySelectorAll(".crs-card").forEach((b) => b.addEventListener("click", () => openCourse(b.dataset.sid)));
 }
 
-// ====== واجهة الدورة: فيديو يمين + قائمة دروس يسار ======
 function openCourse(sid) {
   CURSEC = sid;
-  const sec = SECTIONS.find((s) => s.id === sid);
+  renderCourses();
   const ls = LESSONS.filter((l) => l.section_id === sid);
-  const main = $("academyMain");
-  main.innerHTML = `
-    <button class="back-btn" id="backBtn">‹ كل الدورات</button>
-    <div class="course-view">
-      <div class="player-col">
-        <h2 class="lesson-title" id="lTitle"></h2>
-        <div class="player-box"><div id="playerHost"></div></div>
-        <button class="btn btn-primary" id="markDoneBtn">✓ أكملت هذا الدرس</button>
-        <div class="lesson-desc" id="lDesc"></div>
-      </div>
-      <aside class="playlist">
-        <h3 class="pl-title">${esc(sec ? sec.title : "")}</h3>
-        <div class="pl-list" id="plList"></div>
-      </aside>
-    </div>`;
-  $("backBtn").addEventListener("click", renderHome);
-  const first = ls.find((l) => !DONE.has(l.id)) || ls[0];
-  if (first) playLesson(first.id); else { renderPlaylist(ls); }
+  if (ls.length) { playLesson((ls.find((l) => !DONE.has(l.id)) || ls[0]).id); }
+  else { CURLESSON = null; renderPlaylist([]); $("lTitle").textContent = "—"; $("playerHost").innerHTML = '<p class="hint" style="padding:30px;text-align:center">لا دروس في هذا القسم بعد.</p>'; $("lDesc").innerHTML = ""; }
 }
 
 function renderPlaylist(ls) {
@@ -171,14 +164,12 @@ function playLesson(id) {
     : '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس.</p>';
   const ifr = host.querySelector("iframe");
   if (ifr) ifr.addEventListener("load", () => subscribePlayer(ifr));
-  $("lDesc").innerHTML = l.description ? `<h4>الوصف والروابط</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
+  $("lDesc").innerHTML = l.description ? `<h4>الروابط والمرفقات</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
   const md = $("markDoneBtn");
   md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
   md.classList.toggle("is-done", DONE.has(id));
   md.onclick = () => toggleDone(id);
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
-  const pc = document.querySelector(".player-col");
-  if (pc && window.innerWidth < 900) pc.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // اشتراك في أحداث مشغّل Bunny (player.js) لإكمال الدرس تلقائيًا
@@ -210,6 +201,7 @@ async function autoComplete(id) {
     if (md) { md.textContent = "✓ مكتمل — اضغط للإلغاء"; md.classList.add("is-done"); }
   }
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+  renderCourses();
 }
 
 async function toggleDone(id) {
@@ -228,5 +220,6 @@ async function toggleDone(id) {
     md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
     md.classList.toggle("is-done", DONE.has(id));
     renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+    renderCourses();
   } catch (e) { alert("خطأ: " + e.message); }
 }
