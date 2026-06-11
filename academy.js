@@ -76,19 +76,24 @@ async function loadAcademy() {
   const main = $("academyMain");
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   try {
+    const safe = (p) => p.then((v) => v).catch(() => null);
     const [sections, lessons, progress, members] = await Promise.all([
-      dbGet("sections?select=*&order=sort.asc,created_at.asc"),
-      dbGet("lessons?select=*&order=sort.asc,created_at.asc"),
-      dbGet("progress?select=lesson_id"),
-      dbGet("members?select=calls_total,calls_used"),
+      safe(dbGet("sections?select=*&order=sort.asc,created_at.asc")),
+      safe(dbGet("lessons?select=*&order=sort.asc,created_at.asc")),
+      safe(dbGet("progress?select=lesson_id")),
+      safe(dbGet("members?select=calls_total,calls_used")),
     ]);
-    LESSONS = lessons;
-    DONE = new Set(progress.map((p) => p.lesson_id));
+    if (sections === null && lessons === null) {
+      main.innerHTML = '<p class="empty" style="margin:40px">لم يتم تجهيز قاعدة بيانات المنصّة بعد.<br>شغّل ملف <b>academy-setup.sql</b> في Supabase.</p>';
+      return;
+    }
+    LESSONS = lessons || [];
+    DONE = new Set((progress || []).map((p) => p.lesson_id));
     // المكالمات
     const m = members && members[0];
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
-    if (!sections.length) { main.innerHTML = '<p class="empty" style="margin:40px">لا توجد دروس بعد. تابعنا قريبًا 🚀</p>'; return; }
+    if (!sections || !sections.length) { main.innerHTML = '<p class="empty" style="margin:40px">لا توجد دروس بعد. تابعنا قريبًا 🚀</p>'; return; }
     main.innerHTML = sections.map((sec) => {
       const ls = lessons.filter((l) => l.section_id === sec.id);
       return `<section class="acad-section">
