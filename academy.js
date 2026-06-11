@@ -173,7 +173,7 @@ function playLesson(id) {
     ? `<iframe src="${esc(l.embed_url)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
     : '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس.</p>';
   const ifr = host.querySelector("iframe");
-  if (ifr) ifr.addEventListener("load", () => subscribePlayer(ifr));
+  if (ifr && window.playerjs) attachPlayer(ifr, id);
   $("lDesc").innerHTML = l.description ? `<h4>الروابط والمرفقات</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
   updateWatchUI(id);
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
@@ -191,21 +191,23 @@ function updateWatchUI(id) {
   }
 }
 
-// اشتراك في أحداث مشغّل Bunny (player.js)
-function subscribePlayer(ifr) {
-  try {
-    ["ended", "timeupdate"].forEach((ev) =>
-      ifr.contentWindow.postMessage(JSON.stringify({ context: "player.js", method: "addEventListener", value: ev }), "*"));
-  } catch (_) {}
+// مشغّل Bunny عبر مكتبة player.js + عدّاد مشاهدة مضاد للتخطّي
+function attachPlayer(ifr, id) {
+  const player = new playerjs.Player(ifr);
+  let lastT = null, watched = null, dur = 0;
+  player.on("ready", () => {
+    player.on("timeupdate", (e) => {
+      const t = (e && e.seconds) || 0;
+      const d = (e && e.duration) || dur; dur = d;
+      if (watched === null) watched = ((PCT[id] || 0) / 100) * (d || 0); // ابدأ من المحفوظ
+      // احسب فقط المشاهدة الطبيعية (تقدّم ≤ ثانيتين) — السكِب ما ينحسب
+      if (lastT !== null && t > lastT && (t - lastT) <= 2) watched += (t - lastT);
+      lastT = t;
+      if (d > 0) recordWatch(id, Math.min(100, (watched / d) * 100));
+    });
+    player.on("ended", () => recordWatch(id, 100));
+  });
 }
-window.addEventListener("message", (e) => {
-  let d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (_) { return; }
-  if (!d || d.context !== "player.js" || !CURLESSON) return;
-  if (d.event === "ended") recordWatch(CURLESSON, 100);
-  else if (d.event === "timeupdate" && d.value && d.value.duration) {
-    recordWatch(CURLESSON, Math.min(100, (d.value.seconds / d.value.duration) * 100));
-  }
-});
 
 // تسجيل نسبة المشاهدة (تنمو فقط) + إكمال تلقائي عند ٩٠٪
 async function recordWatch(id, pct) {
