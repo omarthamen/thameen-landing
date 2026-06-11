@@ -94,11 +94,12 @@ async function loadAcademy() {
     const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
     const lessons = await dbGet("lessons?select=*&order=sort.asc,created_at.asc");
     let progress = [], members = [];
-    try { progress = await dbGet("progress?select=lesson_id,percent,completed"); } catch (_) {}
+    try { progress = await dbGet("progress?select=lesson_id,percent,completed"); }
+    catch (_) { try { progress = await dbGet("progress?select=lesson_id,completed"); } catch (_) {} }
     try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {}
     SECTIONS = sections || []; LESSONS = lessons || [];
     PCT = {}; DONE = new Set();
-    (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent || 0; if (p.completed) DONE.add(p.lesson_id); });
+    (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
     const m = members && members[0];
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
@@ -224,10 +225,13 @@ async function recordWatch(id, pct) {
   // حفظ مخفّف: كل +٥٪ أو عند الإكمال
   if (completed !== wasDone || pct - (lastSaved[id] || 0) >= 5) {
     lastSaved[id] = pct;
+    const base = { user_id: USER.id, lesson_id: id, completed, updated_at: new Date().toISOString() };
     try {
       await dbSend("POST", "progress?on_conflict=user_id,lesson_id",
-        { user_id: USER.id, lesson_id: id, percent: pct, completed, updated_at: new Date().toISOString() },
-        "resolution=merge-duplicates,return=minimal");
-    } catch (_) {}
+        { ...base, percent: pct }, "resolution=merge-duplicates,return=minimal");
+    } catch (_) {
+      // لو عمود percent مو موجود، احفظ الإكمال على الأقل
+      try { await dbSend("POST", "progress?on_conflict=user_id,lesson_id", base, "resolution=merge-duplicates,return=minimal"); } catch (_) {}
+    }
   }
 }
