@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=13" />
+  <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body>
 
@@ -326,15 +326,8 @@
   <!-- الأسئلة الشائعة -->
   <section id="faq" class="section">
     <h2 class="section-title">أسئلة شائعة</h2>
-    <div class="faq-toggle-wrap">
-      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="faqReveal" data-open-text="إخفاء الأسئلة" data-close-text="افتح الأسئلة الشائعة">
-        <span class="js-toggle-label">افتح الأسئلة الشائعة</span>
-        <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
-      </button>
-    </div>
-    <div class="learn-reveal" id="faqReveal">
-      <div class="learn-reveal-inner">
-        <div class="faq">
+    <!-- ٤ أسئلة ظاهرة دائمًا -->
+    <div class="faq">
       <details>
         <summary>هدفي أزيد دخلي وأحترف المونتاج، هل التدريب يساعدني؟</summary>
         <p>نعم. التدريب ما يعلّمك بس شلون تضغط أزرار داخل Premiere وAfter Effects — هذا موجود باليوتيوب. داخل البرنامج تتعلّم مهارة مطلوبة بالسوق، ونوريك شلون تتعامل مع العملاء وتقفل الصفقات: شنو الأخطاء اللي تخلّي العميل يرفضك حتى لو مونتاجك جيد، وشلون تعرض قيمة شغلك بطريقة تقرّبك من قفل الصفقة.</p>
@@ -351,40 +344,79 @@
         <summary>أنا طالب أو موظف وما عندي وقت طويل يوميًا، أقدر أستفيد؟</summary>
         <p>نعم. ساعة إلى ساعتين يوميًا تكفي جدًا إذا التزمت وطبّقت. والمحتوى عندك مدى الحياة، يعني ترجع له وتكمّل بالسرعة اللي تناسبك.</p>
       </details>
-      <details>
-        <summary>اليوتيوب مجاني، ليش أدفع؟</summary>
-        <p>اليوتيوب يعطيك الأداة، لكنه ما يعلّمك المهارة كاملة. مثال: لو عطينا نفس أدوات الطبخ لشخص عادي، ونفسها لشيف خبرته أكثر من ٥ سنوات — منو راح يطلّع أفضل طبخة؟ المشكلة مو بالأدوات، المشكلة بالخبرة والترتيب والتطبيق والتصحيح. هنا ما تتعلّم Premiere وAfter Effects فقط — تتعلّم مهارة مونتاج كاملة تمشي عليها خطوة بخطوة.</p>
-      </details>
-      <details>
-        <summary>هل أحتاج كمبيوتر بمواصفات خارقة؟</summary>
-        <p>للمونتاج الأساسي مواصفات متوسطة تكفي للبدء. أما قسم الـ 3D فيُفضّل جهاز متوسط إلى قوي، خصوصًا مع After Effects نسخة ٢٤ أو أحدث. ابدأ باللي عندك وطوّر أدواتك تدريجيًا.</p>
-      </details>
-      <details>
-        <summary>كيف طريقة الدفع إذا ما عندي بطاقة بنكية دولية؟</summary>
-        <p>وفّرنا طرق دفع تناسب الجميع. إذا واجهت أي مشكلة بالدفع من خلال الموقع، أو ما عندك بطاقة، تواصل معنا على الواتساب وراح نرتّب لك أسهل طريقة دفع تناسب بلدك حتى تبدأ مباشرة.</p>
-      </details>
-      <details>
-        <summary>هل أكو شهادة موثّقة بعد إتمام الدورة؟</summary>
-        <p>تستلم شهادة إتمام من ثَمين بعد إنهاء الدورة.</p>
-      </details>
-      <details>
-        <summary>هل أحتاج إلى بلوقنات خارجية؟</summary>
-        <p>لا، ما تحتاج أي إضافات خارجية (PLUG-IN). بس انتبه يكون عندك أفتر إفكتس نسخة ٢٤ أو أحدث لقسم الـ 3D.</p>
-      </details>
+    </div>
+
+    <!-- بقية الأسئلة — تنكشف بزر「عرض المزيد」 -->
+    <div class="learn-reveal" id="faqReveal">
+      <div class="learn-reveal-inner">
+        <div class="faq faq-more">
+          <details>
+            <summary>اليوتيوب مجاني، ليش أدفع؟</summary>
+            <p>اليوتيوب يعطيك الأداة، لكنه ما يعلّمك المهارة كاملة. مثال: لو عطينا نفس أدوات الطبخ لشخص عادي، ونفسها لشيف خبرته أكثر من ٥ سنوات — منو راح يطلّع أفضل طبخة؟ المشكلة مو بالأدوات، المشكلة بالخبرة والترتيب والتطبيق والتصحيح. هنا ما تتعلّم Premiere وAfter Effects فقط — تتعلّم مهارة مونتاج كاملة تمشي عليها خطوة بخطوة.</p>
+          </details>
+          <details>
+            <summary>هل أحتاج كمبيوتر بمواصفات خارقة؟</summary>
+            <p>للمونتاج الأساسي مواصفات متوسطة تكفي للبدء. أما قسم الـ 3D فيُفضّل جهاز متوسط إلى قوي، خصوصًا مع After Effects نسخة ٢٤ أو أحدث. ابدأ باللي عندك وطوّر أدواتك تدريجيًا.</p>
+          </details>
+          <details>
+            <summary>كيف طريقة الدفع إذا ما عندي بطاقة بنكية دولية؟</summary>
+            <p>وفّرنا طرق دفع تناسب الجميع. إذا واجهت أي مشكلة بالدفع من خلال الموقع، أو ما عندك بطاقة، تواصل معنا على الواتساب وراح نرتّب لك أسهل طريقة دفع تناسب بلدك حتى تبدأ مباشرة.</p>
+          </details>
+          <details>
+            <summary>هل أكو شهادة موثّقة بعد إتمام الدورة؟</summary>
+            <p>تستلم شهادة إتمام من ثَمين بعد إنهاء الدورة.</p>
+          </details>
+          <details>
+            <summary>هل أحتاج إلى بلوقنات خارجية؟</summary>
+            <p>لا، ما تحتاج أي إضافات خارجية (PLUG-IN). بس انتبه يكون عندك أفتر إفكتس نسخة ٢٤ أو أحدث لقسم الـ 3D.</p>
+          </details>
         </div>
       </div>
+    </div>
+
+    <div class="faq-toggle-wrap">
+      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="faqReveal" data-open-text="عرض أقل ▴" data-close-text="عرض المزيد من الأسئلة">
+        <span class="js-toggle-label">عرض المزيد من الأسئلة</span>
+        <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
+      </button>
     </div>
   </section>
 
   <!-- دعوة لاتخاذ إجراء -->
   <section class="cta">
     <h2 class="cta-title">الآن معاك خيارين</h2>
-    <p class="cta-sub">
-      إما تضيع 90 يوم بين شروحات يوتيوب متفرقة، أو تبدأ اليوم بمسار واضح يساعدك تبني
-      مهارة مونتاج حقيقية خلال 90 يوم.
-    </p>
+    <p class="cta-lead">القرار اليوم هو اللي يحدّد وين راح تكون بعد ٩٠ يوم.</p>
+
+    <div class="choices">
+      <div class="choice choice--bad">
+        <span class="choice-tag">بدوننا</span>
+        <h3>تضيّع الوقت</h3>
+        <ul>
+          <li>تضيع ٩٠ يوم بين شروحات يوتيوب متفرقة</li>
+          <li>تتعلّم أدوات بس ما تعرف تطلّع فيديو كامل</li>
+          <li>تطبّق وحدك بدون أي تصحيح</li>
+          <li>تخاف الذكاء الاصطناعي يستبدلك</li>
+          <li>تبقى بنفس المستوى وتحبط</li>
+        </ul>
+      </div>
+
+      <div class="choice-vs" aria-hidden="true">أو</div>
+
+      <div class="choice choice--good">
+        <span class="choice-tag">معنا</span>
+        <h3>تبدأ اليوم</h3>
+        <ul>
+          <li>مسار واضح خطوة بخطوة لمدة ٩٠ يوم</li>
+          <li>تبني فيديو احترافي من الصفر للنهاية</li>
+          <li>تصحيح وملاحظات مباشرة بالجلسات</li>
+          <li>تستخدم الـ AI لصالحك بدل ما تخاف منه</li>
+          <li>تطلّع شغل أقوى ومهارة تبني عليها</li>
+        </ul>
+      </div>
+    </div>
+
     <p class="cta-sub2">
-      إذا أنت جاد وتريد ترفع مستواك، تطلع شغل أقوى، وتستخدم الذكاء الاصطناعي لصالحك
+      إذا أنت جاد وتريد ترفع مستواك، تطلّع شغل أقوى، وتستخدم الذكاء الاصطناعي لصالحك
       بدل ما تخاف منه…
     </p>
     <a class="btn btn-primary btn-lg" href="https://wa.me/9647518838203?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%20%D8%A7%D9%86%D8%A7%20%D8%AC%D8%A7%D9%87%D8%B2%20%D9%84%D8%AA%D8%AD%D8%AF%D9%8A%20%D9%A9%D9%A0%20%D9%8A%D9%88%D9%85%20%D9%84%D8%A7%D8%AD%D8%AA%D8%B1%D8%A7%D9%81%20%D8%A7%D9%84%D9%85%D9%88%D9%86%D8%AA%D8%A7%D8%AC" target="_blank" rel="noopener">
