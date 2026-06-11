@@ -8,6 +8,7 @@
   --radius:18px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}   /* مهم: يخلّي خاصية hidden تتغلّب على display:flex */
 body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
 .bg-glow{position:fixed;inset:0;z-index:-1;background:radial-gradient(60vw 60vw at 80% -10%,rgba(91,184,232,.16),transparent 60%),radial-gradient(50vw 50vw at 0% 30%,rgba(19,72,112,.2),transparent 60%),var(--bg)}
 .brand-diamond{color:var(--primary-light);filter:drop-shadow(0 0 10px rgba(91,184,232,.7))}
