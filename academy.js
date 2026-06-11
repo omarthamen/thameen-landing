@@ -196,6 +196,11 @@ function attachPlayer(ifr, id) {
   const player = new playerjs.Player(ifr);
   let lastT = null, watched = null, dur = 0;
   player.on("ready", () => {
+    // كمّل من مكان ما وقف (لو فيه تقدّم محفوظ بين ١٪ و٩٠٪)
+    const savedPct = PCT[id] || 0;
+    if (savedPct > 1 && savedPct < 90) {
+      try { player.getDuration((d) => { if (d > 0) player.setCurrentTime(Math.max(0, (savedPct / 100) * d - 2)); }); } catch (_) {}
+    }
     player.on("timeupdate", (e) => {
       const t = (e && e.seconds) || 0;
       const d = (e && e.duration) || dur; dur = d;
