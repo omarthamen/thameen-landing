@@ -3,6 +3,13 @@ const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
 let TOKEN = null, USER = null;
 
+// روابط التواصل بالفوتر (عدّلها هنا) — معرّفة بالأعلى لتفادي مشكلة الترتيب
+const SOCIALS = [
+  { n: "واتساب", u: "https://wa.me/9647518838203" },
+  { n: "إنستقرام", u: "#" }, { n: "تيك توك", u: "#" }, { n: "يوتيوب", u: "#" },
+  { n: "سناب شات", u: "#" }, { n: "ديسكورد", u: "#" }, { n: "X", u: "#" },
+];
+
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const setMsg = (el, t, ok) => { el.textContent = t; el.className = "msg " + (ok ? "ok" : "err"); };
@@ -71,12 +78,7 @@ async function refresh(rt) {
   else { showApp(false); }
 })();
 
-// ====== الفوتر: روابط التواصل (عدّل الروابط هنا) ======
-const SOCIALS = [
-  { n: "واتساب", u: "https://wa.me/9647518838203" },
-  { n: "إنستقرام", u: "#" }, { n: "تيك توك", u: "#" }, { n: "يوتيوب", u: "#" },
-  { n: "سناب شات", u: "#" }, { n: "ديسكورد", u: "#" }, { n: "X", u: "#" },
-];
+// ====== الفوتر: روابط التواصل ======
 function renderSocials() {
   const el = $("footSocials"); if (!el) return;
   el.innerHTML = SOCIALS.map((s) => `<a href="${s.u}"${s.u !== "#" ? ' target="_blank" rel="noopener"' : ""}>${s.n}</a>`).join("");
