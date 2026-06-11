@@ -335,6 +335,33 @@ async function loadCourses() {
   } catch (x) { wrap.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }
 
+$("bulkBtn").addEventListener("click", async () => {
+  const msg = $("bulkMsg");
+  const lines = $("bulkBox").value.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) { setMsg(msg, "الصق الدروس أول.", false); return; }
+  const btn = $("bulkBtn"); btn.disabled = true; setMsg(msg, "جارٍ الاستيراد…", true);
+  try {
+    let sections = await dbGet("sections?select=id,title");
+    const findOrCreate = async (name) => {
+      let s = sections.find((x) => x.title === name);
+      if (s) return s.id;
+      const created = await dbSend("POST", "sections", { title: name, sort: sections.length }, "return=representation");
+      const id = created[0].id; sections.push({ id, title: name }); return id;
+    };
+    let count = 0;
+    for (const line of lines) {
+      const parts = line.split("|").map((p) => p.trim());
+      if (parts.length < 3) continue;
+      const sid = await findOrCreate(parts[0]);
+      await dbSend("POST", "lessons", { section_id: sid, title: parts[1], embed_url: parseEmbed(parts[2]), sort: count }, "return=minimal");
+      count++;
+    }
+    setMsg(msg, `تم استيراد ${count} درس ✅`, true);
+    $("bulkBox").value = ""; loadCourses();
+  } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+  btn.disabled = false;
+});
+
 $("addSectionBtn").addEventListener("click", async () => {
   const msg = $("sectionMsg");
   const title = $("newSectionTitle").value.trim();

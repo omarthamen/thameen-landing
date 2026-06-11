@@ -20,7 +20,7 @@
       <span class="brand-diamond">◆</span>
       <h1>لوحة تحكّم ثَمين</h1>
       <p class="login-sub">سجّل دخولك للمتابعة</p>
-      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ٨ ✅</p>
+      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ٩ ✅</p>
       <input type="email" id="email" class="fld" placeholder="الإيميل" autocomplete="username" required />
       <input type="password" id="password" class="fld" placeholder="كلمة السر" autocomplete="current-password" required />
       <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
@@ -136,11 +136,20 @@
           </div>
           <p class="msg" id="sectionMsg" role="status"></p>
         </div>
+
+        <div class="card">
+          <h3>⚡ استيراد دفعة</h3>
+          <p class="hint">الصق الدروس (أنا أجهّزها لك). كل سطر: <b>اسم القسم | عنوان الدرس | رابط الفيديو</b></p>
+          <textarea id="bulkBox" class="fld" rows="6" placeholder="الدورة الأولى | الحلقة الأولى | https://iframe.mediadelivery.net/embed/281394/..."></textarea>
+          <button class="btn btn-primary" id="bulkBtn">استيراد الكل</button>
+          <p class="msg" id="bulkMsg" role="status"></p>
+        </div>
+
         <div id="sectionsList"></div>
       </section>
     </main>
   </section>
 
-  <script src="admin.js?v=8"></script>
+  <script src="admin.js?v=9"></script>
 </body>
 </html>
