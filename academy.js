@@ -282,6 +282,20 @@ async function loadMembers() {
   el.innerHTML = ps.map((p) => `<div class="mem"><div class="mem-av" style="background:${avColor(p.user_id || p.name)}">${esc(initialOf(p.name))}</div><span class="mem-name">${esc(p.name || "متدرب")}</span></div>`).join("");
 }
 
+// تضمين الروابط داخل الرسالة (يوتيوب/إنستقرام/تيك توك/فيديو مباشر)
+function embedFor(text) {
+  if (!text) return "";
+  const url = (text.match(/https?:\/\/[^\s]+/) || [])[0];
+  if (!url) return "";
+  let m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (m) return `<div class="embed16"><iframe src="https://www.youtube.com/embed/${m[1]}" allow="encrypted-media;picture-in-picture;fullscreen" allowfullscreen loading="lazy"></iframe></div>`;
+  m = url.match(/instagram\.com\/(reel|p|tv)\/([\w-]+)/);
+  if (m) return `<div class="embed-ig"><iframe src="https://www.instagram.com/${m[1]}/${m[2]}/embed" loading="lazy" scrolling="no"></iframe></div>`;
+  m = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+  if (m) return `<div class="embed-tt"><iframe src="https://www.tiktok.com/embed/v2/${m[1]}" loading="lazy" allowfullscreen></iframe></div>`;
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${esc(url)}" controls preload="metadata"></video>`;
+  return "";
+}
 function renderMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
   let list = MSGS;
@@ -300,7 +314,7 @@ function renderMessages(forceScroll) {
       <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
       <div class="cmsg-body">
         <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
-        <div class="cmsg-bubble">${txt}${media}</div>
+        <div class="cmsg-bubble">${txt}${media}${embedFor(m.text)}</div>
       </div></div>`;
   }).join("");
   if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {

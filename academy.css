@@ -50,6 +50,12 @@
 .cmsg-time{font-size:11px;color:var(--text-subtle)}
 .cmsg-bubble{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:4px 16px 16px 16px;padding:11px 15px;font-size:15px;line-height:1.6;color:var(--text);word-break:break-word;white-space:pre-wrap}
 .cmsg-bubble img,.cmsg-bubble video{max-width:100%;max-height:320px;border-radius:12px;display:block;margin-top:4px}
+.embed16{position:relative;aspect-ratio:16/9;width:min(420px,100%);border-radius:12px;overflow:hidden;margin-top:8px;background:#000}
+.embed16 iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.embed-ig{width:min(340px,100%);height:560px;border-radius:14px;overflow:hidden;margin-top:8px;background:#fff;border:1px solid rgba(255,255,255,.1)}
+.embed-ig iframe{width:100%;height:100%;border:0}
+.embed-tt{width:min(330px,100%);height:580px;border-radius:14px;overflow:hidden;margin-top:8px;background:#000}
+.embed-tt iframe{width:100%;height:100%;border:0}
 .cmsg-bubble img:first-child,.cmsg-bubble video:first-child{margin-top:0}
 .cmsg.me{align-self:flex-start;flex-direction:row-reverse;margin-inline-start:auto}
 .cmsg.me .cmsg-meta{flex-direction:row-reverse}
