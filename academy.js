@@ -205,7 +205,7 @@ function attachPlayer(ifr, id) {
       lastT = t;
       if (d > 0) recordWatch(id, Math.min(100, (watched / d) * 100));
     });
-    player.on("ended", () => recordWatch(id, 100));
+    // ملاحظة: ما نعتمد على حدث "ended" — الإكمال فقط من الثواني المُشاهَدة فعليًا (يمنع السكِب للآخر)
   });
 }
 
