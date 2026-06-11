@@ -93,7 +93,7 @@ document.querySelectorAll(".tab").forEach((t) => {
   });
 });
 
-function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); }
+function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); }
 
 // ====== التعليقات ======
 async function loadComments() {
@@ -257,3 +257,92 @@ $("addChannelBtn").addEventListener("click", () =>
   addMedia("channel", $("channelFile"), $("channelTitle").value.trim(), null, $("channelMsg"), $("channelTitle"), null));
 $("addWorkBtn").addEventListener("click", () =>
   addMedia("work", $("workFile"), null, $("workMeta").value.trim(), $("workMsg"), null, $("workMeta")));
+
+// ====== الدورات (أقسام + دروس) ======
+function parseEmbed(s) {
+  s = (s || "").trim();
+  const m = s.match(/src=["']([^"']+)["']/i);
+  return m ? m[1] : s; // لو لصق iframe كامل ناخذ src، وإلا الرابط نفسه
+}
+function parseChapters(text) {
+  return (text || "").split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
+    const m = line.match(/^(?:(\d+):)?(\d{1,2}(?:\.\d+)?)\s+(.+)$/); // «M:SS عنوان» أو «SS عنوان»
+    if (!m) return null;
+    const t = m[1] ? (+m[1]) * 60 + parseFloat(m[2]) : parseFloat(m[2]);
+    return { t, label: m[3].trim() };
+  }).filter(Boolean).sort((a, b) => a.t - b.t);
+}
+
+async function loadCourses() {
+  const wrap = $("sectionsList");
+  if (!wrap) return;
+  wrap.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  try {
+    const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
+    const lessons = await dbGet("lessons?select=*&order=sort.asc,created_at.asc");
+    if (!sections.length) { wrap.innerHTML = '<p class="empty">لا توجد أقسام بعد. أضف قسمًا من فوق.</p>'; return; }
+    wrap.innerHTML = sections.map((sec) => {
+      const ls = lessons.filter((l) => l.section_id === sec.id);
+      return `<div class="card sec-card" data-sid="${sec.id}">
+        <div class="sec-head"><h3>${esc(sec.title)}</h3><button class="btn btn-danger btn-sm sec-del">حذف القسم</button></div>
+        <div class="lessons">${ls.map((l) => `<div class="lesson-row" data-lid="${l.id}">
+          ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">🎬</div>`}
+          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}</small></div>
+          <button class="btn btn-danger btn-sm lesson-del">حذف</button></div>`).join("") || '<p class="hint">لا دروس بعد.</p>'}</div>
+        <details class="add-lesson">
+          <summary>＋ إضافة درس</summary>
+          <input type="text" class="fld l-title" placeholder="عنوان الدرس" />
+          <input type="text" class="fld l-embed" placeholder="رابط Bunny (iframe embed) أو الصق كود iframe" />
+          <label class="lbl">صورة مصغّرة (ثَمنيل)</label>
+          <input type="file" class="fld l-thumb" accept="image/*" />
+          <label class="lbl">الفصول — سطر لكل فصل: «1:30 عنوان الفصل»</label>
+          <textarea class="fld l-chapters" rows="3" placeholder="0:00 المقدمة
+1:30 الجزء الأول"></textarea>
+          <button class="btn btn-primary btn-sm l-add">حفظ الدرس</button>
+          <p class="msg l-msg"></p>
+        </details></div>`;
+    }).join("");
+
+    wrap.querySelectorAll(".sec-card").forEach((card) => {
+      const sid = card.dataset.sid;
+      card.querySelector(".sec-del").addEventListener("click", async () => {
+        if (!confirm("حذف القسم وكل دروسه؟")) return;
+        try { await dbSend("DELETE", `sections?id=eq.${sid}`); loadCourses(); } catch (x) { alert("خطأ: " + x.message); }
+      });
+      card.querySelectorAll(".lesson-row").forEach((row) => {
+        row.querySelector(".lesson-del").addEventListener("click", async () => {
+          if (!confirm("حذف الدرس؟")) return;
+          try { await dbSend("DELETE", `lessons?id=eq.${row.dataset.lid}`); loadCourses(); } catch (x) { alert("خطأ: " + x.message); }
+        });
+      });
+      const addBtn = card.querySelector(".l-add");
+      addBtn.addEventListener("click", async () => {
+        const msg = card.querySelector(".l-msg");
+        const title = card.querySelector(".l-title").value.trim();
+        if (!title) { setMsg(msg, "اكتب عنوان الدرس.", false); return; }
+        const embed = parseEmbed(card.querySelector(".l-embed").value);
+        const chapters = parseChapters(card.querySelector(".l-chapters").value);
+        const file = card.querySelector(".l-thumb").files[0];
+        addBtn.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
+        try {
+          let thumb = null;
+          if (file) thumb = await uploadFile(file);
+          await dbSend("POST", "lessons", { section_id: sid, title, embed_url: embed || null, thumb_url: thumb, chapters }, "return=minimal");
+          loadCourses();
+        } catch (x) { setMsg(msg, "خطأ: " + x.message, false); addBtn.disabled = false; }
+      });
+    });
+  } catch (x) { wrap.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
+}
+
+$("addSectionBtn").addEventListener("click", async () => {
+  const msg = $("sectionMsg");
+  const title = $("newSectionTitle").value.trim();
+  if (!title) { setMsg(msg, "اكتب اسم القسم.", false); return; }
+  try {
+    const n = await dbGet("sections?select=sort&order=sort.desc&limit=1");
+    const sort = n && n[0] ? (n[0].sort || 0) + 1 : 0;
+    await dbSend("POST", "sections", { title, sort }, "return=minimal");
+    $("newSectionTitle").value = ""; setMsg(msg, "تمت الإضافة ✅", true); loadCourses();
+  } catch (x) { setMsg(msg, "خطأ: " + x.message, false); }
+});
