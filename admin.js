@@ -93,7 +93,39 @@ document.querySelectorAll(".tab").forEach((t) => {
   });
 });
 
-function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); }
+function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); }
+
+// ====== المشتركون ======
+async function loadSubscribers() {
+  const list = $("subsList"); if (!list) return;
+  list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  try {
+    const ps = await dbGet("profiles?select=name,created_at&order=created_at.desc&limit=500");
+    $("subsCount").textContent = (ps?.length || 0) + " مشترك";
+    if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
+    list.innerHTML = ps.map((p) => `<div class="crow"><div class="c-main"><b class="c-name">${esc(p.name || "—")}</b></div></div>`).join("");
+  } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
+}
+
+$("createSubBtn").addEventListener("click", async () => {
+  const msg = $("subMsg"), btn = $("createSubBtn");
+  const name = $("subName").value.trim(), email = $("subEmail").value.trim(), password = $("subPass").value;
+  if (!email || !password) { setMsg(msg, "اكتب الإيميل وكلمة السر.", false); return; }
+  btn.disabled = true; setMsg(msg, "جارٍ إنشاء الحساب…", true);
+  try {
+    const r = await fetchT(`${SUPABASE_URL}/functions/v1/create-subscriber`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
+      body: JSON.stringify({ name, email, password }),
+    }, 25000);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status + " — تأكّد إنك نشرت الدالة create-subscriber"));
+    setMsg(msg, `تم إنشاء حساب «${d.name || email}» ✅ — أرسل له الإيميل وكلمة السر.`, true);
+    $("subName").value = ""; $("subEmail").value = ""; $("subPass").value = "";
+    loadSubscribers();
+  } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+  btn.disabled = false;
+});
 
 // ====== التعليقات ======
 async function loadComments() {

@@ -20,7 +20,7 @@
       <span class="brand-diamond">◆</span>
       <h1>لوحة تحكّم ثَمين</h1>
       <p class="login-sub">سجّل دخولك للمتابعة</p>
-      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ١١ ✅</p>
+      <p id="verBadge" style="color:#5BB8E8;font-size:12px;font-weight:700;margin-bottom:16px">إصدار ١٢ ✅</p>
       <input type="email" id="email" class="fld" placeholder="الإيميل" autocomplete="username" required />
       <input type="password" id="password" class="fld" placeholder="كلمة السر" autocomplete="current-password" required />
       <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
@@ -43,6 +43,7 @@
       <button class="tab" data-tab="video">🎬 الفيديو</button>
       <button class="tab" data-tab="images">🖼️ الصور</button>
       <button class="tab" data-tab="courses">📚 الدورات</button>
+      <button class="tab" data-tab="subs">👥 المشتركون</button>
     </nav>
 
     <main class="dash">
@@ -147,9 +148,27 @@
 
         <div id="sectionsList"></div>
       </section>
+
+      <!-- المشتركون -->
+      <section class="panel" id="tab-subs" hidden>
+        <div class="panel-head"><h2>المشتركون</h2><span class="hint" id="subsCount">…</span></div>
+        <div class="card">
+          <h3>➕ إضافة مشترك جديد</h3>
+          <p class="hint">اكتب اسمه + إيميله + كلمة سر، وراح يتسوّى حسابه كامل (دخول + بروفايل + ٣ مكالمات).</p>
+          <input type="text" id="subName" class="fld" placeholder="اسم المشترك" />
+          <input type="email" id="subEmail" class="fld" placeholder="الإيميل (للدخول)" autocomplete="off" />
+          <input type="text" id="subPass" class="fld" placeholder="كلمة السر" autocomplete="off" />
+          <button class="btn btn-primary" id="createSubBtn">إنشاء الحساب</button>
+          <p class="msg" id="subMsg" role="status"></p>
+        </div>
+        <div class="card">
+          <h3>قائمة المشتركين</h3>
+          <div id="subsList"></div>
+        </div>
+      </section>
     </main>
   </section>
 
-  <script src="admin.js?v=11"></script>
+  <script src="admin.js?v=12"></script>
 </body>
 </html>
