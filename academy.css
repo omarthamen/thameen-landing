@@ -32,7 +32,7 @@
 .player-col{min-width:0}
 .lesson-title{font-size:clamp(18px,3vw,24px);font-weight:900;margin-bottom:14px;line-height:1.4}
 .player-box{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.player-box iframe{width:100%;height:100%;border:0;display:block}
+.player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .player-col #markDoneBtn{margin-top:16px;width:100%}
 .player-col #markDoneBtn.is-done{background:rgba(46,194,126,.15);color:#7ee0a0;box-shadow:none}
 .lesson-desc{margin-top:20px}

@@ -169,6 +169,8 @@ function playLesson(id) {
   host.innerHTML = l.embed_url
     ? `<iframe src="${esc(l.embed_url)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
     : '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس.</p>';
+  const ifr = host.querySelector("iframe");
+  if (ifr) ifr.addEventListener("load", () => subscribePlayer(ifr));
   $("lDesc").innerHTML = l.description ? `<h4>الوصف والروابط</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
   const md = $("markDoneBtn");
   md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
@@ -177,6 +179,37 @@ function playLesson(id) {
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
   const pc = document.querySelector(".player-col");
   if (pc && window.innerWidth < 900) pc.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// اشتراك في أحداث مشغّل Bunny (player.js) لإكمال الدرس تلقائيًا
+function subscribePlayer(ifr) {
+  try {
+    ["ended", "timeupdate"].forEach((ev) =>
+      ifr.contentWindow.postMessage(JSON.stringify({ context: "player.js", method: "addEventListener", value: ev }), "*"));
+  } catch (_) {}
+}
+window.addEventListener("message", (e) => {
+  let d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (_) { return; }
+  if (!d || d.context !== "player.js" || !CURLESSON) return;
+  if (d.event === "ended") autoComplete(CURLESSON);
+  else if (d.event === "timeupdate" && d.value && d.value.duration) {
+    if (d.value.seconds / d.value.duration >= 0.92) autoComplete(CURLESSON);
+  }
+});
+async function autoComplete(id) {
+  if (DONE.has(id)) return;
+  DONE.add(id);
+  try {
+    await dbSend("POST", "progress?on_conflict=user_id,lesson_id",
+      { user_id: USER.id, lesson_id: id, completed: true, updated_at: new Date().toISOString() },
+      "resolution=merge-duplicates,return=minimal");
+  } catch (_) { DONE.delete(id); return; }
+  renderProgress();
+  if (CURLESSON === id) {
+    const md = $("markDoneBtn");
+    if (md) { md.textContent = "✓ مكتمل — اضغط للإلغاء"; md.classList.add("is-done"); }
+  }
+  renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
 }
 
 async function toggleDone(id) {
