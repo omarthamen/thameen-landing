@@ -295,7 +295,7 @@ function renderMessages(forceScroll) {
     const nm = m.name || "متدرب";
     let media = "";
     if (m.media_url) media = m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
-    const txt = m.text ? esc(m.text) : "";
+    const txt = m.text ? linkify(m.text) : "";
     return `<div class="cmsg ${me ? "me" : ""} ${gold ? "gold" : ""}" data-id="${m.id}">
       <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
       <div class="cmsg-body">
@@ -352,7 +352,15 @@ document.querySelectorAll("#commChannels .chan").forEach((c) => c.addEventListen
 (function () {
   const ab = $("attachBtn"), fi = $("commFile"); if (!ab || !fi) return;
   ab.addEventListener("click", () => fi.click());
-  fi.addEventListener("change", (e) => { const f = e.target.files[0]; if (f) { pendingFile = f; showPending(f); } });
+  fi.addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const MAX = 45 * 1024 * 1024; // ٤٥ م.ب (حد Supabase المجاني)
+    if (f.size > MAX) {
+      alert(`الملف كبير (${(f.size / 1048576).toFixed(0)} م.ب).\nالحد الأقصى ٤٥ م.ب.\n\nللفيديوهات الكبيرة: ارفعها على يوتيوب/درايف والصق الرابط كرسالة.`);
+      fi.value = ""; return;
+    }
+    pendingFile = f; showPending(f);
+  });
 })();
 function showPending(f) {
   const pv = $("filePreview"); if (!pv) return;
