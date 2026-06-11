@@ -3,7 +3,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+// قفل لا-عمليّ: يتجاوز مشكلة navigator.locks اللي تعلّق في سفاري (خصوصًا الخاص)
+const noopLock = async (_name, _acquireTimeout, fn) => await fn();
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    lock: noopLock,
+  },
+});
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
