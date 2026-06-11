@@ -394,6 +394,8 @@ body {
   background: #000;
 }
 
+.video-cta { text-align: center; margin-top: 26px; }
+
 /* ---------- زر تشغيل الفيديو المتحرّك ---------- */
 .video-play {
   position: absolute;
