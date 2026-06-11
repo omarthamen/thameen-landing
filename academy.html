@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=9" />
+  <link rel="stylesheet" href="academy.css?v=10" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -110,6 +110,17 @@
             <input id="commInput" placeholder="اكتب رسالتك…" maxlength="700" autocomplete="off" />
             <button class="btn btn-primary" type="submit" id="commSend">إرسال</button>
           </form>
+
+          <!-- نموذج فرص العمل -->
+          <form class="job-form" id="jobForm" hidden>
+            <textarea id="jobDesc" rows="2" maxlength="600" placeholder="العمل المطلوب / وصف الفرصة…"></textarea>
+            <div class="job-row">
+              <input id="jobChannel" placeholder="🔗 رابط قناتك / معرض أعمالك (اختياري)" autocomplete="off" />
+              <input id="jobPrice" placeholder="💰 السعر (اختياري)" autocomplete="off" />
+            </div>
+            <input id="jobContact" placeholder="📞 رابط تواصل مباشر أو رقم واتساب" autocomplete="off" />
+            <button class="btn btn-primary" type="submit" id="jobSend">✦ نشر الفرصة</button>
+          </form>
         </div>
       </div>
     </div>
@@ -121,6 +132,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=19"></script>
+  <script src="academy.js?v=20"></script>
 </body>
 </html>

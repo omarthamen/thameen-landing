@@ -303,26 +303,52 @@ function renderMessages(forceScroll) {
   if (!list.length) { box.innerHTML = `<p class="comm-empty">${commSearch ? "لا نتائج للبحث" : "لا رسائل بعد — كن أول من يبدأ 👋"}</p>`; return; }
   const isAdmin = USER && USER.email === "omarthamen@gmail.com";
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  const gold = CURCHAN === "jobs";
-  box.innerHTML = list.map((m) => {
-    const me = m.user_id === (USER && USER.id);
-    const nm = m.name || "متدرب";
-    let media = "";
-    if (m.media_url) media = m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
-    const txt = m.text ? linkify(m.text) : "";
-    return `<div class="cmsg ${me ? "me" : ""} ${gold ? "gold" : ""}" data-id="${m.id}">
-      <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
-      <div class="cmsg-body">
-        <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
-        <div class="cmsg-bubble">${txt}${media}${embedFor(m.text)}</div>
-      </div></div>`;
-  }).join("");
+  const fn = CURCHAN === "jobs" ? jobCard : CURCHAN === "achievements" ? achCard : bubbleHtml;
+  box.innerHTML = list.map((m) => fn(m, isAdmin)).join("");
   if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
-    const id = e.target.closest(".cmsg").dataset.id;
-    if (!confirm("حذف الرسالة؟")) return;
-    try { await dbSend("DELETE", `community_messages?id=eq.${id}`); loadMessages(false); } catch (_) {}
+    const el = e.target.closest("[data-id]"); if (!el) return;
+    if (!confirm("حذف؟")) return;
+    try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); } catch (_) {}
   }));
   if (forceScroll || atBottom) box.scrollTop = box.scrollHeight;
+}
+function mediaHtml(m) {
+  if (!m.media_url) return "";
+  return m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
+}
+function bubbleHtml(m, isAdmin) {
+  const me = m.user_id === (USER && USER.id), nm = m.name || "متدرب";
+  return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
+    <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
+    <div class="cmsg-body">
+      <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
+      <div class="cmsg-bubble">${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}</div>
+    </div></div>`;
+}
+function achCard(m, isAdmin) {
+  const nm = m.name || "متدرب";
+  return `<div class="ach-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
+    <div class="ach-head"><div class="ach-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
+    ${mediaHtml(m)}${embedFor(m.text)}
+    ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
+}
+function normLink(s) { s = (s || "").trim(); if (!s) return ""; if (/^https?:\/\//i.test(s)) return s; if (/^\+?[\d\s-]{7,}$/.test(s)) return "https://wa.me/" + s.replace(/[^\d]/g, ""); return "https://" + s; }
+function jobCard(m, isAdmin) {
+  const nm = m.name || "متدرب", meta = m.meta || {};
+  const ch = normLink(meta.channel), ct = normLink(meta.contact);
+  return `<div class="job-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
+    <div class="job-top"><div class="job-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div></div>
+    <div class="job-desc">${linkify(m.text || "")}</div>
+    ${meta.price ? `<span class="job-price">💰 ${esc(meta.price)}</span>` : ""}
+    <div class="job-actions">${ch ? `<a class="job-btn" href="${esc(ch)}" target="_blank" rel="noopener">معرض الأعمال</a>` : ""}${ct ? `<a class="job-btn primary" href="${esc(ct)}" target="_blank" rel="noopener">📞 تواصل مباشر</a>` : ""}</div></div>`;
+}
+function applyChannelUI() {
+  const isJobs = CURCHAN === "jobs";
+  const cf = $("commForm"), jf = $("jobForm");
+  if (cf) cf.hidden = isJobs;
+  if (jf) jf.hidden = !isJobs;
+  const inp = $("commInput");
+  if (inp) inp.placeholder = CURCHAN === "achievements" ? "اكتب إنجازك وأرفق عملك… 🏆" : "اكتب رسالتك…";
 }
 async function loadMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
@@ -348,11 +374,30 @@ document.querySelectorAll("#commChannels .chan").forEach((c) => c.addEventListen
   document.querySelectorAll("#commChannels .chan").forEach((x) => x.classList.toggle("on", x === c));
   const info = CHAN_INFO[CURCHAN]; $("chanTitle").textContent = info.t; $("chanDesc").textContent = info.d;
   commSearch = ""; if ($("commSearch")) $("commSearch").value = "";
+  applyChannelUI();
   loadMessages(true);
 }));
 
 // البحث
 (function () { const s = $("commSearch"); if (s) s.addEventListener("input", (e) => { commSearch = e.target.value.trim(); renderMessages(false); }); })();
+
+// نشر فرصة عمل
+(function () {
+  const f = $("jobForm"); if (!f) return;
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const desc = $("jobDesc").value.trim();
+    if (!desc) { alert("اكتب وصف العمل / الفرصة أولاً."); return; }
+    const meta = { channel: $("jobChannel").value.trim() || null, price: $("jobPrice").value.trim() || null, contact: $("jobContact").value.trim() || null };
+    const btn = $("jobSend"); btn.disabled = true;
+    try {
+      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: desc, channel: "jobs", meta }, "return=minimal");
+      $("jobDesc").value = ""; $("jobChannel").value = ""; $("jobPrice").value = ""; $("jobContact").value = "";
+      await loadMessages(true);
+    } catch (err) { alert("خطأ: " + err.message); }
+    btn.disabled = false;
+  });
+})();
 
 // الإيموجي
 (function () {
