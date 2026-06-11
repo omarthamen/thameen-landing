@@ -87,14 +87,13 @@ let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = nu
 async function loadAcademy() {
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
+  const wrap = $("coursesCol");
   try {
-    const safe = (p) => p.then((v) => v).catch(() => null);
-    const [sections, lessons, progress, members] = await Promise.all([
-      safe(dbGet("sections?select=*&order=sort.asc,created_at.asc")),
-      safe(dbGet("lessons?select=*&order=sort.asc,created_at.asc")),
-      safe(dbGet("progress?select=lesson_id")),
-      safe(dbGet("members?select=calls_total,calls_used")),
-    ]);
+    const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
+    const lessons = await dbGet("lessons?select=*&order=sort.asc,created_at.asc");
+    let progress = [], members = [];
+    try { progress = await dbGet("progress?select=lesson_id"); } catch (_) {}
+    try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {}
     SECTIONS = sections || []; LESSONS = lessons || [];
     DONE = new Set((progress || []).map((p) => p.lesson_id));
     const m = members && members[0];
@@ -104,8 +103,12 @@ async function loadAcademy() {
     if (SECTIONS.length) {
       const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0];
       openCourse(firstSec.id);
+    } else {
+      wrap.innerHTML = '<p class="hint" style="padding:14px">لا توجد دورات بعد.</p>';
     }
-  } catch (e) { $("plList").innerHTML = `<p class="hint" style="padding:14px">خطأ: ${esc(e.message)}</p>`; }
+  } catch (e) {
+    wrap.innerHTML = `<p class="hint" style="padding:14px">خطأ بالتحميل:<br>${esc(e.message)}</p>`;
+  }
 }
 
 function renderProgress() {
