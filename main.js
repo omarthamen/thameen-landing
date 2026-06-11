@@ -319,6 +319,50 @@
     mainVideo.addEventListener("ended", () => videoPlay.classList.remove("hidden"));
   }
 
+  // ---- فصول الفيديو (قابلة للتعديل) ----
+  // عدّل التوقيتات والعناوين هنا لمّا يجي الفيديو الطويل.
+  // t = ثانية البداية. الفصل يمتد حتى بداية الفصل اللي بعده (أو نهاية الفيديو).
+  const CHAPTERS = [
+    { t: 0,  label: "الانترو" },
+    { t: 5,  label: "المحتوى" },
+    { t: 10, label: "ابدأ" },
+  ];
+  const chaptersWrap = document.getElementById("chapters");
+  if (mainVideo && chaptersWrap && CHAPTERS.length) {
+    const fmt = (s) => {
+      s = Math.max(0, Math.floor(s));
+      const m = Math.floor(s / 60);
+      const ss = String(s % 60).padStart(2, "0");
+      return `${m}:${ss}`;
+    };
+    const btns = CHAPTERS.map((ch, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chapter";
+      b.setAttribute("role", "tab");
+      b.innerHTML =
+        `<span class="ch-time">${fmt(ch.t)}</span>` +
+        `<span class="ch-label">${ch.label}</span>`;
+      b.addEventListener("click", () => {
+        try { mainVideo.currentTime = ch.t + 0.01; } catch (e) {}
+        mainVideo.play().catch(() => {});
+      });
+      chaptersWrap.appendChild(b);
+      return b;
+    });
+    const setActive = () => {
+      const cur = mainVideo.currentTime;
+      let active = 0;
+      for (let i = 0; i < CHAPTERS.length; i++) {
+        if (cur >= CHAPTERS[i].t) active = i; else break;
+      }
+      btns.forEach((b, i) => b.classList.toggle("on", i === active));
+    };
+    mainVideo.addEventListener("timeupdate", setActive);
+    mainVideo.addEventListener("seeked", setActive);
+    setActive();
+  }
+
   // ---- توهّج يتبع المؤشّر على الكروت ----
   const glowSelector =
     ".course-card, .stack-card, .offer, .review, .hl, .bonus, .ba-col, #faq details";
