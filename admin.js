@@ -353,7 +353,7 @@ $("bulkBtn").addEventListener("click", async () => {
       const parts = line.split("|").map((p) => p.trim());
       if (parts.length < 3) continue;
       const sid = await findOrCreate(parts[0]);
-      await dbSend("POST", "lessons", { section_id: sid, title: parts[1], embed_url: parseEmbed(parts[2]), sort: count }, "return=minimal");
+      await dbSend("POST", "lessons", { section_id: sid, title: parts[1], embed_url: parseEmbed(parts[2]), description: parts[3] || null, sort: count }, "return=minimal");
       count++;
     }
     setMsg(msg, `تم استيراد ${count} درس ✅`, true);

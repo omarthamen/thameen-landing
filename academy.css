@@ -3,43 +3,59 @@
 .me-name{color:var(--text-muted);font-size:14px;font-weight:600}
 
 /* شريط التقدّم العام */
-.prog-hero{max-width:900px;margin:18px auto 0;padding:0 16px;display:flex;align-items:center;gap:18px}
+.prog-hero{max-width:1100px;margin:18px auto 0;padding:0 16px;display:flex;align-items:center;gap:18px}
 .prog-stat{text-align:center;flex:none}
 .prog-pct{display:block;font-size:24px;font-weight:900;background:var(--grad-cta);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .prog-lbl{font-size:12px;color:var(--text-subtle)}
 .prog-bar{flex:1;height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
 .prog-bar span{display:block;height:100%;width:0;border-radius:999px;background:var(--grad-cta);transition:width .5s cubic-bezier(.16,1,.3,1)}
 
-/* المنصّة */
-.academy{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-.acad-section{margin-bottom:34px}
-.acad-sec-title{font-size:20px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.acad-sec-title span{font-size:13px;font-weight:700;color:var(--primary-soft);background:rgba(91,184,232,.12);border:1px solid rgba(91,184,232,.3);border-radius:999px;padding:3px 12px}
-.lesson-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:16px}
-.lesson-card{text-align:start;font-family:inherit;cursor:pointer;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;padding:0;transition:transform .25s cubic-bezier(.16,1,.3,1),border-color .25s,box-shadow .25s}
-.lesson-card:hover{transform:translateY(-4px);border-color:rgba(91,184,232,.4);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-.lc-thumb{position:relative;aspect-ratio:16/9;background:#000;display:grid;place-items:center;font-size:30px;color:rgba(255,255,255,.3)}
-.lc-thumb img{width:100%;height:100%;object-fit:cover}
-.lc-play{position:absolute;inset:0;margin:auto;width:48px;height:48px;border-radius:50%;background:rgba(44,141,208,.9);color:#fff;display:grid;place-items:center;font-size:18px;padding-inline-start:3px;opacity:0;transition:opacity .25s}
-.lesson-card:hover .lc-play{opacity:1}
-.lc-done{position:absolute;top:8px;inset-inline-end:8px;width:26px;height:26px;border-radius:50%;background:#2ec27e;color:#04121d;display:grid;place-items:center;font-weight:900;font-size:14px}
-.lc-title{font-size:15px;font-weight:700;padding:12px 14px 2px}
-.lc-meta{font-size:12px;color:var(--text-subtle);padding:0 14px 14px}
-.lesson-card.done{border-color:rgba(46,194,126,.4)}
+.academy{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
 
-/* مشغّل الدرس */
-.lesson-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
-.lesson-modal[hidden]{display:none}
-.lesson-modal-card{width:100%;max-width:900px;background:var(--bg-panel);border:1px solid rgba(91,184,232,.3);border-radius:22px;padding:24px;margin:auto;position:relative}
-.lesson-close{position:absolute;top:14px;inset-inline-end:14px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:16px;cursor:pointer;z-index:2}
-.lesson-close:hover{background:rgba(255,255,255,.14)}
-#lessonTitle{font-size:22px;font-weight:900;margin:0 40px 16px 0}
-.lesson-player{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:16px}
-.lesson-player iframe{width:100%;height:100%;border:0}
-.lesson-chapters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.ch-h{width:100%;font-weight:700;font-size:14px;color:var(--text-muted);margin-bottom:2px}
-.ch-btn{font-family:inherit;cursor:pointer;color:var(--text-muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;transition:.2s}
-.ch-btn:hover{background:rgba(91,184,232,.14);border-color:rgba(91,184,232,.4);color:#fff}
-.ch-btn span{color:var(--primary-soft);font-weight:800;font-size:12px}
-#markDoneBtn{width:100%}
-@media(max-width:560px){.lesson-modal-card{padding:18px 14px}#lessonTitle{font-size:18px}}
+/* ====== قائمة الدورات ====== */
+.course-list{display:grid;gap:14px}
+.course-row{display:flex;align-items:center;gap:16px;text-align:start;font-family:inherit;cursor:pointer;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 20px;transition:transform .25s cubic-bezier(.16,1,.3,1),border-color .25s,box-shadow .25s}
+.course-row:hover{transform:translateY(-3px);border-color:rgba(91,184,232,.45);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.cr-icon{font-size:30px;flex:none;width:56px;height:56px;display:grid;place-items:center;border-radius:14px;background:rgba(91,184,232,.12);border:1px solid rgba(91,184,232,.25)}
+.cr-info{flex:1;min-width:0}
+.cr-info b{display:block;font-size:18px;font-weight:800}
+.cr-info small{color:var(--text-subtle);font-size:13px}
+.cr-bar{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:9px}
+.cr-bar span{display:block;height:100%;border-radius:999px;background:var(--grad-cta)}
+.cr-arrow{font-size:26px;color:var(--text-subtle);flex:none}
+
+/* ====== واجهة الدورة ====== */
+.back-btn{font-family:inherit;cursor:pointer;color:var(--text-muted);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700;margin-bottom:18px}
+.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.course-view{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+/* العمود الرئيسي (يمين في RTL) = الفيديو */
+.player-col{min-width:0}
+.lesson-title{font-size:clamp(18px,3vw,24px);font-weight:900;margin-bottom:14px;line-height:1.4}
+.player-box{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.player-box iframe{width:100%;height:100%;border:0;display:block}
+.player-col #markDoneBtn{margin-top:16px;width:100%}
+.player-col #markDoneBtn.is-done{background:rgba(46,194,126,.15);color:#7ee0a0;box-shadow:none}
+.lesson-desc{margin-top:20px}
+.lesson-desc h4{font-size:15px;font-weight:800;margin-bottom:8px;color:var(--text-muted)}
+.lesson-desc .desc-body{color:var(--text-muted);font-size:15px;line-height:1.85;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 18px;word-break:break-word}
+.lesson-desc a{color:var(--primary-light);text-decoration:none;font-weight:600}
+.lesson-desc a:hover{text-decoration:underline}
+
+/* قائمة دروس القسم (يسار في RTL) */
+.playlist{background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;position:sticky;top:16px}
+.pl-title{font-size:16px;font-weight:800;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.pl-list{max-height:70vh;overflow-y:auto}
+.pl-item{width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.05);padding:13px 16px;transition:background .2s}
+.pl-item:hover{background:rgba(255,255,255,.04)}
+.pl-item.on{background:rgba(91,184,232,.14)}
+.pl-num{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
+.pl-num.done{background:#2ec27e;color:#04121d;border-color:transparent}
+.pl-item.on .pl-num{background:var(--grad-cta);color:#04121d;border-color:transparent}
+.pl-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+.pl-item.on .pl-name{color:#fff}
+
+@media(max-width:900px){
+  .course-view{grid-template-columns:1fr}
+  .playlist{position:static;order:2}
+  .pl-list{max-height:none}
+}

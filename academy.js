@@ -6,6 +6,7 @@ let TOKEN = null, USER = null;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const setMsg = (el, t, ok) => { el.textContent = t; el.className = "msg " + (ok ? "ok" : "err"); };
+const linkify = (t) => esc(t || "").replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, "<br>");
 
 function fetchT(url, opts = {}, ms = 15000) {
   const c = new AbortController(); const id = setTimeout(() => c.abort(), ms);
@@ -71,7 +72,7 @@ async function refresh(rt) {
 })();
 
 // ====== تحميل الدورة ======
-let LESSONS = [], DONE = new Set();
+let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 async function loadAcademy() {
   const main = $("academyMain");
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
@@ -84,34 +85,15 @@ async function loadAcademy() {
       safe(dbGet("members?select=calls_total,calls_used")),
     ]);
     if (sections === null && lessons === null) {
-      main.innerHTML = '<p class="empty" style="margin:40px">لم يتم تجهيز قاعدة بيانات المنصّة بعد.<br>شغّل ملف <b>academy-setup.sql</b> في Supabase.</p>';
-      return;
+      main.innerHTML = '<p class="empty" style="margin:40px">لم يتم تجهيز قاعدة بيانات المنصّة بعد.</p>'; return;
     }
-    LESSONS = lessons || [];
+    SECTIONS = sections || []; LESSONS = lessons || [];
     DONE = new Set((progress || []).map((p) => p.lesson_id));
-    // المكالمات
     const m = members && members[0];
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
-    if (!sections || !sections.length) { main.innerHTML = '<p class="empty" style="margin:40px">لا توجد دروس بعد. تابعنا قريبًا 🚀</p>'; return; }
-    main.innerHTML = sections.map((sec) => {
-      const ls = lessons.filter((l) => l.section_id === sec.id);
-      return `<section class="acad-section">
-        <h2 class="acad-sec-title">${esc(sec.title)} <span>${ls.filter((l)=>DONE.has(l.id)).length}/${ls.length}</span></h2>
-        <div class="lesson-grid">${ls.map((l) => `
-          <button class="lesson-card ${DONE.has(l.id) ? "done" : ""}" data-lid="${l.id}">
-            <div class="lc-thumb">${l.thumb_url ? `<img src="${esc(l.thumb_url)}" alt="" loading="lazy">` : "🎬"}
-              <span class="lc-play">▶</span>${DONE.has(l.id) ? '<span class="lc-done">✓</span>' : ""}</div>
-            <div class="lc-title">${esc(l.title)}</div>
-            <div class="lc-meta">${(l.chapters || []).length} فصل</div>
-          </button>`).join("")}</div>
-      </section>`;
-    }).join("");
-    main.querySelectorAll(".lesson-card").forEach((b) =>
-      b.addEventListener("click", () => openLesson(b.dataset.lid)));
-  } catch (e) {
-    main.innerHTML = `<p class="empty" style="margin:40px">خطأ في التحميل: ${esc(e.message)}</p>`;
-  }
+    renderHome();
+  } catch (e) { main.innerHTML = `<p class="empty" style="margin:40px">خطأ: ${esc(e.message)}</p>`; }
 }
 
 function renderProgress() {
@@ -121,57 +103,83 @@ function renderProgress() {
   $("progFill").style.width = pct + "%";
 }
 
-// ====== مشغّل الدرس ======
-let curIframe = null;
-function openLesson(id) {
-  const l = LESSONS.find((x) => x.id === id);
-  if (!l) return;
-  $("lessonTitle").textContent = l.title;
-  $("lessonMsg").textContent = "";
+// ====== الصفحة الرئيسية: قائمة الدورات ======
+function renderHome() {
+  CURSEC = null; CURLESSON = null;
+  const main = $("academyMain");
+  if (!SECTIONS.length) { main.innerHTML = '<p class="empty" style="margin:40px">لا توجد دورات بعد 🚀</p>'; return; }
+  main.innerHTML = `<div class="course-list">` + SECTIONS.map((sec) => {
+    const ls = LESSONS.filter((l) => l.section_id === sec.id);
+    const done = ls.filter((l) => DONE.has(l.id)).length;
+    const pct = ls.length ? Math.round((done / ls.length) * 100) : 0;
+    return `<button class="course-row" data-sid="${sec.id}">
+      <div class="cr-icon">📚</div>
+      <div class="cr-info">
+        <b>${esc(sec.title)}</b>
+        <small>${ls.length} درس · ${done}/${ls.length} مكتمل</small>
+        <div class="cr-bar"><span style="width:${pct}%"></span></div>
+      </div>
+      <span class="cr-arrow">‹</span>
+    </button>`;
+  }).join("") + `</div>`;
+  main.querySelectorAll(".course-row").forEach((b) => b.addEventListener("click", () => openCourse(b.dataset.sid)));
+}
+
+// ====== واجهة الدورة: فيديو يمين + قائمة دروس يسار ======
+function openCourse(sid) {
+  CURSEC = sid;
+  const sec = SECTIONS.find((s) => s.id === sid);
+  const ls = LESSONS.filter((l) => l.section_id === sid);
+  const main = $("academyMain");
+  main.innerHTML = `
+    <button class="back-btn" id="backBtn">‹ كل الدورات</button>
+    <div class="course-view">
+      <div class="player-col">
+        <h2 class="lesson-title" id="lTitle"></h2>
+        <div class="player-box"><div id="playerHost"></div></div>
+        <button class="btn btn-primary" id="markDoneBtn">✓ أكملت هذا الدرس</button>
+        <div class="lesson-desc" id="lDesc"></div>
+      </div>
+      <aside class="playlist">
+        <h3 class="pl-title">${esc(sec ? sec.title : "")}</h3>
+        <div class="pl-list" id="plList"></div>
+      </aside>
+    </div>`;
+  $("backBtn").addEventListener("click", renderHome);
+  const first = ls.find((l) => !DONE.has(l.id)) || ls[0];
+  if (first) playLesson(first.id); else { renderPlaylist(ls); }
+}
+
+function renderPlaylist(ls) {
+  const wrap = $("plList");
+  if (!wrap) return;
+  wrap.innerHTML = ls.length ? ls.map((l, i) => `
+    <button class="pl-item ${l.id === CURLESSON ? "on" : ""}" data-lid="${l.id}">
+      <span class="pl-num ${DONE.has(l.id) ? "done" : ""}">${DONE.has(l.id) ? "✓" : i + 1}</span>
+      <span class="pl-name">${esc(l.title)}</span>
+    </button>`).join("") : '<p class="hint" style="padding:14px">لا دروس بعد.</p>';
+  wrap.querySelectorAll(".pl-item").forEach((b) => b.addEventListener("click", () => playLesson(b.dataset.lid)));
+}
+
+function playLesson(id) {
+  const l = LESSONS.find((x) => x.id === id); if (!l) return;
+  CURLESSON = id;
+  $("lTitle").textContent = l.title;
   const host = $("playerHost");
-  if (l.embed_url) {
-    host.innerHTML = `<iframe src="${esc(l.embed_url)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-    curIframe = host.querySelector("iframe");
-  } else { host.innerHTML = '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس بعد.</p>'; curIframe = null; }
-
-  const chs = l.chapters || [];
-  $("lessonChapters").innerHTML = chs.length
-    ? `<p class="ch-h">الفصول</p>` + chs.map((c) => {
-        const m = Math.floor(c.t / 60), s = String(Math.floor(c.t % 60)).padStart(2, "0");
-        return `<button class="ch-btn" data-t="${c.t}"><span>${m}:${s}</span> ${esc(c.label)}</button>`;
-      }).join("")
-    : "";
-  $("lessonChapters").querySelectorAll(".ch-btn").forEach((b) =>
-    b.addEventListener("click", () => seekTo(parseFloat(b.dataset.t))));
-
+  host.innerHTML = l.embed_url
+    ? `<iframe src="${esc(l.embed_url)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
+    : '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس.</p>';
+  $("lDesc").innerHTML = l.description ? `<h4>الوصف والروابط</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
   const md = $("markDoneBtn");
   md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
+  md.classList.toggle("is-done", DONE.has(id));
   md.onclick = () => toggleDone(id);
-
-  const modal = $("lessonModal"); modal.hidden = false;
-  document.body.style.overflow = "hidden";
-}
-function closeLesson() {
-  $("lessonModal").hidden = true;
-  $("playerHost").innerHTML = ""; curIframe = null;
-  document.body.style.overflow = "";
-}
-$("lessonClose").addEventListener("click", closeLesson);
-$("lessonModal").addEventListener("click", (e) => { if (e.target === $("lessonModal")) closeLesson(); });
-
-// التنقّل لفصل عبر بروتوكول player.js (يدعمه مشغّل Bunny)
-function seekTo(sec) {
-  if (!curIframe || !curIframe.contentWindow) return;
-  curIframe.contentWindow.postMessage(JSON.stringify({
-    context: "player.js", version: "0.0.1", method: "setCurrentTime", value: sec,
-  }), "*");
-  curIframe.contentWindow.postMessage(JSON.stringify({
-    context: "player.js", version: "0.0.1", method: "play",
-  }), "*");
+  renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+  const pc = document.querySelector(".player-col");
+  if (pc && window.innerWidth < 900) pc.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function toggleDone(id) {
-  const msg = $("lessonMsg");
   try {
     if (DONE.has(id)) {
       await dbSend("DELETE", `progress?lesson_id=eq.${id}&user_id=eq.${USER.id}`);
@@ -183,9 +191,9 @@ async function toggleDone(id) {
       DONE.add(id);
     }
     renderProgress();
-    $("markDoneBtn").textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
-    // حدّث البطاقة بالخلفية
-    const card = document.querySelector(`.lesson-card[data-lid="${id}"]`);
-    if (card) card.classList.toggle("done", DONE.has(id));
-  } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+    const md = $("markDoneBtn");
+    md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
+    md.classList.toggle("is-done", DONE.has(id));
+    renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+  } catch (e) { alert("خطأ: " + e.message); }
 }
