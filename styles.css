@@ -492,45 +492,105 @@ body {
   background: #000;
 }
 
-/* ---------- فصول الفيديو ---------- */
-.chapters {
+/* ---------- كنترولز الفيديو المخصّصة + فصول داخل الفيديو ---------- */
+.vcontrols {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 4;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 16px;
-}
-.chapter {
-  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  font-family: inherit;
-  cursor: pointer;
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 999px;
-  padding: 9px 16px 9px 12px;
-  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.2s var(--ease-out);
-}
-.chapter:hover { background: rgba(91,184,232,0.12); border-color: rgba(91,184,232,0.4); transform: translateY(-1px); }
-.chapter .ch-time {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--primary-soft);
-  background: rgba(91,184,232,0.14);
-  border-radius: 999px;
-  padding: 3px 9px;
+  gap: 12px;
+  padding: 34px 16px 14px;
   direction: ltr;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.35) 55%, transparent);
+  opacity: 1;
+  transition: opacity 0.3s var(--ease-out);
 }
-.chapter .ch-label { font-size: 14.5px; font-weight: 700; }
-.chapter.on {
-  color: #04121d;
+/* أثناء التشغيل: تختفي إلا عند المرور على الفيديو */
+.video-frame.playing .vcontrols { opacity: 0; }
+.video-frame.playing:hover .vcontrols,
+.video-frame.playing:focus-within .vcontrols { opacity: 1; }
+.vc-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255,255,255,0.14);
+  transition: background 0.2s, transform 0.2s var(--ease-out);
+}
+.vc-btn:hover { background: rgba(255,255,255,0.26); transform: scale(1.08); }
+.vc-btn svg { width: 18px; height: 18px; fill: #fff; }
+.vc-btn .ic-pause { display: none; }
+.video-frame.playing .vc-btn .ic-play { display: none; }
+.video-frame.playing .vc-btn .ic-pause { display: block; }
+
+.vc-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  cursor: pointer;
+}
+.vc-seg {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.28);
+  overflow: visible;
+  cursor: pointer;
+  transition: height 0.15s var(--ease-out);
+}
+.vc-seg:hover, .vc-seg.on { height: 10px; }
+.vc-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 0;
+  border-radius: 999px;
   background: var(--grad-cta);
-  border-color: transparent;
-  box-shadow: 0 8px 24px rgba(44,141,208,0.45);
 }
-.chapter.on .ch-time { color: #04121d; background: rgba(255,255,255,0.35); }
+.vc-seg-label {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  direction: rtl;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 4px 10px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s var(--ease-out);
+}
+.vc-seg:hover .vc-seg-label, .vc-seg.on .vc-seg-label {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.vc-time {
+  flex: none;
+  min-width: 86px;
+  text-align: center;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 560px) {
+  .vc-time { min-width: 0; font-size: 11px; }
+  .vcontrols { gap: 8px; padding: 30px 10px 10px; }
+  .vc-btn { width: 32px; height: 32px; }
+}
 
 .video-cta { text-align: center; margin-top: 26px; }
 

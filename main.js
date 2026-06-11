@@ -310,16 +310,7 @@
     requestAnimationFrame(step);
   }
 
-  // ---- زر تشغيل الفيديو المخصّص ----
-  const mainVideo = document.getElementById("mainVideo");
-  const videoPlay = document.getElementById("videoPlay");
-  if (mainVideo && videoPlay) {
-    videoPlay.addEventListener("click", () => mainVideo.play());
-    mainVideo.addEventListener("play", () => videoPlay.classList.add("hidden"));
-    mainVideo.addEventListener("ended", () => videoPlay.classList.remove("hidden"));
-  }
-
-  // ---- فصول الفيديو (قابلة للتعديل) ----
+  // ---- مشغّل الفيديو المخصّص + فصول داخل الفيديو ----
   // عدّل التوقيتات والعناوين هنا لمّا يجي الفيديو الطويل.
   // t = ثانية البداية. الفصل يمتد حتى بداية الفصل اللي بعده (أو نهاية الفيديو).
   const CHAPTERS = [
@@ -327,40 +318,84 @@
     { t: 5,  label: "المحتوى" },
     { t: 10, label: "ابدأ" },
   ];
-  const chaptersWrap = document.getElementById("chapters");
-  if (mainVideo && chaptersWrap && CHAPTERS.length) {
+  const mainVideo = document.getElementById("mainVideo");
+  const videoPlay = document.getElementById("videoPlay");
+  const videoFrame = document.getElementById("videoFrame");
+  const vcontrols = document.getElementById("vcontrols");
+  const vcPlay = document.getElementById("vcPlay");
+  const vcBar = document.getElementById("vcBar");
+  const vcTime = document.getElementById("vcTime");
+  const vcFull = document.getElementById("vcFull");
+
+  if (mainVideo) {
     const fmt = (s) => {
-      s = Math.max(0, Math.floor(s));
-      const m = Math.floor(s / 60);
-      const ss = String(s % 60).padStart(2, "0");
-      return `${m}:${ss}`;
+      s = Math.max(0, Math.floor(s || 0));
+      return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     };
-    const btns = CHAPTERS.map((ch, i) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "chapter";
-      b.setAttribute("role", "tab");
-      b.innerHTML =
-        `<span class="ch-time">${fmt(ch.t)}</span>` +
-        `<span class="ch-label">${ch.label}</span>`;
-      b.addEventListener("click", () => {
-        try { mainVideo.currentTime = ch.t + 0.01; } catch (e) {}
-        mainVideo.play().catch(() => {});
+
+    // الزر المركزي الكبير
+    if (videoPlay) videoPlay.addEventListener("click", () => mainVideo.play());
+
+    // بناء قطع الفصول على الشريط حسب مدّة الفيديو
+    let segs = [];
+    const buildBar = () => {
+      const dur = mainVideo.duration;
+      if (!vcBar || !dur || !isFinite(dur)) return;
+      vcBar.innerHTML = "";
+      segs = [];
+      CHAPTERS.forEach((ch, i) => {
+        const start = ch.t;
+        const end = i + 1 < CHAPTERS.length ? CHAPTERS[i + 1].t : dur;
+        const seg = document.createElement("div");
+        seg.className = "vc-seg";
+        seg.style.flex = Math.max(0.001, (end - start) / dur) + " 0 0";
+        seg.innerHTML =
+          '<span class="vc-fill"></span>' +
+          '<span class="vc-seg-label">' + ch.label + "</span>";
+        seg.addEventListener("click", (e) => {
+          const r = seg.getBoundingClientRect();
+          const frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+          try { mainVideo.currentTime = start + frac * (end - start) + 0.001; } catch (x) {}
+          mainVideo.play().catch(() => {});
+        });
+        vcBar.appendChild(seg);
+        segs.push({ fill: seg.querySelector(".vc-fill"), seg, start, end });
       });
-      chaptersWrap.appendChild(b);
-      return b;
-    });
-    const setActive = () => {
-      const cur = mainVideo.currentTime;
-      let active = 0;
-      for (let i = 0; i < CHAPTERS.length; i++) {
-        if (cur >= CHAPTERS[i].t) active = i; else break;
-      }
-      btns.forEach((b, i) => b.classList.toggle("on", i === active));
     };
-    mainVideo.addEventListener("timeupdate", setActive);
-    mainVideo.addEventListener("seeked", setActive);
-    setActive();
+
+    const update = () => {
+      const cur = mainVideo.currentTime;
+      segs.forEach((s) => {
+        let f = 0;
+        if (cur >= s.end) f = 100;
+        else if (cur > s.start) f = ((cur - s.start) / (s.end - s.start)) * 100;
+        s.fill.style.width = f + "%";
+        s.seg.classList.toggle("on", cur >= s.start && cur < s.end);
+      });
+      if (vcTime) vcTime.textContent = fmt(cur) + " / " + fmt(mainVideo.duration);
+    };
+
+    mainVideo.addEventListener("loadedmetadata", () => { buildBar(); update(); });
+    mainVideo.addEventListener("timeupdate", update);
+    mainVideo.addEventListener("seeked", update);
+    if (mainVideo.readyState >= 1) { buildBar(); update(); }
+
+    // حالة التشغيل
+    const setPlaying = (p) => { if (videoFrame) videoFrame.classList.toggle("playing", p); };
+    mainVideo.addEventListener("play", () => { if (videoPlay) videoPlay.classList.add("hidden"); setPlaying(true); });
+    mainVideo.addEventListener("pause", () => setPlaying(false));
+    mainVideo.addEventListener("ended", () => { if (videoPlay) videoPlay.classList.remove("hidden"); setPlaying(false); });
+
+    const toggle = () => { mainVideo.paused ? mainVideo.play() : mainVideo.pause(); };
+    if (vcPlay) vcPlay.addEventListener("click", toggle);
+    mainVideo.addEventListener("click", toggle);
+
+    if (vcFull) vcFull.addEventListener("click", () => {
+      const el = videoFrame || mainVideo;
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (el.requestFullscreen) el.requestFullscreen();
+      else if (mainVideo.webkitEnterFullscreen) mainVideo.webkitEnterFullscreen(); // iOS
+    });
   }
 
   // ---- إثبات بصري: قنوات اشتغل معها + نماذج شغل ----
