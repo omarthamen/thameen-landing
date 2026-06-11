@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=6" />
+  <link rel="stylesheet" href="academy.css?v=7" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -33,7 +33,11 @@
   <!-- ====== المنصّة ====== -->
   <section id="appView" hidden>
     <header class="acad-nav">
-      <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين <small style="color:#5BB8E8;font-size:11px;font-weight:700">v15</small></a>
+      <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين</a>
+      <nav class="nav-tabs">
+        <button class="nav-tab on" data-view="courses">📚 الدورات</button>
+        <button class="nav-tab" data-view="community">💬 المجتمع</button>
+      </nav>
       <div class="nav-right">
         <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
         <span class="nav-stat">مكالماتك <b id="callsLeft">3</b></span>
@@ -42,29 +46,47 @@
       </div>
     </header>
 
-    <div class="acad-grid" id="acadGrid">
-      <!-- دوراتي (يمين) -->
-      <aside class="col courses-col">
-        <h3 class="col-h">دوراتي</h3>
-        <div id="coursesCol"></div>
-      </aside>
-
-      <!-- المشغّل (وسط) -->
-      <div class="col center-col">
-        <h2 class="lesson-title" id="lTitle">—</h2>
-        <div class="player-box"><div id="playerHost"></div></div>
-        <div class="watch-wrap">
-          <div class="watch-prog"><span id="watchFill"></span></div>
-          <p class="watch-label" id="watchLabel">شغّل الدرس — يُحتسب إنجازك تلقائيًا حسب مشاهدتك</p>
+    <!-- ===== عرض الدورات ===== -->
+    <div id="viewCourses">
+      <div class="acad-grid" id="acadGrid">
+        <aside class="col courses-col">
+          <h3 class="col-h">دوراتي</h3>
+          <div id="coursesCol"></div>
+        </aside>
+        <div class="col center-col">
+          <h2 class="lesson-title" id="lTitle">—</h2>
+          <div class="player-box"><div id="playerHost"></div></div>
+          <div class="watch-wrap">
+            <div class="watch-prog"><span id="watchFill"></span></div>
+            <p class="watch-label" id="watchLabel">شغّل الدرس — يُحتسب إنجازك تلقائيًا حسب مشاهدتك</p>
+          </div>
+          <div class="lesson-desc" id="lDesc"></div>
         </div>
-        <div class="lesson-desc" id="lDesc"></div>
+        <aside class="col lessons-col">
+          <h3 class="col-h">دروس</h3>
+          <div id="plList"></div>
+        </aside>
       </div>
+    </div>
 
-      <!-- دروس القسم (يسار) -->
-      <aside class="col lessons-col">
-        <h3 class="col-h">دروس</h3>
-        <div id="plList"></div>
-      </aside>
+    <!-- ===== عرض المجتمع ===== -->
+    <div id="viewCommunity" class="community-wrap" hidden>
+      <div class="comm-card">
+        <div class="comm-head">
+          <div class="comm-head-txt">
+            <h2>💬 مجتمع ثَمين</h2>
+            <p>شارك إنجازك، اسأل، وتفاعل مع باقي المتدربين</p>
+          </div>
+          <span class="comm-count" id="commCount">—</span>
+        </div>
+        <div class="comm-messages" id="commMessages">
+          <p class="hint" style="text-align:center;padding:30px">جارٍ التحميل…</p>
+        </div>
+        <form class="comm-compose" id="commForm">
+          <input id="commInput" placeholder="اكتب رسالتك للمجتمع…" maxlength="500" autocomplete="off" />
+          <button class="btn btn-primary" type="submit" id="commSend">إرسال</button>
+        </form>
+      </div>
     </div>
 
     <footer class="acad-footer">
@@ -74,6 +96,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=15"></script>
+  <script src="academy.js?v=16"></script>
 </body>
 </html>

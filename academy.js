@@ -240,3 +240,70 @@ async function recordWatch(id, pct) {
     }
   }
 }
+
+// ====== المجتمع (شات حي) ======
+let commTimer = null;
+function myName() {
+  if (USER && USER.user_metadata && USER.user_metadata.name) return USER.user_metadata.name;
+  return USER && USER.email ? USER.email.split("@")[0] : "متدرب";
+}
+function avColor(s) {
+  let h = 0; s = s || "";
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return `linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h + 40) % 360},65%,42%))`;
+}
+function initialOf(n) { return (n || "؟").trim().charAt(0) || "؟"; }
+function fmtTime(iso) {
+  try { const d = new Date(iso); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; }
+  catch (_) { return ""; }
+}
+async function loadMessages(forceScroll) {
+  const box = $("commMessages"); if (!box) return;
+  let msgs;
+  try { msgs = await dbGet("community_messages?select=*&order=created_at.asc&limit=200"); }
+  catch (e) { box.innerHTML = `<p class="comm-empty">تعذّر تحميل الرسائل:<br>${esc(e.message)}</p>`; return; }
+  const cc = $("commCount"); if (cc) cc.textContent = `${msgs.length} رسالة`;
+  if (!msgs.length) { box.innerHTML = '<p class="comm-empty">لا رسائل بعد — كن أول من يبدأ 👋</p>'; return; }
+  const isAdmin = USER && USER.email === "omarthamen@gmail.com";
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  box.innerHTML = msgs.map((m) => {
+    const me = m.user_id === (USER && USER.id);
+    const nm = m.name || "متدرب";
+    return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
+      <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
+      <div class="cmsg-body">
+        <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
+        <div class="cmsg-bubble">${esc(m.text)}</div>
+      </div></div>`;
+  }).join("");
+  if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
+    const id = e.target.closest(".cmsg").dataset.id;
+    if (!confirm("حذف الرسالة؟")) return;
+    try { await dbSend("DELETE", `community_messages?id=eq.${id}`); loadMessages(false); } catch (_) {}
+  }));
+  if (forceScroll || atBottom) box.scrollTop = box.scrollHeight;
+}
+function startCommPoll() { stopCommPoll(); commTimer = setInterval(() => loadMessages(false), 4000); }
+function stopCommPoll() { if (commTimer) { clearInterval(commTimer); commTimer = null; } }
+function switchView(view) {
+  document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
+  const vc = $("viewCourses"), vm = $("viewCommunity");
+  if (vc) vc.hidden = view !== "courses";
+  if (vm) vm.hidden = view !== "community";
+  if (view === "community") { loadMessages(true); startCommPoll(); } else stopCommPoll();
+}
+document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
+(function wireCommForm() {
+  const f = document.getElementById("commForm"); if (!f) return;
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const inp = document.getElementById("commInput"), btn = document.getElementById("commSend");
+    const t = inp.value.trim(); if (!t) return;
+    btn.disabled = true; inp.value = "";
+    try {
+      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t }, "return=minimal");
+      await loadMessages(true);
+    } catch (err) { alert("خطأ: " + err.message); inp.value = t; }
+    btn.disabled = false; inp.focus();
+  });
+})();
