@@ -26,11 +26,20 @@ $("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const btn = $("loginBtn"); btn.disabled = true;
   setMsg($("loginMsg"), "جارٍ الدخول…", true);
-  const { error } = await sb.auth.signInWithPassword({
-    email: $("email").value.trim(),
-    password: $("password").value,
-  });
-  if (error) { setMsg($("loginMsg"), "بيانات غير صحيحة: " + error.message, false); btn.disabled = false; }
+  try {
+    const signIn = sb.auth.signInWithPassword({
+      email: $("email").value.trim(),
+      password: $("password").value,
+    });
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("انتهت المهلة — تحقّق من الاتصال")), 15000));
+    const { data, error } = await Promise.race([signIn, timeout]);
+    if (error) { setMsg($("loginMsg"), "بيانات غير صحيحة: " + error.message, false); btn.disabled = false; return; }
+    if (data && data.session) { showDash(true); return; }
+    setMsg($("loginMsg"), "تعذّر الدخول، حاول مرة ثانية.", false); btn.disabled = false;
+  } catch (err) {
+    setMsg($("loginMsg"), "خطأ: " + (err && err.message ? err.message : err), false);
+    btn.disabled = false;
+  }
 });
 
 $("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); showDash(false); });
