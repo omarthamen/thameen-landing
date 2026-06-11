@@ -14,9 +14,9 @@
 @media(max-width:700px){.nav-name{display:none}.nav-right{gap:10px}}
 
 /* ===== الشبكة ثلاثية الأعمدة ===== */
-.acad-grid{max-width:1340px;margin:0 auto;padding:20px clamp(14px,3vw,28px);display:grid;grid-template-columns:300px minmax(0,1fr) 300px;gap:18px;align-items:start}
-.col-h{font-size:17px;font-weight:900;margin-bottom:14px}
-.courses-col,.lessons-col{position:sticky;top:78px}
+.acad-grid{max-width:1640px;margin:0 auto;padding:26px clamp(16px,3vw,40px);display:grid;grid-template-columns:340px minmax(0,1fr) 360px;gap:24px;align-items:start}
+.col-h{font-size:19px;font-weight:900;margin-bottom:16px}
+.courses-col,.lessons-col{position:sticky;top:80px}
 .courses-col .col-h,.lessons-col .col-h{padding-inline-start:4px}
 
 /* عمود دوراتي (يمين) */
@@ -24,20 +24,20 @@
 .crs-card{display:flex;gap:12px;align-items:center;text-align:start;font-family:inherit;cursor:pointer;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px;transition:transform .2s,border-color .2s,box-shadow .2s}
 .crs-card:hover{transform:translateY(-2px);border-color:rgba(91,184,232,.4)}
 .crs-card.on{border-color:rgba(91,184,232,.6);box-shadow:0 0 0 1px rgba(91,184,232,.3),0 12px 30px rgba(0,0,0,.4);background:radial-gradient(120% 100% at 50% 0%,rgba(44,141,208,.14),transparent 60%),var(--bg-panel)}
-.crs-cover{position:relative;width:90px;height:64px;border-radius:11px;flex:none;overflow:hidden;background:linear-gradient(135deg,#2C8DD0,#134870);display:grid;place-items:center}
+.crs-cover{position:relative;width:104px;height:72px;border-radius:12px;flex:none;overflow:hidden;background:linear-gradient(135deg,#2C8DD0,#134870);display:grid;place-items:center}
 .crs-cover img{width:100%;height:100%;object-fit:cover}
 .crs-cover .crs-ph{font-size:24px;color:rgba(255,255,255,.85)}
 .crs-cover .crs-badge{position:absolute;top:5px;inset-inline-start:5px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900}
 .crs-badge.full{background:#2ec27e;color:#04121d}
 .crs-info{flex:1;min-width:0}
-.crs-info b{display:block;font-size:14.5px;font-weight:800;line-height:1.4;margin-bottom:6px;color:#fff}
+.crs-info b{display:block;font-size:15.5px;font-weight:800;line-height:1.4;margin-bottom:6px;color:#fff}
 .crs-line{display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(255,255,255,.65)}
 .crs-bar{height:5px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:7px}
 .crs-bar span{display:block;height:100%;border-radius:999px;background:var(--grad-cta)}
 
 /* العمود الأوسط — المشغّل */
 .center-col{min-width:0}
-.lesson-title{font-size:clamp(18px,2.4vw,24px);font-weight:900;margin-bottom:14px;line-height:1.4}
+.lesson-title{font-size:clamp(20px,2.6vw,28px);font-weight:900;margin-bottom:16px;line-height:1.4}
 .player-box{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .watch-wrap{margin-top:16px}
@@ -54,14 +54,14 @@
 
 /* عمود الدروس (يسار) */
 .lessons-col #plList{background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
-.pl-item{width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:11px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.05);padding:13px 15px;transition:background .2s}
+.pl-item{width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.05);padding:16px 17px;transition:background .2s}
 .pl-item:last-child{border-bottom:0}
 .pl-item:hover{background:rgba(255,255,255,.04)}
 .pl-item.on{background:rgba(91,184,232,.14)}
 .pl-num{flex:none;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
 .pl-num.done{background:#2ec27e;color:#04121d;border-color:transparent}
 .pl-item.on .pl-num{background:var(--grad-cta);color:#04121d;border-color:transparent}
-.pl-name{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.45}
+.pl-name{font-size:14.5px;font-weight:600;color:var(--text);line-height:1.5}
 .pl-item.on .pl-name{color:#fff}
 
 /* ===== الفوتر ===== */
@@ -72,9 +72,19 @@
 .foot-copy{color:var(--text-subtle);font-size:12.5px}
 
 /* ===== الجوال ===== */
-@media(max-width:1000px){
-  .acad-grid{grid-template-columns:1fr;gap:22px}
+/* لابتوب متوسط: قائمة الدروس تحت الفيديو، دوراتي على الجنب */
+@media(max-width:1200px){
+  .acad-grid{grid-template-columns:300px minmax(0,1fr);gap:20px}
+  .lessons-col{grid-column:1 / -1;position:static}
+  .lessons-col #plList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
+  .lessons-col .pl-item{border:1px solid rgba(255,255,255,.06);border-radius:12px}
+}
+/* جوال: كل شي عمود واحد، الفيديو فوق */
+@media(max-width:760px){
+  .acad-grid{grid-template-columns:1fr;gap:22px;padding:16px}
   .courses-col,.lessons-col{position:static}
   .center-col{order:-1}
-  #coursesCol{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+  #coursesCol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+  .lessons-col #plList{grid-template-columns:1fr}
+  .acad-nav{flex-wrap:wrap;gap:10px}
 }

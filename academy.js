@@ -5,9 +5,8 @@ let TOKEN = null, USER = null;
 
 // روابط التواصل بالفوتر (عدّلها هنا) — معرّفة بالأعلى لتفادي مشكلة الترتيب
 const SOCIALS = [
-  { n: "واتساب", u: "https://wa.me/9647518838203" },
-  { n: "إنستقرام", u: "#" }, { n: "تيك توك", u: "#" }, { n: "يوتيوب", u: "#" },
-  { n: "سناب شات", u: "#" }, { n: "ديسكورد", u: "#" }, { n: "X", u: "#" },
+  { n: "📷 إنستقرام", u: "https://www.instagram.com/thameen.j/" },
+  { n: "▶️ يوتيوب", u: "https://www.youtube.com/channel/UCMeR85JgB5jXCZTQy1C69pA" },
 ];
 
 const $ = (id) => document.getElementById(id);
