@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=4" />
+  <link rel="stylesheet" href="academy.css?v=5" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -33,7 +33,7 @@
   <!-- ====== المنصّة ====== -->
   <section id="appView" hidden>
     <header class="acad-nav">
-      <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين <small style="color:#5BB8E8;font-size:11px;font-weight:700">v9</small></a>
+      <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين <small style="color:#5BB8E8;font-size:11px;font-weight:700">v10</small></a>
       <div class="nav-right">
         <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
         <span class="nav-stat">مكالماتك <b id="callsLeft">3</b></span>
@@ -53,7 +53,10 @@
       <div class="col center-col">
         <h2 class="lesson-title" id="lTitle">—</h2>
         <div class="player-box"><div id="playerHost"></div></div>
-        <button class="btn btn-primary" id="markDoneBtn">✓ أكملت هذا الدرس</button>
+        <div class="watch-wrap">
+          <div class="watch-prog"><span id="watchFill"></span></div>
+          <p class="watch-label" id="watchLabel">شغّل الدرس — يُحتسب إنجازك تلقائيًا حسب مشاهدتك</p>
+        </div>
         <div class="lesson-desc" id="lDesc"></div>
       </div>
 
@@ -70,6 +73,6 @@
     </footer>
   </section>
 
-  <script src="academy.js?v=9"></script>
+  <script src="academy.js?v=10"></script>
 </body>
 </html>

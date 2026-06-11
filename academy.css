@@ -30,8 +30,8 @@
 .crs-cover .crs-badge{position:absolute;top:5px;inset-inline-start:5px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900}
 .crs-badge.full{background:#2ec27e;color:#04121d}
 .crs-info{flex:1;min-width:0}
-.crs-info b{display:block;font-size:14.5px;font-weight:800;line-height:1.4;margin-bottom:6px}
-.crs-line{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-subtle)}
+.crs-info b{display:block;font-size:14.5px;font-weight:800;line-height:1.4;margin-bottom:6px;color:#fff}
+.crs-line{display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(255,255,255,.65)}
 .crs-bar{height:5px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:7px}
 .crs-bar span{display:block;height:100%;border-radius:999px;background:var(--grad-cta)}
 
@@ -40,8 +40,12 @@
 .lesson-title{font-size:clamp(18px,2.4vw,24px);font-weight:900;margin-bottom:14px;line-height:1.4}
 .player-box{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
-.center-col #markDoneBtn{margin-top:16px;width:100%}
-.center-col #markDoneBtn.is-done{background:rgba(46,194,126,.15);color:#7ee0a0;box-shadow:none}
+.watch-wrap{margin-top:16px}
+.watch-prog{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.watch-prog span{display:block;height:100%;width:0;border-radius:999px;background:var(--grad-cta);transition:width .4s ease}
+.watch-prog span.done{background:linear-gradient(135deg,#34d399,#10b981)}
+.watch-label{text-align:center;font-size:14px;color:var(--text-muted);margin-top:10px;font-weight:600}
+.watch-label.done{color:#7ee0a0}
 .lesson-desc{margin-top:20px}
 .lesson-desc h4{font-size:15px;font-weight:800;margin-bottom:10px;color:var(--text-muted)}
 .lesson-desc .desc-body{color:var(--text-muted);font-size:15px;line-height:1.9;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 18px;word-break:break-word}

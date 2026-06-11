@@ -86,6 +86,7 @@ function renderSocials() {
 
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
+let PCT = {}, lastSaved = {};
 async function loadAcademy() {
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
@@ -94,10 +95,11 @@ async function loadAcademy() {
     const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
     const lessons = await dbGet("lessons?select=*&order=sort.asc,created_at.asc");
     let progress = [], members = [];
-    try { progress = await dbGet("progress?select=lesson_id"); } catch (_) {}
+    try { progress = await dbGet("progress?select=lesson_id,percent,completed"); } catch (_) {}
     try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {}
     SECTIONS = sections || []; LESSONS = lessons || [];
-    DONE = new Set((progress || []).map((p) => p.lesson_id));
+    PCT = {}; DONE = new Set();
+    (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent || 0; if (p.completed) DONE.add(p.lesson_id); });
     const m = members && members[0];
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
@@ -173,14 +175,23 @@ function playLesson(id) {
   const ifr = host.querySelector("iframe");
   if (ifr) ifr.addEventListener("load", () => subscribePlayer(ifr));
   $("lDesc").innerHTML = l.description ? `<h4>الروابط والمرفقات</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
-  const md = $("markDoneBtn");
-  md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
-  md.classList.toggle("is-done", DONE.has(id));
-  md.onclick = () => toggleDone(id);
+  updateWatchUI(id);
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
 }
 
-// اشتراك في أحداث مشغّل Bunny (player.js) لإكمال الدرس تلقائيًا
+// تحديث شريط المشاهدة
+function updateWatchUI(id) {
+  const done = DONE.has(id);
+  const pct = done ? 100 : (PCT[id] || 0);
+  const fill = $("watchFill"), label = $("watchLabel");
+  if (fill) { fill.style.width = pct + "%"; fill.classList.toggle("done", done); }
+  if (label) {
+    label.classList.toggle("done", done);
+    label.textContent = done ? "✓ أكملت هذا الدرس" : `شاهدت ${Math.round(pct)}% · يكتمل تلقائيًا عند ٩٠٪`;
+  }
+}
+
+// اشتراك في أحداث مشغّل Bunny (player.js)
 function subscribePlayer(ifr) {
   try {
     ["ended", "timeupdate"].forEach((ev) =>
@@ -190,44 +201,32 @@ function subscribePlayer(ifr) {
 window.addEventListener("message", (e) => {
   let d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (_) { return; }
   if (!d || d.context !== "player.js" || !CURLESSON) return;
-  if (d.event === "ended") autoComplete(CURLESSON);
+  if (d.event === "ended") recordWatch(CURLESSON, 100);
   else if (d.event === "timeupdate" && d.value && d.value.duration) {
-    if (d.value.seconds / d.value.duration >= 0.92) autoComplete(CURLESSON);
+    recordWatch(CURLESSON, Math.min(100, (d.value.seconds / d.value.duration) * 100));
   }
 });
-async function autoComplete(id) {
-  if (DONE.has(id)) return;
-  DONE.add(id);
-  try {
-    await dbSend("POST", "progress?on_conflict=user_id,lesson_id",
-      { user_id: USER.id, lesson_id: id, completed: true, updated_at: new Date().toISOString() },
-      "resolution=merge-duplicates,return=minimal");
-  } catch (_) { DONE.delete(id); return; }
-  renderProgress();
-  if (CURLESSON === id) {
-    const md = $("markDoneBtn");
-    if (md) { md.textContent = "✓ مكتمل — اضغط للإلغاء"; md.classList.add("is-done"); }
-  }
-  renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
-  renderCourses();
-}
 
-async function toggleDone(id) {
-  try {
-    if (DONE.has(id)) {
-      await dbSend("DELETE", `progress?lesson_id=eq.${id}&user_id=eq.${USER.id}`);
-      DONE.delete(id);
-    } else {
-      await dbSend("POST", "progress?on_conflict=user_id,lesson_id",
-        { user_id: USER.id, lesson_id: id, completed: true, updated_at: new Date().toISOString() },
-        "resolution=merge-duplicates,return=minimal");
-      DONE.add(id);
-    }
-    renderProgress();
-    const md = $("markDoneBtn");
-    md.textContent = DONE.has(id) ? "✓ مكتمل — اضغط للإلغاء" : "✓ أكملت هذا الدرس";
-    md.classList.toggle("is-done", DONE.has(id));
+// تسجيل نسبة المشاهدة (تنمو فقط) + إكمال تلقائي عند ٩٠٪
+async function recordWatch(id, pct) {
+  pct = Math.round(pct);
+  if (pct <= (PCT[id] || 0)) return;
+  PCT[id] = pct;
+  const completed = pct >= 90;
+  const wasDone = DONE.has(id);
+  if (completed && !wasDone) {
+    DONE.add(id);
+    renderProgress(); renderCourses();
     renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
-    renderCourses();
-  } catch (e) { alert("خطأ: " + e.message); }
+  }
+  if (id === CURLESSON) updateWatchUI(id);
+  // حفظ مخفّف: كل +٥٪ أو عند الإكمال
+  if (completed !== wasDone || pct - (lastSaved[id] || 0) >= 5) {
+    lastSaved[id] = pct;
+    try {
+      await dbSend("POST", "progress?on_conflict=user_id,lesson_id",
+        { user_id: USER.id, lesson_id: id, percent: pct, completed, updated_at: new Date().toISOString() },
+        "resolution=merge-duplicates,return=minimal");
+    } catch (_) {}
+  }
 }
