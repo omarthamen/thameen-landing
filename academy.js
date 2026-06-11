@@ -241,39 +241,66 @@ async function recordWatch(id, pct) {
   }
 }
 
-// ====== المجتمع (شات حي) ======
-let commTimer = null;
+// ====== المجتمع ======
+let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
+const CHAN_INFO = {
+  general: { t: "العام", d: "شارك، اسأل، وتفاعل مع باقي المتدربين" },
+  achievements: { t: "الإنجازات", d: "اعرض شغلك وإنجازاتك وارفع فيديوهاتك 🚀" },
+  jobs: { t: "فرص عمل", d: "فرص ومشاريع مونتاج — للجادّين ✦" },
+};
+const EMOJIS = "😀 😂 🤣 😊 😍 😎 🥳 🔥 👍 👏 🙏 💪 🎬 🎥 ✨ ⭐ 💯 ❤️ 🎉 ✅ 👀 🤔 😅 🥰 😱 💎 🚀 📈 🏆 🎯 👌 🤝 💡 ⚡ 🌟 😭 🙌 💥 🤩 😏".split(" ");
+
 function myName() {
   if (USER && USER.user_metadata && USER.user_metadata.name) return USER.user_metadata.name;
   return USER && USER.email ? USER.email.split("@")[0] : "متدرب";
 }
-function avColor(s) {
-  let h = 0; s = s || "";
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
-  return `linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h + 40) % 360},65%,42%))`;
-}
+function avColor(s) { let h = 0; s = s || ""; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return `linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h + 40) % 360},65%,42%))`; }
 function initialOf(n) { return (n || "؟").trim().charAt(0) || "؟"; }
-function fmtTime(iso) {
-  try { const d = new Date(iso); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; }
-  catch (_) { return ""; }
+function fmtTime(iso) { try { const d = new Date(iso); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; } catch (_) { return ""; } }
+
+// رفع ملف للمجتمع
+async function uploadCommFile(file) {
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const path = `community/${crypto.randomUUID()}.${ext}`;
+  const r = await fetchT(`${SUPABASE_URL}/storage/v1/object/media/${path}`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN, "x-upsert": "true", "Content-Type": file.type || "application/octet-stream" },
+    body: file,
+  }, 180000);
+  if (!r.ok) throw new Error(await r.text());
+  return `${SUPABASE_URL}/storage/v1/object/public/media/${path}`;
 }
-async function loadMessages(forceScroll) {
+
+async function registerProfile() {
+  if (!USER) return;
+  try { await dbSend("POST", "profiles?on_conflict=user_id", { user_id: USER.id, name: myName() }, "resolution=merge-duplicates,return=minimal"); } catch (_) {}
+}
+async function loadMembers() {
+  const el = $("memList"); if (!el) return;
+  let ps; try { ps = await dbGet("profiles?select=user_id,name&order=created_at.asc&limit=300"); } catch (_) { return; }
+  const c = $("memCount"); if (c) c.textContent = `(${ps.length})`;
+  el.innerHTML = ps.map((p) => `<div class="mem"><div class="mem-av" style="background:${avColor(p.user_id || p.name)}">${esc(initialOf(p.name))}</div><span class="mem-name">${esc(p.name || "متدرب")}</span></div>`).join("");
+}
+
+function renderMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
-  let msgs;
-  try { msgs = await dbGet("community_messages?select=*&order=created_at.asc&limit=200"); }
-  catch (e) { box.innerHTML = `<p class="comm-empty">تعذّر تحميل الرسائل:<br>${esc(e.message)}</p>`; return; }
-  const cc = $("commCount"); if (cc) cc.textContent = `${msgs.length} رسالة`;
-  if (!msgs.length) { box.innerHTML = '<p class="comm-empty">لا رسائل بعد — كن أول من يبدأ 👋</p>'; return; }
+  let list = MSGS;
+  if (commSearch) { const q = commSearch.toLowerCase(); list = list.filter((m) => (m.text || "").toLowerCase().includes(q) || (m.name || "").toLowerCase().includes(q)); }
+  if (!list.length) { box.innerHTML = `<p class="comm-empty">${commSearch ? "لا نتائج للبحث" : "لا رسائل بعد — كن أول من يبدأ 👋"}</p>`; return; }
   const isAdmin = USER && USER.email === "omarthamen@gmail.com";
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  box.innerHTML = msgs.map((m) => {
+  const gold = CURCHAN === "jobs";
+  box.innerHTML = list.map((m) => {
     const me = m.user_id === (USER && USER.id);
     const nm = m.name || "متدرب";
-    return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
+    let media = "";
+    if (m.media_url) media = m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
+    const txt = m.text ? esc(m.text) : "";
+    return `<div class="cmsg ${me ? "me" : ""} ${gold ? "gold" : ""}" data-id="${m.id}">
       <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
       <div class="cmsg-body">
         <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
-        <div class="cmsg-bubble">${esc(m.text)}</div>
+        <div class="cmsg-bubble">${txt}${media}</div>
       </div></div>`;
   }).join("");
   if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
@@ -283,27 +310,80 @@ async function loadMessages(forceScroll) {
   }));
   if (forceScroll || atBottom) box.scrollTop = box.scrollHeight;
 }
+async function loadMessages(forceScroll) {
+  const box = $("commMessages"); if (!box) return;
+  try { MSGS = await dbGet(`community_messages?select=*&channel=eq.${CURCHAN}&order=created_at.asc&limit=200`); }
+  catch (e) { box.innerHTML = `<p class="comm-empty">تعذّر التحميل:<br>${esc(e.message)}</p>`; return; }
+  renderMessages(forceScroll);
+}
 function startCommPoll() { stopCommPoll(); commTimer = setInterval(() => loadMessages(false), 4000); }
 function stopCommPoll() { if (commTimer) { clearInterval(commTimer); commTimer = null; } }
+
 function switchView(view) {
   document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
   const vc = $("viewCourses"), vm = $("viewCommunity");
   if (vc) vc.hidden = view !== "courses";
   if (vm) vm.hidden = view !== "community";
-  if (view === "community") { loadMessages(true); startCommPoll(); } else stopCommPoll();
+  if (view === "community") { registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
 }
 document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
+
+// القنوات
+document.querySelectorAll("#commChannels .chan").forEach((c) => c.addEventListener("click", () => {
+  CURCHAN = c.dataset.ch;
+  document.querySelectorAll("#commChannels .chan").forEach((x) => x.classList.toggle("on", x === c));
+  const info = CHAN_INFO[CURCHAN]; $("chanTitle").textContent = info.t; $("chanDesc").textContent = info.d;
+  commSearch = ""; if ($("commSearch")) $("commSearch").value = "";
+  loadMessages(true);
+}));
+
+// البحث
+(function () { const s = $("commSearch"); if (s) s.addEventListener("input", (e) => { commSearch = e.target.value.trim(); renderMessages(false); }); })();
+
+// الإيموجي
+(function () {
+  const p = $("emojiPanel"); if (!p) return;
+  p.innerHTML = EMOJIS.map((e) => `<button type="button">${e}</button>`).join("");
+  p.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { const inp = $("commInput"); inp.value += b.textContent; inp.focus(); }));
+  const eb = $("emojiBtn"); if (eb) eb.addEventListener("click", () => { p.hidden = !p.hidden; });
+})();
+
+// الإرفاق
+(function () {
+  const ab = $("attachBtn"), fi = $("commFile"); if (!ab || !fi) return;
+  ab.addEventListener("click", () => fi.click());
+  fi.addEventListener("change", (e) => { const f = e.target.files[0]; if (f) { pendingFile = f; showPending(f); } });
+})();
+function showPending(f) {
+  const pv = $("filePreview"); if (!pv) return;
+  pv.hidden = false;
+  const url = URL.createObjectURL(f);
+  pv.innerHTML = `${f.type.startsWith("video") ? `<video src="${url}" muted></video>` : `<img src="${url}">`}<span class="fp-name">${esc(f.name)}</span><button type="button" class="fp-x">✕</button>`;
+  pv.querySelector(".fp-x").addEventListener("click", clearPending);
+}
+function clearPending() { pendingFile = null; const pv = $("filePreview"); if (pv) { pv.hidden = true; pv.innerHTML = ""; } const fi = $("commFile"); if (fi) fi.value = ""; }
+
+// الإرسال
 (function wireCommForm() {
-  const f = document.getElementById("commForm"); if (!f) return;
+  const f = $("commForm"); if (!f) return;
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const inp = document.getElementById("commInput"), btn = document.getElementById("commSend");
-    const t = inp.value.trim(); if (!t) return;
-    btn.disabled = true; inp.value = "";
+    const inp = $("commInput"), btn = $("commSend");
+    const t = inp.value.trim();
+    if (!t && !pendingFile) return;
+    btn.disabled = true;
+    const ep = $("emojiPanel"); if (ep) ep.hidden = true;
     try {
-      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t }, "return=minimal");
+      let media_url = null, media_type = null;
+      if (pendingFile) {
+        btn.textContent = "جارٍ الرفع…";
+        media_url = await uploadCommFile(pendingFile);
+        media_type = pendingFile.type.startsWith("video") ? "video" : "image";
+      }
+      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t || null, channel: CURCHAN, media_url, media_type }, "return=minimal");
+      inp.value = ""; clearPending();
       await loadMessages(true);
-    } catch (err) { alert("خطأ: " + err.message); inp.value = t; }
-    btn.disabled = false; inp.focus();
+    } catch (err) { alert("خطأ: " + err.message); }
+    btn.disabled = false; btn.textContent = "إرسال"; inp.focus();
   });
 })();

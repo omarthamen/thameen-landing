@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=7" />
+  <link rel="stylesheet" href="academy.css?v=8" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -35,8 +35,8 @@
     <header class="acad-nav">
       <a class="nav-brand" href="#" id="navHome"><span class="brand-diamond">◆</span> أكاديمية ثَمين</a>
       <nav class="nav-tabs">
-        <button class="nav-tab on" data-view="courses">📚 الدورات</button>
-        <button class="nav-tab" data-view="community">💬 المجتمع</button>
+        <button class="nav-tab on" data-view="courses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2zM20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/></svg> الدورات</button>
+        <button class="nav-tab" data-view="community"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg> المجتمع</button>
       </nav>
       <div class="nav-right">
         <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
@@ -71,21 +71,46 @@
 
     <!-- ===== عرض المجتمع ===== -->
     <div id="viewCommunity" class="community-wrap" hidden>
-      <div class="comm-card">
-        <div class="comm-head">
-          <div class="comm-head-txt">
-            <h2>💬 مجتمع ثَمين</h2>
-            <p>شارك إنجازك، اسأل، وتفاعل مع باقي المتدربين</p>
+      <div class="comm-layout">
+        <!-- جانب: القنوات + الأعضاء -->
+        <aside class="comm-side">
+          <div class="comm-channels" id="commChannels">
+            <button class="chan on" data-ch="general"><span class="chan-ic">#</span> العام</button>
+            <button class="chan" data-ch="achievements"><span class="chan-ic">★</span> الإنجازات</button>
+            <button class="chan gold" data-ch="jobs"><span class="chan-ic">◆</span> فرص عمل</button>
           </div>
-          <span class="comm-count" id="commCount">—</span>
+          <div class="comm-members">
+            <h4>الأعضاء <span id="memCount"></span></h4>
+            <div id="memList"></div>
+          </div>
+        </aside>
+
+        <!-- الشات -->
+        <div class="comm-card">
+          <div class="comm-head">
+            <div class="comm-head-txt">
+              <h2 id="chanTitle">العام</h2>
+              <p id="chanDesc">شارك، اسأل، وتفاعل مع باقي المتدربين</p>
+            </div>
+            <input id="commSearch" class="comm-search" placeholder="بحث في الرسائل…" autocomplete="off" />
+          </div>
+          <div class="comm-messages" id="commMessages">
+            <p class="hint" style="text-align:center;padding:30px">جارٍ التحميل…</p>
+          </div>
+          <div id="filePreview" class="file-preview" hidden></div>
+          <div id="emojiPanel" class="emoji-panel" hidden></div>
+          <form class="comm-compose" id="commForm">
+            <button type="button" class="comp-icon" id="emojiBtn" title="إيموجي" aria-label="إيموجي">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.2" fill="#04121d"/><circle cx="15" cy="10" r="1.2" fill="#04121d"/><path d="M8.5 14.5a4 4 0 0 0 7 0" fill="none" stroke="#04121d" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </button>
+            <button type="button" class="comp-icon" id="attachBtn" title="إرفاق فيديو/صورة" aria-label="إرفاق">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3l7.8-7.8"/></svg>
+            </button>
+            <input type="file" id="commFile" accept="image/*,video/*,image/gif" hidden />
+            <input id="commInput" placeholder="اكتب رسالتك…" maxlength="700" autocomplete="off" />
+            <button class="btn btn-primary" type="submit" id="commSend">إرسال</button>
+          </form>
         </div>
-        <div class="comm-messages" id="commMessages">
-          <p class="hint" style="text-align:center;padding:30px">جارٍ التحميل…</p>
-        </div>
-        <form class="comm-compose" id="commForm">
-          <input id="commInput" placeholder="اكتب رسالتك للمجتمع…" maxlength="500" autocomplete="off" />
-          <button class="btn btn-primary" type="submit" id="commSend">إرسال</button>
-        </form>
       </div>
     </div>
 
@@ -96,6 +121,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=16"></script>
+  <script src="academy.js?v=17"></script>
 </body>
 </html>
