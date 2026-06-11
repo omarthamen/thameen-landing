@@ -181,6 +181,17 @@ $("savePosterBtn").addEventListener("click", async () => {
   btn.disabled = false;
 });
 
+$("delPosterBtn").addEventListener("click", async () => {
+  const msg = $("posterMsg");
+  if (!confirm("حذف صورة الغلاف؟")) return;
+  try {
+    videoVal.poster = null;
+    await setContent("video", videoVal);
+    $("posterPreview").hidden = true; $("posterPreview").src = "";
+    setMsg(msg, "تم حذف الغلاف ✅", true);
+  } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+});
+
 // الفصول
 function renderChapters(chs) { $("chaptersRows").innerHTML = ""; chs.forEach((ch) => addChapterRow(ch.label, ch.t)); }
 function addChapterRow(label = "", t = 0) {
