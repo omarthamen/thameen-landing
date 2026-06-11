@@ -242,7 +242,7 @@ async function recordWatch(id, pct) {
 }
 
 // ====== المجتمع ======
-let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
+let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [], lastSig = "";
 const CHAN_INFO = {
   general: { t: "العام", d: "شارك، اسأل، وتفاعل مع باقي المتدربين" },
   achievements: { t: "الإنجازات", d: "اعرض شغلك وإنجازاتك وارفع فيديوهاتك 🚀" },
@@ -354,6 +354,11 @@ async function loadMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
   try { MSGS = await dbGet(`community_messages?select=*&channel=eq.${CURCHAN}&order=created_at.asc&limit=200`); }
   catch (e) { box.innerHTML = `<p class="comm-empty">تعذّر التحميل:<br>${esc(e.message)}</p>`; return; }
+  // وقّع البيانات — لا تعيد الرسم إلا إذا فيه تغيير فعلي (يمنع وميض الروابط وقفز التمرير)
+  const last = MSGS[MSGS.length - 1];
+  const sig = CURCHAN + ":" + MSGS.length + ":" + (last ? last.id : "");
+  if (!forceScroll && sig === lastSig) return;
+  lastSig = sig;
   renderMessages(forceScroll);
 }
 function startCommPoll() { stopCommPoll(); commTimer = setInterval(() => loadMessages(false), 4000); }
