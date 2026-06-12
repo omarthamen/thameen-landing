@@ -368,3 +368,8 @@
 .acc-sub{margin:16px 0 8px;font-size:13px;color:var(--text-muted)}
 .acc-post{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;color:var(--text-muted);padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.04);margin-bottom:7px}
 .acc-post small{color:var(--text-subtle);font-size:11px;flex:none}
+
+/* زر واتساب بشاشة الدخول */
+.login-wa{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:linear-gradient(135deg,#25D366,#1da851);color:#fff;text-decoration:none;font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:999px;transition:.2s;box-shadow:0 8px 22px rgba(37,211,102,.28)}
+.login-wa:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.login-wa svg{width:19px;height:19px}
