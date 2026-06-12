@@ -414,29 +414,33 @@ const SOON_TOOLS = [
   { n: "Figma", sub: "التصميم والتعاون", c: "st-figma", ic: FIGMA_SVG },
   { n: "Claude", sub: "الذكاء الاصطناعي", c: "st-claude", ic: CLAUDE_SVG },
 ];
-function comingSoonBox() {
-  return `<div class="soon-card">
-    <span class="soon-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6z"/><path d="M19 14l.8 2.6L22.5 18l-2.7.8L19 21.5l-.8-2.7L15.5 18l2.7-1.4z"/></svg> قريبًا</span>
-    <h3 class="soon-title">سلسلة الاحتراف بالذكاء الاصطناعي</h3>
-    <p class="soon-sub">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
-    <div class="soon-grid">${SOON_TOOLS.map((t) => `<div class="soon-tool"><span class="st-ic ${t.c}">${t.ic}</span><b>${esc(t.n)}</b><small>${esc(t.sub)}</small></div>`).join("")}</div>
-    <div class="soon-cta"><span class="soon-cta-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span><span>الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — <b>استعدّوا!</b></span></div>
+// مجلّد «قريبًا» مضغوط داخل قائمة الدروس — ينفتح ويبيّن الأدوات والتفاصيل
+function comingSoonFolder() {
+  const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
+  const spark = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6z"/></svg>';
+  const tools = SOON_TOOLS.map((t) => `<div class="soonf-tool"><span class="st-ic ${t.c}">${t.ic}</span><div class="soonf-meta"><b>${esc(t.n)}</b><small>${esc(t.sub)}</small></div></div>`).join("");
+  return `<div class="pl-folder pl-soonf">
+    <button class="pl-fold-head" type="button">
+      <span class="pl-fold-ic soonf-ic">${spark}</span>
+      <span class="pl-fold-name">سلسلة الذكاء الاصطناعي</span>
+      <span class="soonf-tag">قريبًا</span>
+      <span class="pl-fold-arrow">${chevron}</span>
+    </button>
+    <div class="pl-fold-body">
+      <p class="soonf-intro">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
+      <div class="soonf-tools">${tools}</div>
+      <p class="soonf-cta">⚡ الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — استعدّوا!</p>
+    </div>
   </div>`;
 }
 function isProSection(secId) {
   const s = SECTIONS.find((x) => x.id === secId);
   return s && /محترف|احتراف|تطوير|pro/i.test(s.title || "");
 }
-function updateProSoon() {
-  const el = $("proSoon"); if (!el) return;
-  if (isProSection(CURSEC)) { el.innerHTML = comingSoonBox(); el.hidden = false; }
-  else { el.hidden = true; el.innerHTML = ""; }
-}
 function renderPlaylist(ls) {
-  updateProSoon();
   const wrap = $("plList");
   if (!wrap) return;
-  if (!ls.length) { wrap.innerHTML = '<p class="hint" style="padding:14px">لا دروس بعد.</p>'; return; }
+  if (!ls.length) { wrap.innerHTML = (isProSection(CURSEC) ? comingSoonFolder() : '<p class="hint" style="padding:14px">لا دروس بعد.</p>'); bindPlaylist(wrap); return; }
   const folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>';
   const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
   const seen = new Set(); let html = "";
@@ -458,7 +462,11 @@ function renderPlaylist(ls) {
       <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}<div class="pl-fold-end">نهاية المجلّد</div></div>
     </div>`;
   });
+  if (isProSection(CURSEC)) html += comingSoonFolder();
   wrap.innerHTML = html;
+  bindPlaylist(wrap);
+}
+function bindPlaylist(wrap) {
   wrap.querySelectorAll(".pl-item").forEach((b) => b.addEventListener("click", () => playLesson(b.dataset.lid)));
   wrap.querySelectorAll(".pl-fold-head").forEach((b) => b.addEventListener("click", () => b.closest(".pl-folder").classList.toggle("open")));
 }
