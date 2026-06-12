@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=8" />
+  <link rel="stylesheet" href="admin.css?v=9" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -162,6 +162,16 @@
           <p class="msg" id="subMsg" role="status"></p>
         </div>
         <div class="card">
+          <h3>📞 موعد المكالمة الجماعية</h3>
+          <p class="hint">يوصل لكل المشتركين بصفحة «مكالماتي» مع عدّاد تنازلي.</p>
+          <div class="add-media">
+            <input type="datetime-local" id="groupCallAt" class="fld" />
+            <button class="btn btn-primary btn-sm" id="saveGroupCall">حفظ الموعد</button>
+            <a class="btn btn-ghost btn-sm" id="joinGroupAdmin" href="https://meet.jit.si/thameenAcademyGroupCall2026" target="_blank" rel="noopener">انضم الآن</a>
+          </div>
+          <p class="msg" id="groupCallMsg" role="status"></p>
+        </div>
+        <div class="card">
           <h3>قائمة المشتركين</h3>
           <div id="subsList"></div>
         </div>
@@ -169,6 +179,6 @@
     </main>
   </section>
 
-  <script src="admin.js?v=21"></script>
+  <script src="admin.js?v=22"></script>
 </body>
 </html>

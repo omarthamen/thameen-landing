@@ -170,7 +170,7 @@ async function loadAcademy() {
   const dataP = Promise.all([
     loadCourseData(),
     dbGet("progress?select=lesson_id,percent,completed").catch(() => dbGet("progress?select=lesson_id,completed").catch(() => [])),
-    dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => [])),
+    dbGet("members?select=calls_total,calls_used,created_at,call_at").catch(() => dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => []))),
   ]);
   if (!(await guardP)) return;           // موقوف من الأدمن
   showOnboarding();
@@ -763,12 +763,14 @@ function restoreView() {
 function switchView(view) {
   try { localStorage.setItem("thameen_view", view); } catch (_) {}
   document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
-  const vc = $("viewCourses"), vm = $("viewCommunity"), va = $("viewAccount");
+  const vc = $("viewCourses"), vm = $("viewCommunity"), va = $("viewAccount"), vcl = $("viewCalls");
   if (vc) vc.hidden = view !== "courses";
   if (vm) vm.hidden = view !== "community";
   if (va) va.hidden = view !== "account";
+  if (vcl) vcl.hidden = view !== "calls";
   if (view === "community") { registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
   if (view === "account") loadAccount();
+  if (view === "calls") loadCalls(); else endCall();   // أوقف الكاميرا لو طلع من المكالمات
 }
 document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
 
@@ -1046,4 +1048,81 @@ async function loadAccount() {
     }
     fi.value = "";
   });
+})();
+
+// ====== المكالمات (Jitsi مجاني داخل الموقع) ======
+let jitsiApi = null;
+function fmtDateTime(d) { let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${fmtDate(d)} · ${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; }
+function fmtCountdown(ms) {
+  const s = Math.floor(ms / 1000), days = Math.floor(s / 86400), hrs = Math.floor((s % 86400) / 3600), mins = Math.floor((s % 3600) / 60);
+  if (days > 0) return `${toAr(days)} يوم و${toAr(hrs)} ساعة`;
+  if (hrs > 0) return `${toAr(hrs)} ساعة و${toAr(mins)} دقيقة`;
+  return `${toAr(Math.max(1, mins))} دقيقة`;
+}
+function renderCallWhen(whenId, countId, noteId, btnId, date) {
+  const btn = $(btnId);
+  if (!date || isNaN(date.getTime())) {
+    $(whenId).textContent = "لم يُحدّد موعد بعد";
+    $(countId).innerHTML = ""; $(noteId).textContent = "راح نحدّد لك الموعد قريبًا.";
+    if (btn) btn.disabled = true;
+    return;
+  }
+  $(whenId).textContent = fmtDateTime(date);
+  const diff = date.getTime() - Date.now();
+  if (btn) btn.disabled = false;
+  if (diff > 60000) { $(countId).innerHTML = "باقي <b>" + fmtCountdown(diff) + "</b>"; $(noteId).textContent = "ادخل الغرفة بوقت المكالمة."; }
+  else if (diff > -2 * 3600 * 1000) { $(countId).innerHTML = '<b style="color:#5fe08a">● متاحة الآن</b>'; $(noteId).textContent = "اضغط للدخول."; }
+  else { $(countId).innerHTML = '<span style="color:var(--text-subtle)">انتهى موعدها</span>'; $(noteId).textContent = ""; }
+}
+function renderCallsSchedule() {
+  const el = $("callsSchedule"); if (!el) return;
+  const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
+  const sub = raw ? new Date(raw) : null;
+  const total = (MEMBER && MEMBER.calls_total) || 3, used = (MEMBER && MEMBER.calls_used) || 0;
+  const now = new Date(), ord = ["الأولى", "الثانية", "الثالثة", "الرابعة"];
+  let html = "";
+  for (let i = 0; i < total; i++) {
+    const date = sub ? addMonths(sub, i + 1) : null;
+    let state, cls;
+    if (i < used) { state = "تمّت ✓"; cls = "used"; }
+    else if (date && date <= now) { state = "حان وقتها"; cls = "ready"; }
+    else { state = "قادمة"; cls = "soon"; }
+    html += `<div class="acc-call ${cls}"><div class="acc-call-n">${i + 1}</div><div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${date ? fmtDate(date) : "—"}</small></div><span class="acc-call-tag">${state}</span></div>`;
+  }
+  el.innerHTML = html;
+}
+async function loadCalls() {
+  const privAt = MEMBER && MEMBER.call_at ? new Date(MEMBER.call_at) : null;
+  renderCallWhen("privWhen", "privCount", "privNote", "startPrivCall", privAt);
+  let groupAt = null;
+  try { const r = await dbGet("app_config?select=value&key=eq.group_call_at"); if (r && r[0] && r[0].value) groupAt = new Date(r[0].value); } catch (_) {}
+  renderCallWhen("groupWhen", "groupCount", "groupNote", "joinGroupCall", groupAt);
+  renderCallsSchedule();
+}
+function startCall(room, title) {
+  const host = $("jitsiHost"); if (!host) return;
+  $("callRoomTitle").textContent = title;
+  $("callRoom").hidden = false;
+  host.innerHTML = "";
+  if (!window.JitsiMeetExternalAPI) { host.innerHTML = '<p class="hint" style="padding:30px;text-align:center">جارٍ تحميل المكالمة… أعد المحاولة بعد ثانية.</p>'; return; }
+  try {
+    jitsiApi = new window.JitsiMeetExternalAPI("meet.jit.si", {
+      roomName: room, parentNode: host, width: "100%", height: "100%",
+      userInfo: { displayName: myName() },
+      configOverwrite: { prejoinPageEnabled: false, disableDeepLinking: true, startWithVideoMuted: false },
+      interfaceConfigOverwrite: { MOBILE_APP_PROMO: false, SHOW_JITSI_WATERMARK: false },
+    });
+    jitsiApi.addEventListener("readyToClose", endCall);
+  } catch (e) { host.innerHTML = '<p class="hint" style="padding:30px;text-align:center">تعذّر بدء المكالمة. جرّب تحديث الصفحة.</p>'; }
+  $("callRoom").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function endCall() {
+  if (jitsiApi) { try { jitsiApi.dispose(); } catch (_) {} jitsiApi = null; }
+  const h = $("jitsiHost"); if (h) h.innerHTML = "";
+  const cr = $("callRoom"); if (cr) cr.hidden = true;
+}
+(function () {
+  const sp = $("startPrivCall"); if (sp) sp.addEventListener("click", () => { if (USER) startCall("thameenPrv" + String(USER.id).replace(/-/g, ""), "مكالمتك الخاصة"); });
+  const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => startCall("thameenAcademyGroupCall2026", "المكالمة الجماعية"));
+  const ec = $("endCall"); if (ec) ec.addEventListener("click", endCall);
 })();

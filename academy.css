@@ -410,3 +410,28 @@
 .login-wa{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:linear-gradient(135deg,#25D366,#1da851);color:#fff;text-decoration:none;font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:999px;transition:.2s;box-shadow:0 8px 22px rgba(37,211,102,.28)}
 .login-wa:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .login-wa svg{width:19px;height:19px}
+
+/* ===== صفحة المكالمات ===== */
+.calls-wrap{max-width:1100px;margin:0 auto;padding:26px clamp(14px,3vw,30px)}
+.calls-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.call-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px}
+.call-card.call-sched{grid-column:1/-1}
+.call-ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#5BB8E8;background:rgba(91,184,232,.14);margin-bottom:14px}
+.call-ic svg{width:24px;height:24px}
+.call-card.call-group .call-ic{color:#c4b3ff;background:rgba(139,124,246,.16)}
+.call-card h3{margin:0 0 6px;font-size:18px;color:#fff}
+.call-sub{color:var(--text-muted);font-size:13.5px;line-height:1.7;margin:0 0 16px}
+.call-when{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+.call-count{font-size:13.5px;color:var(--text-muted);margin-bottom:16px;min-height:18px}
+.call-count b{color:#5BB8E8}
+.call-btn{width:100%}
+.call-card.call-group .call-btn{background:linear-gradient(135deg,#8B7CF6,#6c5ce7);color:#fff}
+.call-note{font-size:11.5px;color:var(--text-subtle);margin:9px 0 0;text-align:center}
+.call-sched .acc-calls{margin-top:8px}
+/* غرفة المكالمة */
+.call-room{max-width:1100px;margin:18px auto 0;padding:0 clamp(14px,3vw,30px)}
+.call-room-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.call-room-head span{font-size:16px;font-weight:800;color:#fff}
+.jitsi-host{width:100%;height:min(70vh,620px);border-radius:18px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.1)}
+.jitsi-host iframe{width:100%;height:100%;border:0}
+@media(max-width:760px){.calls-grid{grid-template-columns:1fr}.jitsi-host{height:64vh}}

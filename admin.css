@@ -133,3 +133,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .sec-cover-img{width:90px;height:56px;border-radius:10px;object-fit:cover;flex:none;background:#000}
 .sec-cover-row .fld{flex:1;min-width:140px;margin-bottom:0}
 .sec-cover-msg{font-size:13px;width:100%}
+
+/* جدولة المكالمة للمشترك */
+.sub-call{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:9px;font-size:12.5px;color:var(--text-muted)}
+.sub-call-lbl{font-weight:700}
+.sub-call-at{flex:none;width:auto;padding:6px 9px;font-size:12.5px;color-scheme:dark}
