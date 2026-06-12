@@ -100,7 +100,7 @@ document.querySelectorAll(".tab").forEach((t) => {
   });
 });
 
-function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); }
+function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); loadNotifsAdmin(); }
 
 // ====== المشتركون ======
 async function loadSubscribers() {
@@ -148,19 +148,78 @@ async function loadSubscribers() {
 
 function fmtJoin(iso) { try { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; } catch (_) { return "—"; } }
 function toLocalInput(iso) { if (!iso) return ""; try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; } catch (_) { return ""; } }
+function fmtCallDate(iso) { try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} · ${h}:${p(d.getMinutes())} ${ap}`; } catch (_) { return "—"; } }
 async function loadGroupCall() {
-  try { const r = await dbGet("app_config?select=value&key=eq.group_call_at"); if (r && r[0] && $("groupCallAt")) $("groupCallAt").value = toLocalInput(r[0].value); } catch (_) {}
+  let rows = [];
+  try { rows = await dbGet("group_calls?select=id,call_at,duration_min&order=call_at.desc"); } catch (_) {}
+  const now = Date.now();
+  // املأ الحقل بأقرب مكالمة قادمة/جارية (إن وُجدت)
+  const active = (rows || []).filter((r) => now < new Date(r.call_at).getTime() + (r.duration_min || 75) * 60000).sort((a, b) => new Date(a.call_at) - new Date(b.call_at))[0];
+  if ($("groupCallAt")) $("groupCallAt").value = active ? toLocalInput(active.call_at) : "";
+  if ($("groupCallDur")) $("groupCallDur").value = active ? (active.duration_min || 75) : 75;
+  // قائمة كل المكالمات (مكتملة بعلامة ✓)
+  const list = $("callsAdminList");
+  if (list) {
+    if (!rows || !rows.length) { list.innerHTML = '<p class="hint">ما في مكالمات مجدولة بعد.</p>'; }
+    else list.innerHTML = rows.map((r) => {
+      const ended = now >= new Date(r.call_at).getTime() + (r.duration_min || 75) * 60000;
+      return `<div class="call-adm-row ${ended ? "done" : ""}">
+        <span class="call-adm-ic">${ended ? "✓" : "📅"}</span>
+        <div class="call-adm-body"><b>${fmtCallDate(r.call_at)}</b><small>${ended ? "اكتملت" : "قادمة"} · ${toLocalNum(r.duration_min || 75)} دقيقة</small></div>
+        <button class="btn btn-danger btn-sm del-call" data-id="${r.id}">حذف</button>
+      </div>`;
+    }).join("");
+    list.querySelectorAll(".del-call").forEach((b) => b.addEventListener("click", async () => {
+      if (!confirm("حذف هذه المكالمة؟")) return;
+      try { await dbSend("DELETE", `group_calls?id=eq.${b.dataset.id}`, null, "return=minimal"); loadGroupCall(); } catch (e) { alert("خطأ: " + e.message); }
+    }));
+  }
 }
+function toLocalNum(n) { return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]); }
 (function () {
   const b = $("saveGroupCall"); if (!b) return;
   b.addEventListener("click", async () => {
-    const msg = $("groupCallMsg"), v = $("groupCallAt").value, val = v ? new Date(v).toISOString() : null;
+    const msg = $("groupCallMsg"), v = $("groupCallAt").value;
+    if (!v) { setMsg(msg, "اختر التاريخ والوقت أولاً", false); return; }
+    const iso = new Date(v).toISOString(), dur = parseInt(($("groupCallDur") || {}).value || "75", 10) || 75;
     b.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
-    try { await dbSend("POST", "app_config?on_conflict=key", { key: "group_call_at", value: val }, "resolution=merge-duplicates,return=minimal"); setMsg(msg, "تم حفظ موعد المكالمة الجماعية ✅", true); }
-    catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+    try {
+      // مكالمة جديدة تتراكم في الأرشيف (تظهر مكتملة تلقائيًا بعد انتهاء وقتها)
+      await dbSend("POST", "group_calls", { call_at: iso, duration_min: dur }, "return=minimal");
+      // إشعار تلقائي لكل المشتركين
+      await dbSend("POST", "notifications", { title: "📞 موعد مكالمة جماعية جديدة", body: `المكالمة يوم ${fmtCallDate(iso)}. جهّز أسئلتك من صفحة «مكالماتي».`, kind: "call" }, "return=minimal");
+      setMsg(msg, "تم — وانرسل إشعار لكل المشتركين ✅", true);
+      loadGroupCall();
+    } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
     b.disabled = false;
   });
 })();
+// إرسال إشعار عام لكل المشتركين
+(function () {
+  const b = $("sendNotifBtn"); if (!b) return;
+  b.addEventListener("click", async () => {
+    const msg = $("notifMsg"), t = ($("notifTitle").value || "").trim(), body = ($("notifBody").value || "").trim();
+    if (!t) { setMsg(msg, "اكتب عنوان الإشعار", false); return; }
+    b.disabled = true; setMsg(msg, "جارٍ الإرسال…", true);
+    try {
+      await dbSend("POST", "notifications", { title: t, body: body || null, kind: "general" }, "return=minimal");
+      $("notifTitle").value = ""; $("notifBody").value = "";
+      setMsg(msg, "تم إرسال الإشعار لكل المشتركين ✅", true);
+      loadNotifsAdmin();
+    } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+    b.disabled = false;
+  });
+})();
+async function loadNotifsAdmin() {
+  const list = $("notifAdminList"); if (!list) return;
+  let rows = [];
+  try { rows = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=20"); } catch (_) {}
+  if (!rows || !rows.length) { list.innerHTML = '<p class="hint">ما أرسلت إشعارات بعد.</p>'; return; }
+  list.innerHTML = rows.map((n) => `<div class="notif-adm-row"><div class="notif-adm-body"><b>${esc(n.title)}</b>${n.body ? `<small>${esc(n.body)}</small>` : ""}</div><button class="btn btn-danger btn-sm del-notif" data-id="${n.id}">حذف</button></div>`).join("");
+  list.querySelectorAll(".del-notif").forEach((b) => b.addEventListener("click", async () => {
+    try { await dbSend("DELETE", `notifications?id=eq.${b.dataset.id}`, null, "return=minimal"); loadNotifsAdmin(); } catch (e) { alert("خطأ: " + e.message); }
+  }));
+}
 async function rpc(fn, body) {
   const r = await fetchT(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
     method: "POST",

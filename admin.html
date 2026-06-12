@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=9" />
+  <link rel="stylesheet" href="admin.css?v=10" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -163,13 +163,26 @@
         </div>
         <div class="card">
           <h3>📞 موعد المكالمة الجماعية</h3>
-          <p class="hint">يوصل لكل المشتركين بصفحة «مكالماتي» مع عدّاد تنازلي.</p>
+          <p class="hint">حدّد الموعد + مدة المكالمة. أول ما تحفظ، يوصل <b>إشعار تلقائي لكل المشتركين</b> + عدّاد تنازلي. وبعد انتهاء وقتها تنحفظ تلقائيًا بعلامة ✓.</p>
           <div class="add-media">
             <input type="datetime-local" id="groupCallAt" class="fld" />
-            <button class="btn btn-primary btn-sm" id="saveGroupCall">حفظ الموعد</button>
+            <input type="number" id="groupCallDur" class="fld" min="15" max="240" step="5" value="75" placeholder="المدة بالدقائق" title="مدة المكالمة بالدقائق" />
+            <button class="btn btn-primary btn-sm" id="saveGroupCall">حفظ + إرسال إشعار</button>
             <a class="btn btn-ghost btn-sm" id="joinGroupAdmin" href="https://meet.jit.si/thameenAcademyGroupCall2026" target="_blank" rel="noopener">انضم الآن</a>
           </div>
+          <p class="hint" style="margin-top:4px">المدة الافتراضية ٧٥ دقيقة (ساعة وربع).</p>
           <p class="msg" id="groupCallMsg" role="status"></p>
+          <div id="callsAdminList" class="calls-adm-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>🔔 إرسال إشعار للجميع</h3>
+          <p class="hint">يوصل لكل المشتركين في جرس الإشعارات داخل الأكاديمية.</p>
+          <input type="text" id="notifTitle" class="fld" placeholder="عنوان الإشعار (مثلاً: أُضيفت دروس جديدة 🎬)" />
+          <textarea id="notifBody" class="fld" rows="2" placeholder="تفاصيل (اختياري)"></textarea>
+          <button class="btn btn-primary" id="sendNotifBtn">إرسال الإشعار</button>
+          <p class="msg" id="notifMsg" role="status"></p>
+          <div id="notifAdminList" class="notif-adm-list"></div>
         </div>
         <div class="card">
           <h3>قائمة المشتركين</h3>
@@ -179,6 +192,6 @@
     </main>
   </section>
 
-  <script src="admin.js?v=23"></script>
+  <script src="admin.js?v=24"></script>
 </body>
 </html>

@@ -11,6 +11,31 @@
 .nav-tab:hover{background:rgba(91,184,232,.14);color:#fff}
 .nav-tab.on{color:#04121d;background:var(--grad-cta);border-color:transparent;box-shadow:0 6px 18px rgba(44,141,208,.4)}
 .nav-right{display:flex;align-items:center;gap:12px;position:relative}
+/* جرس الإشعارات */
+.nav-bell{position:relative;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;transition:.2s;flex:none}
+.nav-bell:hover{background:rgba(91,184,232,.16);border-color:rgba(91,184,232,.4)}
+.nav-bell svg{width:19px;height:19px}
+.bell-badge{position:absolute;top:-3px;inset-inline-end:-3px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ff5a5a;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #000;font-variant-numeric:tabular-nums}
+.notif-panel{position:absolute;top:calc(100% + 10px);inset-inline-end:0;width:320px;max-width:calc(100vw - 28px);background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:18px;box-shadow:0 26px 60px rgba(0,0,0,.6);z-index:60;overflow:hidden;animation:navMenuIn .18s ease}
+.notif-panel-head{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-size:15px;color:#fff}
+.notif-list{max-height:min(60vh,420px);overflow-y:auto}
+.notif-empty{color:var(--text-subtle);font-size:13.5px;text-align:center;padding:26px 14px}
+.notif-item{display:flex;gap:11px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);transition:.2s}
+.notif-item.unread{background:rgba(91,184,232,.07)}
+.notif-ic{flex:none;font-size:18px;line-height:1.4}
+.notif-c{flex:1;min-width:0}
+.notif-c b{display:block;font-size:14px;color:#fff;line-height:1.5}
+.notif-c p{margin:3px 0 0;font-size:13px;color:var(--text-muted);line-height:1.6}
+.notif-c small{display:block;margin-top:5px;font-size:11.5px;color:var(--text-subtle)}
+/* المكالمات المكتملة (داخل صفحة المكالمات) */
+.calls-done{display:flex;flex-direction:column;gap:9px}
+.cdone-title{margin:4px 2px 2px;font-size:14px;color:var(--text-muted)}
+.cdone-item{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:14px;background:rgba(80,200,120,.07);border:1px solid rgba(80,200,120,.22)}
+.cdone-ic{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#04121d;background:#5fe08a}
+.cdone-body{flex:1;min-width:0}
+.cdone-body b{display:block;font-size:14.5px;color:#fff}
+.cdone-body small{font-size:12.5px;color:var(--text-subtle)}
+.cdone-tag{flex:none;font-size:12px;font-weight:700;color:#74d99a;background:rgba(80,200,120,.14);padding:4px 11px;border-radius:99px}
 /* زر البروفايل + القائمة المنسدلة */
 .nav-menu-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 11px 5px 6px;cursor:pointer;transition:.2s}
 .nav-menu-btn:hover,.nav-menu-btn.on{background:rgba(91,184,232,.16);border-color:rgba(91,184,232,.4)}
