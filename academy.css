@@ -195,23 +195,32 @@
 .col-h{font-size:19px;font-weight:900;margin-bottom:16px}
 .courses-col,.lessons-col{position:sticky;top:80px}
 .courses-col .col-h,.lessons-col .col-h{padding-inline-start:4px}
-/* بوكس «قريبًا» — سلسلة الذكاء الاصطناعي */
-.pl-soon{position:relative;margin-top:14px;border-radius:16px;padding:18px 16px 16px;background:radial-gradient(120% 90% at 50% 0%,rgba(139,124,246,.16),transparent 60%),linear-gradient(180deg,rgba(91,184,232,.07),rgba(255,255,255,.02));border:1px solid rgba(139,124,246,.32);overflow:hidden}
-.pl-soon::before{content:"";position:absolute;inset:0;border-radius:16px;padding:1px;background:linear-gradient(135deg,rgba(139,124,246,.6),transparent 45%,rgba(91,184,232,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.7}
-.pl-soon-badge{display:inline-block;font-size:11.5px;font-weight:800;color:#04121d;background:linear-gradient(135deg,#8B7CF6,#5BB8E8);padding:4px 13px;border-radius:999px;letter-spacing:.5px;box-shadow:0 4px 14px rgba(139,124,246,.4);animation:soonPulse 2.4s ease-in-out infinite}
-@keyframes soonPulse{0%,100%{box-shadow:0 4px 14px rgba(139,124,246,.35)}50%{box-shadow:0 4px 22px rgba(139,124,246,.7)}}
-.pl-soon-title{margin:11px 0 5px;font-size:15px;font-weight:800;color:#fff;line-height:1.5}
-.pl-soon-sub{margin:0 0 13px;font-size:12.5px;color:var(--text-muted);line-height:1.7}
-.pl-soon-stack{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 10px;padding:6px 2px 2px}
-.cs-logo{display:flex;flex-direction:column;align-items:center;gap:7px;width:62px}
-.cs-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
-.cs-ic svg{width:24px;height:24px;display:block}
-.cs-claude{background:#D97757}
-.cs-figma{background:#1e1e28}.cs-figma svg{height:26px;width:auto}
-.cs-pr{background:linear-gradient(150deg,#2f0b59,#12022e);color:#e3beff;box-shadow:inset 0 0 0 1.5px #8a5cf6,0 6px 16px rgba(0,0,0,.35)}
-.cs-ae{background:linear-gradient(150deg,#11116b,#05052a);color:#c6ccff;box-shadow:inset 0 0 0 1.5px #8f9dff,0 6px 16px rgba(0,0,0,.35)}
-.cs-n{font-size:11px;font-weight:600;color:var(--text-muted);text-align:center;line-height:1.3}
-.pl-soon-foot{margin:15px 0 0;font-size:12.5px;font-weight:600;color:var(--primary-soft);line-height:1.7;text-align:center}
+/* بانر «قريبًا» — سلسلة الذكاء الاصطناعي (تصميم زجاجي نيون 2D) */
+.soon-wrap{max-width:1180px;margin:6px auto 34px;padding:0 clamp(14px,3vw,26px)}
+.soon-card{position:relative;border-radius:26px;padding:clamp(22px,3.4vw,40px);background:radial-gradient(120% 140% at 80% -10%,rgba(139,124,246,.18),transparent 55%),radial-gradient(120% 140% at 0% 110%,rgba(91,184,232,.14),transparent 55%),linear-gradient(160deg,#0c0c1c,#070710);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(124,99,246,.12)}
+.soon-card::before{content:"";position:absolute;inset:0;border-radius:26px;padding:1.5px;background:linear-gradient(130deg,#8B7CF6,rgba(124,99,246,.1) 38%,rgba(91,184,232,.15) 62%,#5BB8E8);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.soon-badge{position:absolute;top:clamp(18px,2.4vw,26px);inset-inline-end:clamp(18px,2.6vw,30px);display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:#fff;padding:9px 18px;border-radius:999px;background:linear-gradient(135deg,rgba(139,124,246,.55),rgba(91,184,232,.4));border:1px solid rgba(180,170,255,.45);backdrop-filter:blur(8px);box-shadow:0 8px 26px rgba(124,99,246,.45);animation:soonPulse 2.6s ease-in-out infinite}
+.soon-badge svg{width:16px;height:16px;color:#fff}
+@keyframes soonPulse{0%,100%{box-shadow:0 8px 22px rgba(124,99,246,.35)}50%{box-shadow:0 8px 34px rgba(124,99,246,.7)}}
+.soon-title{margin:6px 0 10px;font-size:clamp(22px,3.2vw,34px);font-weight:900;color:#fff;line-height:1.35;letter-spacing:-.3px}
+.soon-sub{margin:0 0 22px;font-size:clamp(13.5px,1.5vw,16px);color:var(--text-muted);line-height:1.8;max-width:760px}
+.soon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.4vw,16px);direction:ltr}
+.soon-tool{display:flex;flex-direction:column;align-items:center;text-align:center;gap:11px;padding:22px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);transition:.25s}
+.soon-tool:hover{transform:translateY(-3px);border-color:rgba(139,124,246,.4);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.soon-tool b{font-size:clamp(14px,1.5vw,16px);font-weight:800;color:#fff}
+.soon-tool small{font-size:clamp(11px,1.2vw,12.5px);color:var(--text-subtle);line-height:1.5;direction:rtl}
+.st-ic{width:clamp(54px,6vw,66px);height:clamp(54px,6vw,66px);border-radius:18px;display:grid;place-items:center;font-weight:800;font-size:clamp(20px,2.4vw,24px);box-shadow:0 10px 24px rgba(0,0,0,.4)}
+.st-ic svg{width:58%;height:58%;display:block}
+.st-figma{background:#0e0e16}.st-figma svg{width:auto;height:64%}
+.st-claude{background:linear-gradient(150deg,#e8895d,#cf5f33)}
+.st-pr{background:linear-gradient(150deg,#3a1276,#160433);color:#e3beff;box-shadow:inset 0 0 0 1.6px #9a6bff,0 10px 24px rgba(0,0,0,.4)}
+.st-ae{background:linear-gradient(150deg,#1a1a8c,#070736);color:#c6ccff;box-shadow:inset 0 0 0 1.6px #8f9dff,0 10px 24px rgba(0,0,0,.4)}
+.soon-cta{display:flex;align-items:center;gap:13px;margin-top:22px;padding:15px 20px;border-radius:16px;background:linear-gradient(135deg,rgba(91,184,232,.12),rgba(139,124,246,.1));border:1px solid rgba(124,150,246,.3)}
+.soon-cta-ic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#8B7CF6,#5BB8E8);box-shadow:0 8px 20px rgba(124,99,246,.4)}
+.soon-cta-ic svg{width:20px;height:20px;color:#fff}
+.soon-cta span{font-size:clamp(13.5px,1.5vw,16px);font-weight:600;color:#dbe8ff;line-height:1.6}
+.soon-cta b{color:#fff;font-weight:800}
+@media(max-width:680px){.soon-grid{grid-template-columns:repeat(2,1fr)}.soon-badge{position:static;margin-bottom:14px}}
 
 /* عمود دوراتي (يمين) */
 #coursesCol{display:grid;gap:12px}

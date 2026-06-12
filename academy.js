@@ -406,33 +406,37 @@ function plItemHtml(l, i) {
     </button>`;
 }
 // بوكس «قريبًا» — يحمّس لحلقات الذكاء الاصطناعي والأدوات
+const FIGMA_SVG = '<svg viewBox="0 0 38 57"><path fill="#1abcfe" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/><path fill="#0acf83" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/><path fill="#ff7262" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/><path fill="#f24e1e" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/><path fill="#a259ff" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/></svg>';
+const CLAUDE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.2 5.2l13.6 13.6M18.8 5.2L5.2 18.8"/></svg>';
 const SOON_TOOLS = [
-  // شعار Claude الرسمي (وميض/سَنبرست)
-  { n: "Claude", c: "cs-claude", ic: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.2 5.2l13.6 13.6M18.8 5.2L5.2 18.8"/></svg>' },
-  // شعار Figma الرسمي
-  { n: "Figma", c: "cs-figma", ic: '<svg viewBox="0 0 38 57"><path fill="#1abcfe" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/><path fill="#0acf83" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/><path fill="#ff7262" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/><path fill="#f24e1e" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/><path fill="#a259ff" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/></svg>' },
-  // شعار Adobe Premiere Pro الحديث (مونوغرام Pr)
-  { n: "Premiere", c: "cs-pr", ic: "<b>Pr</b>" },
-  // شعار Adobe After Effects الحديث (مونوغرام Ae)
-  { n: "After Effects", c: "cs-ae", ic: "<b>Ae</b>" },
+  { n: "After Effects", sub: "الموشن جرافيك والمؤثرات", c: "st-ae", ic: "<b>Ae</b>" },
+  { n: "Premiere Pro", sub: "المونتاج الاحترافي", c: "st-pr", ic: "<b>Pr</b>" },
+  { n: "Figma", sub: "التصميم والتعاون", c: "st-figma", ic: FIGMA_SVG },
+  { n: "Claude", sub: "الذكاء الاصطناعي", c: "st-claude", ic: CLAUDE_SVG },
 ];
 function comingSoonBox() {
-  return `<div class="pl-soon">
-    <span class="pl-soon-badge">قريبًا</span>
-    <h4 class="pl-soon-title">سلسلة الاحتراف بالذكاء الاصطناعي</h4>
-    <p class="pl-soon-sub">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
-    <div class="pl-soon-stack">${SOON_TOOLS.map((t) => `<div class="cs-logo"><span class="cs-ic ${t.c}">${t.ic}</span><span class="cs-n">${esc(t.n)}</span></div>`).join("")}</div>
-    <p class="pl-soon-foot">⚡ الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — استعدّوا!</p>
+  return `<div class="soon-card">
+    <span class="soon-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6z"/><path d="M19 14l.8 2.6L22.5 18l-2.7.8L19 21.5l-.8-2.7L15.5 18l2.7-1.4z"/></svg> قريبًا</span>
+    <h3 class="soon-title">سلسلة الاحتراف بالذكاء الاصطناعي</h3>
+    <p class="soon-sub">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
+    <div class="soon-grid">${SOON_TOOLS.map((t) => `<div class="soon-tool"><span class="st-ic ${t.c}">${t.ic}</span><b>${esc(t.n)}</b><small>${esc(t.sub)}</small></div>`).join("")}</div>
+    <div class="soon-cta"><span class="soon-cta-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span><span>الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — <b>استعدّوا!</b></span></div>
   </div>`;
 }
 function isProSection(secId) {
   const s = SECTIONS.find((x) => x.id === secId);
   return s && /محترف|احتراف|تطوير|pro/i.test(s.title || "");
 }
+function updateProSoon() {
+  const el = $("proSoon"); if (!el) return;
+  if (isProSection(CURSEC)) { el.innerHTML = comingSoonBox(); el.hidden = false; }
+  else { el.hidden = true; el.innerHTML = ""; }
+}
 function renderPlaylist(ls) {
+  updateProSoon();
   const wrap = $("plList");
   if (!wrap) return;
-  if (!ls.length) { wrap.innerHTML = (isProSection(CURSEC) ? comingSoonBox() : '<p class="hint" style="padding:14px">لا دروس بعد.</p>'); return; }
+  if (!ls.length) { wrap.innerHTML = '<p class="hint" style="padding:14px">لا دروس بعد.</p>'; return; }
   const folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>';
   const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
   const seen = new Set(); let html = "";
@@ -454,7 +458,6 @@ function renderPlaylist(ls) {
       <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}<div class="pl-fold-end">نهاية المجلّد</div></div>
     </div>`;
   });
-  if (isProSection(CURSEC)) html += comingSoonBox();
   wrap.innerHTML = html;
   wrap.querySelectorAll(".pl-item").forEach((b) => b.addEventListener("click", () => playLesson(b.dataset.lid)));
   wrap.querySelectorAll(".pl-fold-head").forEach((b) => b.addEventListener("click", () => b.closest(".pl-folder").classList.toggle("open")));
