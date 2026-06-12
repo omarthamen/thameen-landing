@@ -121,7 +121,7 @@ function setWatermark() {
   const el = $("wmOverlay"); if (!el || !USER) return;
   const raw = (USER.email || myName() || "ثَمين");
   const label = raw.replace(/[&<>]/g, "");
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='230'><text x='12' y='120' transform='rotate(-24 180 115)' fill='rgba(255,255,255,0.12)' font-size='27' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='170'><text x='10' y='90' transform='rotate(-22 150 85)' fill='rgba(255,255,255,0.20)' font-size='19' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
   el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
@@ -130,7 +130,8 @@ let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = nu
 let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
   if (!(await guardDevice())) return;   // قفل الجهاز — يوقف كل شي لو جهاز مختلف
-  setWatermark();                       // علامة مائية بهوية المشترك
+  setWatermark();                       // علامة مائية على الفيديو
+  try { if (!localStorage.getItem("thameen_guide_hidden")) { const gm = $("guideModal"); if (gm) gm.hidden = false; } } catch (_) {}
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
   loadAvatars();
@@ -587,6 +588,19 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
     } catch (err) { alert("خطأ: " + err.message); }
     btn.disabled = false; btn.textContent = "إرسال"; inp.focus();
   });
+})();
+
+// ====== نافذة التعليمات الترحيبية ======
+(function () {
+  const modal = $("guideModal"); if (!modal) return;
+  const open = () => { modal.hidden = false; };
+  const close = () => { modal.hidden = true; };
+  const hideForever = () => { try { localStorage.setItem("thameen_guide_hidden", "1"); } catch (_) {} close(); };
+  const x = $("guideX"); if (x) x.addEventListener("click", close);
+  const ok = $("guideOk"); if (ok) ok.addEventListener("click", close);
+  const hide = $("guideHide"); if (hide) hide.addEventListener("click", hideForever);
+  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", open);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
 // ====== حسابي ======
