@@ -319,6 +319,17 @@
 .guide-enjoy{text-align:center;color:#5BB8E8;font-weight:800;font-size:16px;margin:0 0 24px}
 .guide-actions{display:flex;gap:10px;flex-wrap:wrap}
 .guide-actions .btn{flex:1;min-width:150px}
+/* القنوات */
+.ch-group{margin-bottom:16px}
+.ch-group-h{font-size:14px;font-weight:800;color:#5BB8E8;margin:0 0 9px}
+.ch-link{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:12px;text-decoration:none;color:#fff;font-weight:600;font-size:14px;margin-bottom:8px;transition:.18s;border:1px solid transparent}
+.ch-link .ch-ic{flex:none;width:24px;height:24px;display:grid;place-items:center}
+.ch-link .ch-ic svg{width:22px;height:22px}
+.ch-link.tg{background:rgba(40,159,217,.16);border-color:rgba(40,159,217,.4);color:#7cc6ee}
+.ch-link.tg:hover{background:rgba(40,159,217,.28)}
+.ch-link.wa{background:rgba(37,211,102,.14);border-color:rgba(37,211,102,.38);color:#5fe08a}
+.ch-link.wa:hover{background:rgba(37,211,102,.24)}
+.ch-label{flex:1}
 @media(max-width:760px){.guide-card{padding:30px 20px 24px}.btn-guide{font-size:12px;padding:6px 12px}}
 .acc-profile h2{margin:0;font-size:22px;color:#fff}
 .acc-email{color:var(--text-muted);font-size:14px;margin:0}

@@ -13,7 +13,7 @@
   <link rel="dns-prefetch" href="https://cdn.embed.ly" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=6" />
-  <link rel="stylesheet" href="academy.css?v=23" />
+  <link rel="stylesheet" href="academy.css?v=24" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -43,6 +43,7 @@
         <button class="nav-tab" data-view="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> حسابي</button>
       </nav>
       <div class="nav-right">
+        <button class="btn-guide btn-channels" id="channelsBtn" title="القنوات والتحديثات">📢 القنوات</button>
         <button class="btn-guide" id="guideBtn" title="تعليمات مهمة">📘 تعليمات مهمة</button>
         <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
         <span class="nav-stat">مكالماتك <b id="callsLeft">3</b></span>
@@ -221,15 +222,27 @@
         </ul>
         <p class="guide-foot">وأي سؤال أو فكرة عندك، شاركها ويانا بالقروب 🤍</p>
         <p class="guide-enjoy">مشاهدة ممتعة</p>
+        <div id="guideChannels"></div>
         <div class="guide-actions">
           <button class="btn btn-primary" id="guideOk" type="button">فهمت، نبدأ</button>
           <button class="btn btn-ghost" id="guideHide" type="button">عدم الإظهار مجددًا</button>
         </div>
       </div>
     </div>
+
+    <!-- ===== نافذة القنوات ===== -->
+    <div id="channelsModal" class="guide-overlay" hidden>
+      <div class="guide-card">
+        <button class="guide-x" id="channelsX" type="button" aria-label="إغلاق">✕</button>
+        <div class="guide-emoji">📢</div>
+        <h2 class="guide-title">انضم لقنواتنا وتابع كل جديد</h2>
+        <p class="guide-lead">فيها الملفات، الشروحات، الأعمال، وكل التحديثات والمحتوى الجديد.</p>
+        <div id="channelsList"></div>
+      </div>
+    </div>
   </section>
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script defer src="academy.js?v=40"></script>
+  <script defer src="academy.js?v=41"></script>
 </body>
 </html>

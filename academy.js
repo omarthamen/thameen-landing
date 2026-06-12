@@ -793,6 +793,38 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
+// ====== القنوات والتحديثات ======
+const CHANNELS = [
+  { group: "قنوات البريمير (المونتاج)", links: [
+    { label: "تليجرام — الشروحات والشات العام", url: "https://t.me/+KLKOJdJxgNdlMTk8", type: "tg" },
+    { label: "تليجرام — شات الملفات", url: "https://t.me/+shlLzDzF7w8wMTlk", type: "tg" },
+    { label: "واتساب — الأعمال والمهم", url: "https://chat.whatsapp.com/J1i4vsDFb6I8LtbyOfXBa9", type: "wa" },
+  ] },
+  { group: "قناة الثري دي (3D)", links: [
+    { label: "تليجرام — الملفات والشروحات والشات", url: "https://t.me/+x4w8xiMjg3dmNTBk", type: "tg" },
+    { label: "واتساب — الأعمال والمهم", url: "https://chat.whatsapp.com/Flc5nwuQdbF0O7hHsQBbEH", type: "wa" },
+  ] },
+];
+function channelsHtml() {
+  const tg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.7 13.2l-4.7-1.5c-1-.3-1-1 .2-1.5L20.6 3c.8-.3 1.5.2 1.3 1.3z"/></svg>';
+  const wa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-.7-.3-1.5-.6-2.1-1.4-.2-.3.2-.3.5-1 .1-.1 0-.3 0-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.1 1.6 2.5 4 3.4 1.4.6 2 .6 2.7.5.4-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1z"/></svg>';
+  return CHANNELS.map((g) =>
+    `<div class="ch-group"><h4 class="ch-group-h">${esc(g.group)}</h4>` +
+    g.links.map((l) => `<a class="ch-link ${l.type}" href="${l.url}" target="_blank" rel="noopener"><span class="ch-ic">${l.type === "tg" ? tg : wa}</span><span class="ch-label">${esc(l.label)}</span></a>`).join("") +
+    `</div>`).join("");
+}
+(function () {
+  const html = channelsHtml();
+  const list = $("channelsList"); if (list) list.innerHTML = html;
+  const inGuide = $("guideChannels"); if (inGuide) inGuide.innerHTML = '<h3 class="guide-sub">انضم لقنواتنا</h3>' + html;
+  const modal = $("channelsModal"); if (!modal) return;
+  const open = () => { modal.hidden = false; };
+  const close = () => { modal.hidden = true; };
+  const x = $("channelsX"); if (x) x.addEventListener("click", close);
+  const cb = $("channelsBtn"); if (cb) cb.addEventListener("click", open);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+})();
+
 // ====== حسابي ======
 function addMonths(d, n) { const x = new Date(d.getTime()); const day = x.getDate(); x.setMonth(x.getMonth() + n); if (x.getDate() < day) x.setDate(0); return x; }
 function fmtDate(d) {
