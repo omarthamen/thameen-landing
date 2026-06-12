@@ -135,12 +135,6 @@ async function loadSubscribers() {
             <span title="عدد عناوين IP" class="${ipN > 3 ? "stat-warn" : ""}">🌐 ${ipN} IP</span>
             ${p.last_ip ? `<span title="آخر IP" style="direction:ltr">${esc(p.last_ip)}</span>` : ""}
           </div>
-          <div class="sub-call">
-            <span class="sub-call-lbl">📞 موعد مكالمته:</span>
-            <input type="datetime-local" class="fld sub-call-at" value="${toLocalInput(p.call_at)}" />
-            <button class="btn btn-ghost btn-sm save-call" data-uid="${esc(p.user_id)}">حفظ</button>
-            <a class="btn btn-ghost btn-sm" href="https://meet.jit.si/thameenPrv${esc(String(p.user_id).replace(/-/g, ""))}" target="_blank" rel="noopener">انضم</a>
-          </div>
         </div>
         <div class="c-actions">
           <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "▶ تفعيل" : "⏸ إيقاف"}</button>
@@ -148,13 +142,6 @@ async function loadSubscribers() {
         </div></div>`;
     }).join("");
     list.querySelectorAll(".susp-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "set_suspended")));
-    list.querySelectorAll(".save-call").forEach((b) => b.addEventListener("click", async () => {
-      const row = b.closest(".sub-row"), inp = row.querySelector(".sub-call-at"), uid = b.dataset.uid;
-      const val = inp.value ? new Date(inp.value).toISOString() : null;
-      b.disabled = true; const old = b.textContent; b.textContent = "…";
-      try { await dbSend("PATCH", `members?user_id=eq.${uid}`, { call_at: val }); b.textContent = "تم ✓"; setTimeout(() => { b.textContent = old; b.disabled = false; }, 1500); }
-      catch (e) { alert("خطأ: " + e.message); b.textContent = old; b.disabled = false; }
-    }));
     list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }

@@ -432,26 +432,41 @@
 .login-wa svg{width:19px;height:19px}
 
 /* ===== صفحة المكالمات ===== */
-.calls-wrap{max-width:1100px;margin:0 auto;padding:26px clamp(14px,3vw,30px)}
-.calls-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.call-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px}
-.call-card.call-sched{grid-column:1/-1}
-.call-ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#5BB8E8;background:rgba(91,184,232,.14);margin-bottom:14px}
-.call-ic svg{width:24px;height:24px}
-.call-card.call-group .call-ic{color:#c4b3ff;background:rgba(139,124,246,.16)}
-.call-card h3{margin:0 0 6px;font-size:18px;color:#fff}
+.calls-wrap{max-width:640px;margin:0 auto;padding:26px clamp(14px,3vw,30px);display:flex;flex-direction:column;gap:18px}
+.call-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px}
+.call-card.call-group{text-align:center;background:radial-gradient(120% 100% at 50% 0%,rgba(139,124,246,.14),transparent 62%),var(--bg-soft);border-color:rgba(139,124,246,.28)}
+.call-ic{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;margin:0 auto 14px;color:#c4b3ff;background:rgba(139,124,246,.16)}
+.call-ic svg{width:25px;height:25px}
+.call-card h3{margin:0 0 6px;font-size:19px;color:#fff}
 .call-sub{color:var(--text-muted);font-size:13.5px;line-height:1.7;margin:0 0 16px}
-.call-when{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
-.call-count{font-size:13.5px;color:var(--text-muted);margin-bottom:16px;min-height:18px}
-.call-count b{color:#5BB8E8}
+.call-when{font-size:17px;font-weight:800;color:#fff;margin-bottom:10px}
+.call-countdown{font-size:14px;color:var(--text-muted);margin-bottom:10px;line-height:1.7}
+.call-countdown b{display:inline-block;font-size:21px;color:#c4b3ff;margin-top:3px;font-variant-numeric:tabular-nums}
+.cd-live{color:#5fe08a!important;font-size:17px!important}
+.cd-done{color:var(--text-subtle)}
+.call-reminder{font-size:13.5px;line-height:1.85;color:var(--primary-soft);background:rgba(91,184,232,.08);border:1px solid rgba(91,184,232,.2);border-radius:13px;padding:12px 15px;margin-bottom:18px}
 .call-btn{width:100%}
 .call-card.call-group .call-btn{background:linear-gradient(135deg,#8B7CF6,#6c5ce7);color:#fff}
-.call-note{font-size:11.5px;color:var(--text-subtle);margin:9px 0 0;text-align:center}
-.call-sched .acc-calls{margin-top:8px}
-/* غرفة المكالمة */
-.call-room{max-width:1100px;margin:18px auto 0;padding:0 clamp(14px,3vw,30px)}
-.call-room-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.call-room-head span{font-size:16px;font-weight:800;color:#fff}
-.jitsi-host{width:100%;height:min(70vh,620px);border-radius:18px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.1)}
-.jitsi-host iframe{width:100%;height:100%;border:0}
-@media(max-width:760px){.calls-grid{grid-template-columns:1fr}.jitsi-host{height:64vh}}
+.call-card.call-group .call-btn:disabled{background:rgba(255,255,255,.08);color:var(--text-subtle)}
+/* صندوق الأسئلة */
+.qbox-head h3{margin:0 0 4px;font-size:17px}
+.q-add{display:flex;gap:9px;margin:14px 0}
+.q-add input{flex:1;min-width:0;font-family:inherit;font-size:15px;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 14px}
+.q-add input:focus{outline:none;border-color:var(--primary-light)}
+.q-add .btn{flex:none}
+.q-list{display:flex;flex-direction:column;gap:9px}
+.q-empty{color:var(--text-subtle);font-size:13.5px;text-align:center;padding:14px;border:1px dashed rgba(255,255,255,.16);border-radius:12px}
+.q-item{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.q-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:800;color:#c4b3ff;background:rgba(139,124,246,.16)}
+.q-body{flex:1;min-width:0;font-size:14.5px;color:var(--text);word-break:break-word;line-height:1.7}
+.q-del{flex:none;width:26px;height:26px;border-radius:7px;border:1px solid rgba(255,90,90,.3);background:rgba(255,90,90,.1);color:#ff9b9b;cursor:pointer;font-size:12px}
+.q-del:hover{background:rgba(255,90,90,.25)}
+/* إشعار موعد المكالمة */
+.call-notif{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}
+.call-notif-card{position:relative;width:100%;max-width:380px;text-align:center;background:radial-gradient(120% 100% at 50% 0%,rgba(139,124,246,.2),transparent 60%),var(--bg-panel);border:1px solid rgba(139,124,246,.35);border-radius:22px;padding:30px 24px 26px;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.call-notif-x{position:absolute;top:12px;inset-inline-start:14px;background:none;border:none;color:var(--text-subtle);font-size:17px;cursor:pointer}
+.call-notif-ic{font-size:38px;margin-bottom:8px}
+.call-notif-card h3{margin:0 0 8px;font-size:19px;color:#fff}
+.call-notif-card #callNotifWhen{font-size:17px;font-weight:800;color:#c4b3ff;margin:0 0 10px}
+.call-notif-sub{font-size:13.5px;color:var(--text-muted);line-height:1.7;margin:0 0 18px}
+.call-notif-card .btn{width:100%}

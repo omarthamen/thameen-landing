@@ -199,12 +199,13 @@ async function loadAcademy() {
     (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
     MEMBER = (members && members[0]) || null;
     const m = MEMBER;
-    $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
+    $("callsLeft").textContent = DONE.size;
     renderProgress();
     renderChallenge();
     renderCourses();
     loadAvatars();                       // مؤجّل — بعد عرض الدورات (يقلل التزاحم)
     recordLogin();                       // تسجيل الدخول للمراقبة — مؤجّل وغير حاجب
+    checkCallNotif();                    // إشعار موعد المكالمة — مرة وحدة لكل موعد
     if (SECTIONS.length) {
       let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
       const savedLesson = savedLid && LESSONS.find((l) => l.id === savedLid);
@@ -822,7 +823,7 @@ function switchView(view) {
   if (vcl) vcl.hidden = view !== "calls";
   if (view === "community") { registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
   if (view === "account") loadAccount();
-  if (view === "calls") loadCalls(); else endCall();   // أوقف الكاميرا لو طلع من المكالمات
+  if (view === "calls") loadCalls(); else stopCalls();   // أوقف عدّاد المكالمة لو طلع من الصفحة
 }
 document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
 
@@ -1102,8 +1103,10 @@ async function loadAccount() {
   });
 })();
 
-// ====== المكالمات (Jitsi مجاني داخل الموقع) ======
-let jitsiApi = null;
+// ====== المكالمة الجماعية الشهرية (Jitsi مجاني) ======
+const GROUP_ROOM = "thameenAcademyGroupCall2026";
+let callTimer = null, GROUP_AT = null;
+
 function fmtDateTime(d) { let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${fmtDate(d)} · ${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; }
 function fmtCountdown(ms) {
   const s = Math.floor(ms / 1000), days = Math.floor(s / 86400), hrs = Math.floor((s % 86400) / 3600), mins = Math.floor((s % 3600) / 60);
@@ -1111,54 +1114,91 @@ function fmtCountdown(ms) {
   if (hrs > 0) return `${toAr(hrs)} ساعة و${toAr(mins)} دقيقة`;
   return `${toAr(Math.max(1, mins))} دقيقة`;
 }
-function renderCallWhen(whenId, countId, noteId, btnId, date) {
-  const btn = $(btnId);
-  if (!date || isNaN(date.getTime())) {
-    $(whenId).textContent = "لم يُحدّد موعد بعد";
-    $(countId).innerHTML = ""; $(noteId).textContent = "راح نحدّد لك الموعد قريبًا.";
+// تذكير متجدّد حسب الوقت المتبقّي — يحثّه يجهّز أسئلته
+function callReminder(diff) {
+  const days = Math.floor(diff / 86400000), hrs = Math.floor(diff / 3600000);
+  if (days >= 14) return `تبقّى ${toAr(days)} يوم على المكالمة — عندك وقت كافي، ابدأ من الحين تجمّع كل سؤال أو نقطة تحتاج تسأل عنها بصندوق التجهيز تحت 👇`;
+  if (days >= 7) return `باقي ${toAr(days)} يوم — راجع شغلك وحدّد النقاط اللي تبي رأينا فيها، وسجّلها بالأسئلة تحت.`;
+  if (days >= 2) return `باقي ${toAr(days)} يوم فقط! تأكّد إن كل أسئلتك مكتوبة بصندوق التجهيز عشان تستغل المكالمة كاملة.`;
+  if (hrs >= 12) return "بكرة المكالمة! راجع قائمة أسئلتك الآن وكمّل أي نقطة ناقصة.";
+  if (hrs >= 1) return `المكالمة اليوم — باقي ${toAr(hrs)} ساعة! جهّز نفسك وراجع قائمة أسئلتك.`;
+  return "المكالمة قريبة جدًا — جهّز نفسك وخلّي أسئلتك جنبك!";
+}
+function renderGroupCall() {
+  const whenEl = $("groupWhen"), cdEl = $("groupCountdown"), remEl = $("groupReminder"), btn = $("joinGroupCall");
+  if (!whenEl) return;
+  if (!GROUP_AT || isNaN(GROUP_AT.getTime())) {
+    whenEl.textContent = "لم يُحدّد موعد بعد";
+    cdEl.hidden = true; remEl.textContent = "بنعلمك أول ما يتحدّد موعد المكالمة الجاية.";
     if (btn) btn.disabled = true;
     return;
   }
-  $(whenId).textContent = fmtDateTime(date);
-  const diff = date.getTime() - Date.now();
-  if (btn) btn.disabled = false;
-  if (diff > 60000) { $(countId).innerHTML = "باقي <b>" + fmtCountdown(diff) + "</b>"; $(noteId).textContent = "ادخل الغرفة بوقت المكالمة."; }
-  else if (diff > -2 * 3600 * 1000) { $(countId).innerHTML = '<b style="color:#5fe08a">● متاحة الآن</b>'; $(noteId).textContent = "اضغط للدخول."; }
-  else { $(countId).innerHTML = '<span style="color:var(--text-subtle)">انتهى موعدها</span>'; $(noteId).textContent = ""; }
-}
-function renderCallsSchedule() {
-  const el = $("callsSchedule"); if (!el) return;
-  const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
-  const sub = raw ? new Date(raw) : null;
-  const total = (MEMBER && MEMBER.calls_total) || 3, used = (MEMBER && MEMBER.calls_used) || 0;
-  const now = new Date(), ord = ["الأولى", "الثانية", "الثالثة", "الرابعة"];
-  let html = "";
-  for (let i = 0; i < total; i++) {
-    const date = sub ? addMonths(sub, i + 1) : null;
-    let state, cls;
-    if (i < used) { state = "تمّت ✓"; cls = "used"; }
-    else if (date && date <= now) { state = "حان وقتها"; cls = "ready"; }
-    else { state = "قادمة"; cls = "soon"; }
-    html += `<div class="acc-call ${cls}"><div class="acc-call-n">${i + 1}</div><div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${date ? fmtDate(date) : "—"}</small></div><span class="acc-call-tag">${state}</span></div>`;
+  whenEl.textContent = fmtDateTime(GROUP_AT);
+  const diff = GROUP_AT.getTime() - Date.now();
+  const live = diff <= 10 * 60000 && diff > -4 * 3600000;   // من ١٠ دقائق قبل إلى ٤ ساعات بعد
+  if (btn) btn.disabled = !live;
+  cdEl.hidden = false;
+  if (live) {
+    cdEl.innerHTML = '<b class="cd-live">● المكالمة متاحة الآن</b>';
+    remEl.textContent = "اضغط «انضم للمكالمة» وتنفتح لك بنافذة جديدة.";
+  } else if (diff > 0) {
+    cdEl.innerHTML = "باقي على المكالمة<br><b>" + fmtCountdown(diff) + "</b>";
+    remEl.textContent = callReminder(diff);
+  } else {
+    cdEl.innerHTML = '<span class="cd-done">انتهت آخر مكالمة</span>';
+    remEl.textContent = "ننتظر الموعد الجاي — بنعلمك أول ما يتحدّد.";
   }
-  el.innerHTML = html;
 }
 async function loadCalls() {
-  const privAt = MEMBER && MEMBER.call_at ? new Date(MEMBER.call_at) : null;
-  renderCallWhen("privWhen", "privCount", "privNote", "startPrivCall", privAt);
-  let groupAt = null;
-  try { const r = await dbGet("app_config?select=value&key=eq.group_call_at"); if (r && r[0] && r[0].value) groupAt = new Date(r[0].value); } catch (_) {}
-  renderCallWhen("groupWhen", "groupCount", "groupNote", "joinGroupCall", groupAt);
-  renderCallsSchedule();
+  try { const r = await dbGet("app_config?select=value&key=eq.group_call_at"); GROUP_AT = (r && r[0] && r[0].value) ? new Date(r[0].value) : null; } catch (_) {}
+  renderGroupCall();
+  if (callTimer) clearInterval(callTimer);
+  callTimer = setInterval(renderGroupCall, 30000);   // حدّث العدّاد كل نص دقيقة
+  loadQuestions();
 }
+function stopCalls() { if (callTimer) { clearInterval(callTimer); callTimer = null; } }
 // تفتح بنافذة جديدة (بدون حد ٥ دقائق، مجاني تمامًا)
 function startCall(room) {
   const url = "https://meet.jit.si/" + room + "#userInfo.displayName=" + encodeURIComponent('"' + myName() + '"') + "&config.prejoinPageEnabled=false";
   window.open(url, "_blank", "noopener");
 }
-function endCall() {}
+
+// إشعار موعد المكالمة — يظهر مرة وحدة لكل موعد جديد عند الدخول
+async function checkCallNotif() {
+  let at = null;
+  try { const r = await dbGet("app_config?select=value&key=eq.group_call_at"); at = (r && r[0] && r[0].value) ? r[0].value : null; } catch (_) {}
+  if (!at) return;
+  const d = new Date(at);
+  if (isNaN(d.getTime()) || d.getTime() < Date.now()) return;   // موعد فات — لا تذكّر
+  let seen = null; try { seen = localStorage.getItem("thameen_callnotif"); } catch (_) {}
+  if (seen === at) return;   // شافه لهذا الموعد بالذات
+  const w = $("callNotifWhen"); if (w) w.textContent = fmtDateTime(d);
+  const n = $("callNotif"); if (n) n.hidden = false;
+  try { localStorage.setItem("thameen_callnotif", at); } catch (_) {}
+}
+
+// صندوق الأسئلة — تجهيز أسئلة المكالمة
+async function loadQuestions() {
+  const list = $("qList"); if (!list) return;
+  let qs = [];
+  try { qs = await dbGet(`call_questions?select=id,text&user_id=eq.${USER.id}&order=created_at.asc`); } catch (_) {}
+  if (!qs || !qs.length) { list.innerHTML = '<p class="q-empty">ما عندك أسئلة بعد — اكتب أول سؤال فوق 👆</p>'; return; }
+  list.innerHTML = qs.map((q, i) => `<div class="q-item"><span class="q-n">${toAr(i + 1)}</span><div class="q-body">${esc(q.text)}</div><button class="q-del" data-id="${q.id}" title="حذف">✕</button></div>`).join("");
+  list.querySelectorAll(".q-del").forEach((b) => b.addEventListener("click", async () => {
+    try { await dbSend("DELETE", `call_questions?id=eq.${b.dataset.id}`, null, "return=minimal"); loadQuestions(); } catch (_) {}
+  }));
+}
+async function addQuestion() {
+  const inp = $("qInput"); if (!inp) return;
+  const t = inp.value.trim(); if (!t || !USER) return;
+  inp.value = "";
+  try { await dbSend("POST", "call_questions", { user_id: USER.id, text: t }, "return=minimal"); loadQuestions(); } catch (e) { alert("تعذّر الحفظ"); }
+}
 (function () {
-  const sp = $("startPrivCall"); if (sp) sp.addEventListener("click", () => { if (USER) startCall("thameenPrv" + String(USER.id).replace(/-/g, ""), "مكالمتك الخاصة"); });
-  const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => startCall("thameenAcademyGroupCall2026", "المكالمة الجماعية"));
-  const ec = $("endCall"); if (ec) ec.addEventListener("click", endCall);
+  const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => startCall(GROUP_ROOM));
+  const qa = $("qAddBtn"); if (qa) qa.addEventListener("click", addQuestion);
+  const qi = $("qInput"); if (qi) qi.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addQuestion(); } });
+  const nx = $("callNotifX"), ng = $("callNotifGo"), nn = $("callNotif");
+  if (nx) nx.addEventListener("click", () => { if (nn) nn.hidden = true; });
+  if (ng) ng.addEventListener("click", () => { if (nn) nn.hidden = true; switchView("calls"); });
 })();
