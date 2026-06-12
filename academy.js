@@ -90,7 +90,12 @@ function setNavProfile() {
   if ($("meName")) $("meName").textContent = name;
   if ($("meEmail")) $("meEmail").textContent = (USER && USER.email) || "";
   const init = initialOf(name), col = avColor((USER && USER.id) || name);
-  [$("navAvatar"), $("navAvatarLg")].forEach((el) => { if (el) { el.textContent = init; el.style.background = col; } });
+  const url = AVATARS[USER && USER.id];
+  [$("navAvatar"), $("navAvatarLg")].forEach((el) => {
+    if (!el) return;
+    if (url) { el.innerHTML = `<img src="${esc(url)}" alt="" class="av-img">`; el.style.background = "none"; }
+    else { el.textContent = init; el.style.background = col; }
+  });
 }
 (function () {
   const btn = $("navMenuBtn"), menu = $("navMenu"); if (!btn || !menu) return;
@@ -632,6 +637,7 @@ function avStyle(uid, nm) { return AVATARS[uid] ? "" : `background:${avColor(uid
 async function loadAvatars() {
   try { const ps = await dbGet("profiles?select=user_id,avatar_url&limit=500"); AVATARS = {}; (ps || []).forEach((p) => { if (p.avatar_url) AVATARS[p.user_id] = p.avatar_url; }); }
   catch (_) {}
+  setNavProfile();   // حدّث أفتار القائمة بصورة البروفايل بعد ما تحمّل
 }
 function fmtTime(iso) { try { const d = new Date(iso); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; } catch (_) { return ""; } }
 
@@ -1125,6 +1131,7 @@ async function loadAccount() {
         { user_id: USER.id, name: myName(), avatar_url: url }, "resolution=merge-duplicates,return=minimal");
       AVATARS[USER.id] = url;
       const av = $("accAvatar"); if (av) { av.style.background = ""; av.innerHTML = `<img src="${esc(url)}" alt="" class="av-img">`; }
+      setNavProfile();   // حدّث أفتار القائمة فورًا
       setMsg(msg, "تم تحديث صورتك ✅", true);
     } catch (err) {
       const m = String(err.message || err);
