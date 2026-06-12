@@ -11,7 +11,7 @@
 [hidden]{display:none!important}   /* مهم: يخلّي خاصية hidden تتغلّب على display:flex */
 body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
 .bg-glow{position:fixed;inset:0;z-index:-1;background:radial-gradient(60vw 60vw at 80% -10%,rgba(91,184,232,.16),transparent 60%),radial-gradient(50vw 50vw at 0% 30%,rgba(19,72,112,.2),transparent 60%),var(--bg)}
-.brand-diamond{color:var(--primary-light);filter:drop-shadow(0 0 10px rgba(91,184,232,.7))}
+.brand-diamond{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.22em;background:url("logo.png") center/contain no-repeat;color:transparent;overflow:hidden;line-height:1.15em;filter:drop-shadow(0 2px 6px rgba(91,184,232,.35))}
 
 /* أزرار */
 .btn{display:inline-block;font-family:inherit;font-weight:800;font-size:16px;padding:13px 26px;border-radius:999px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}
@@ -37,7 +37,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 /* الدخول */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-card{width:100%;max-width:400px;text-align:center;background:radial-gradient(120% 100% at 50% 0%,rgba(44,141,208,.18),transparent 60%),var(--bg-panel);border:1px solid rgba(91,184,232,.3);border-radius:24px;padding:38px 28px;box-shadow:0 40px 100px rgba(0,0,0,.7)}
-.login-card .brand-diamond{font-size:30px;display:block;margin-bottom:12px}
+.login-card .brand-diamond{font-size:34px;display:block;margin:0 auto 12px}
 .login-card h1{font-size:24px;font-weight:900}
 .login-sub{color:var(--text-muted);font-size:14.5px;margin:6px 0 22px}
 .login-card .fld{text-align:right}
