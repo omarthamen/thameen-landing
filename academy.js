@@ -202,6 +202,47 @@ function openCourse(sid) {
   else { CURLESSON = null; renderPlaylist([]); $("lTitle").textContent = "—"; $("playerHost").innerHTML = '<p class="hint" style="padding:30px;text-align:center">لا دروس في هذا القسم بعد.</p>'; $("lDesc").innerHTML = ""; }
 }
 
+// وصف الدرس: روابط كبطاقات مرتبة + زر عرض المزيد/أقل
+function descIcon(u) {
+  if (/youtube\.com|youtu\.be/i.test(u)) return "▶️";
+  if (/drive\.google|docs\.google/i.test(u)) return "📁";
+  if (/notion\./i.test(u)) return "📝";
+  if (/github\./i.test(u)) return "💻";
+  if (/thameen\.shop/i.test(u)) return "🛒";
+  if (/figma|freepik|flaticon|pixabay|epidemicsound|artlist|sketchfab|cgtrader|polyhaven|listary|blender|malloy/i.test(u)) return "🌐";
+  return "🔗";
+}
+function descHost(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (_) { return u; } }
+function renderLessonDesc(text) {
+  const box = $("lDesc"); if (!box) return;
+  box.classList.remove("desc-expanded");
+  const lines = String(text || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  if (!lines.length) { box.innerHTML = ""; return; }
+  const items = []; let pending = null; const urlRe = /^https?:\/\//i;
+  for (const ln of lines) {
+    if (urlRe.test(ln)) { items.push({ link: true, label: pending || descHost(ln), url: ln }); pending = null; }
+    else { if (pending) items.push({ link: false, text: pending }); pending = ln; }
+  }
+  if (pending) items.push({ link: false, text: pending });
+  const LIMIT = 4;
+  const rows = items.map((it, i) => {
+    const extra = i >= LIMIT ? " desc-extra" : "";
+    if (!it.link) return `<div class="desc-note${extra}">${esc(it.text)}</div>`;
+    return `<a class="desc-item${extra}" href="${esc(it.url)}" target="_blank" rel="noopener">
+      <span class="desc-ic">${descIcon(it.url)}</span>
+      <span class="desc-label">${esc(it.label)}</span>
+      <span class="desc-open">فتح ↗</span></a>`;
+  }).join("");
+  const hidden = items.length - LIMIT;
+  const more = hidden > 0 ? `<button type="button" class="desc-toggle" data-n="${hidden}">عرض جميع التفاصيل (${hidden}+)</button>` : "";
+  box.innerHTML = `<div class="desc-card"><h4 class="desc-h"><span>📎</span> الروابط والمرفقات</h4><div class="desc-list">${rows}</div>${more}</div>`;
+  const tg = box.querySelector(".desc-toggle");
+  if (tg) tg.addEventListener("click", () => {
+    const exp = box.classList.toggle("desc-expanded");
+    tg.textContent = exp ? "عرض أقل ▲" : `عرض جميع التفاصيل (${tg.dataset.n}+)`;
+  });
+}
+
 function renderPlaylist(ls) {
   const wrap = $("plList");
   if (!wrap) return;
@@ -224,7 +265,7 @@ function playLesson(id) {
     : '<p class="hint" style="padding:30px;text-align:center">لا يوجد فيديو لهذا الدرس.</p>';
   const ifr = host.querySelector("iframe");
   if (ifr && window.playerjs) attachPlayer(ifr, id);
-  $("lDesc").innerHTML = l.description ? `<h4>الروابط والمرفقات</h4><div class="desc-body">${linkify(l.description)}</div>` : "";
+  renderLessonDesc(l.description);
   updateWatchUI(id);
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
 }
