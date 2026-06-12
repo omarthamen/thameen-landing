@@ -78,6 +78,22 @@ async function refresh(rt) {
   else { showApp(false); }
 })();
 
+// ====== قائمة الملف الشخصي (تجمع الأزرار الثانوية) ======
+function setNavProfile() {
+  const name = myName();
+  if ($("meName")) $("meName").textContent = name;
+  if ($("meEmail")) $("meEmail").textContent = (USER && USER.email) || "";
+  const init = initialOf(name), col = avColor((USER && USER.id) || name);
+  [$("navAvatar"), $("navAvatarLg")].forEach((el) => { if (el) { el.textContent = init; el.style.background = col; } });
+}
+(function () {
+  const btn = $("navMenuBtn"), menu = $("navMenu"); if (!btn || !menu) return;
+  const close = () => { menu.hidden = true; btn.classList.remove("on"); };
+  btn.addEventListener("click", (e) => { e.stopPropagation(); const willOpen = menu.hidden; menu.hidden = !willOpen; btn.classList.toggle("on", willOpen); });
+  menu.querySelectorAll(".nav-menu-item").forEach((b) => b.addEventListener("click", close));
+  document.addEventListener("click", (e) => { if (!menu.hidden && !btn.contains(e.target) && !menu.contains(e.target)) close(); });
+})();
+
 // ====== الفوتر: روابط التواصل ======
 function renderSocials() {
   const el = $("footSocials"); if (!el) return;
@@ -158,7 +174,7 @@ async function loadAcademy() {
   ]);
   if (!(await guardP)) return;           // موقوف من الأدمن
   showOnboarding();
-  $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
+  setNavProfile();
   renderSocials();
   const wrap = $("coursesCol");
   try {

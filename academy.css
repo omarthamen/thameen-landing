@@ -10,7 +10,37 @@
 .nav-tab svg{width:16px;height:16px}
 .nav-tab:hover{background:rgba(91,184,232,.14);color:#fff}
 .nav-tab.on{color:#04121d;background:var(--grad-cta);border-color:transparent;box-shadow:0 6px 18px rgba(44,141,208,.4)}
-.nav-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.nav-right{display:flex;align-items:center;gap:12px;position:relative}
+/* زر البروفايل + القائمة المنسدلة */
+.nav-menu-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 11px 5px 6px;cursor:pointer;transition:.2s}
+.nav-menu-btn:hover,.nav-menu-btn.on{background:rgba(91,184,232,.16);border-color:rgba(91,184,232,.4)}
+.nav-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;overflow:hidden;flex:none}
+.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-menu-chev{width:15px;height:15px;color:var(--text-muted);transition:transform .2s}
+.nav-menu-btn.on .nav-menu-chev{transform:rotate(180deg)}
+.nav-menu{position:absolute;top:calc(100% + 10px);inset-inline-end:0;width:250px;max-width:calc(100vw - 28px);background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:8px;box-shadow:0 26px 60px rgba(0,0,0,.6);z-index:60;animation:navMenuIn .18s ease}
+@keyframes navMenuIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.nav-menu-head{display:flex;align-items:center;gap:10px;padding:10px 10px 12px}
+.nav-avatar.lg{width:42px;height:42px;font-size:17px}
+.nav-menu-id{min-width:0}
+.nav-menu-id b{display:block;font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-menu-id small{font-size:11.5px;color:var(--text-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.nav-menu-stats{display:flex;gap:8px;padding:0 6px 8px}
+.nav-menu-stats>div{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:9px;text-align:center}
+.nav-menu-stats b{display:block;font-size:16px;color:#5BB8E8;font-weight:800}
+.nav-menu-stats small{font-size:11px;color:var(--text-subtle)}
+.nav-menu-item{display:flex;align-items:center;gap:10px;width:100%;text-align:start;font-family:inherit;font-weight:700;font-size:14px;color:var(--text);background:transparent;border:0;border-radius:11px;padding:11px 12px;cursor:pointer;transition:.15s}
+.nav-menu-item:hover{background:rgba(91,184,232,.12);color:#fff}
+.nav-menu-item svg{width:18px;height:18px;flex:none;color:#5BB8E8}
+.nav-menu-item.danger{color:#ff8f8f}
+.nav-menu-item.danger:hover{background:rgba(255,90,90,.14)}
+.nav-menu-item.danger svg{color:#ff8f8f}
+@media(max-width:680px){
+  .acad-nav{gap:8px;padding:10px 14px}
+  .nav-brand{font-size:16px}
+  .nav-tab{padding:9px 12px;font-size:0;gap:0}
+  .nav-tab svg{width:19px;height:19px}
+}
 
 /* ===== المجتمع ===== */
 .community-wrap{max-width:1180px;margin:0 auto;padding:22px clamp(12px,3vw,28px)}

@@ -13,7 +13,7 @@
   <link rel="dns-prefetch" href="https://cdn.embed.ly" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=8" />
-  <link rel="stylesheet" href="academy.css?v=29" />
+  <link rel="stylesheet" href="academy.css?v=30" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -46,12 +46,32 @@
         <button class="nav-tab" data-view="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> حسابي</button>
       </nav>
       <div class="nav-right">
-        <button class="btn-guide btn-channels" id="channelsBtn" title="القنوات والتحديثات">📢 القنوات</button>
-        <button class="btn-guide" id="guideBtn" title="تعليمات مهمة">📘 تعليمات مهمة</button>
-        <span class="nav-stat">إنجازك <b id="progPct">0%</b></span>
-        <span class="nav-stat">مكالماتك <b id="callsLeft">3</b></span>
-        <span class="nav-name" id="meName"></span>
-        <button class="btn-logout" id="logoutBtn">تسجيل الخروج</button>
+        <button class="nav-menu-btn" id="navMenuBtn" aria-label="القائمة" aria-haspopup="true">
+          <span class="nav-avatar" id="navAvatar">؟</span>
+          <svg class="nav-menu-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="nav-menu" id="navMenu" hidden>
+          <div class="nav-menu-head">
+            <span class="nav-avatar lg" id="navAvatarLg">؟</span>
+            <div class="nav-menu-id"><b id="meName"></b><small id="meEmail"></small></div>
+          </div>
+          <div class="nav-menu-stats">
+            <div><b id="progPct">0%</b><small>إنجازك</small></div>
+            <div><b id="callsLeft">3</b><small>مكالماتك</small></div>
+          </div>
+          <button class="nav-menu-item" id="channelsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a3 3 0 0 1 0 6"/></svg>
+            القنوات والتحديثات
+          </button>
+          <button class="nav-menu-item" id="guideBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h6"/></svg>
+            تعليمات مهمة
+          </button>
+          <button class="nav-menu-item danger" id="logoutBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            تسجيل الخروج
+          </button>
+        </div>
       </div>
     </header>
 
@@ -250,6 +270,6 @@
   </section>
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script defer src="academy.js?v=49"></script>
+  <script defer src="academy.js?v=50"></script>
 </body>
 </html>
