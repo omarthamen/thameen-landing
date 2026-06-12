@@ -1471,3 +1471,16 @@ body {
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
 .pstat.featured small{ color:#c9c3e8; }
+
+/* ===== زر دخول المشتركين بالشريط العلوي ===== */
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.topbar-login{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--text-muted);font-weight:700;font-size:14px;padding:8px 16px;border:1px solid rgba(255,255,255,.16);border-radius:999px;transition:.2s;white-space:nowrap}
+.topbar-login:hover{color:#fff;border-color:rgba(91,184,232,.55);background:rgba(91,184,232,.12)}
+.topbar-login svg{width:16px;height:16px}
+@media(max-width:520px){
+  .topbar{padding:14px 16px}
+  .topbar-actions{gap:7px}
+  .topbar-login{font-size:0;padding:9px 11px;gap:0}
+  .topbar-login svg{width:18px;height:18px}
+  .topbar-cta{font-size:14px;padding:8px 16px}
+}
