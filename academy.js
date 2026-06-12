@@ -175,6 +175,19 @@ function renderProgress() {
 
 // ====== تحدّي ٩٠ يوم + الرسائل التحفيزية ======
 function toAr(n) { return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]); }
+// مدة الفيديو: mm:ss أو h:mm:ss
+function fmtDur(s) {
+  s = Math.round(s || 0); if (!s) return "";
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}` : `${m}:${String(sec).padStart(2, "0")}`;
+}
+// إجمالي بالعربي: «X س Y د»
+function fmtDurAr(s) {
+  s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${toAr(h)} س ${toAr(m)} د`;
+  if (m > 0) return `${toAr(m)} د`;
+  return "";
+}
 const CHAL_MILE = {
   1: "ألف مبروك بدء التحدّي! تذكّر ليش دخلت من البداية: قرّرت تطوّر نفسك وتصير مونتير محترف تشتغل بشغفك. اليوم قرار، و٩٠ يوم تحوّل كامل.",
   7: "أسبوع كامل وأنت ثابت! الاستمرار هو اللي يفرّقك عن ٩٩٪ من الناس. كمّل بنفس الزخم ولا تكسر العادة.",
@@ -248,11 +261,13 @@ function renderCourses() {
     const pct = ls.length ? Math.round((done / ls.length) * 100) : 0;
     const full = ls.length && done === ls.length;
     const cover = sec.cover_url ? `<img src="${esc(sec.cover_url)}" alt="">` : `<span class="crs-ph">📚</span>`;
+    const secs = ls.reduce((a, l) => a + (l.duration || 0), 0);
+    const durTxt = secs ? ` · ${fmtDurAr(secs)}` : "";
     return `<button class="crs-card ${sec.id === CURSEC ? "on" : ""}" data-sid="${sec.id}">
       <div class="crs-cover">${cover}${full ? '<span class="crs-badge full">✓</span>' : ""}</div>
       <div class="crs-info">
         <b>${esc(sec.title)}</b>
-        <div class="crs-line">🎬 ${ls.length} درس · ${done}/${ls.length} مكتمل</div>
+        <div class="crs-line">${ls.length} درس · ${done}/${ls.length} مكتمل${durTxt}</div>
         <div class="crs-bar"><span style="width:${pct}%"></span></div>
       </div>
     </button>`;
@@ -318,9 +333,11 @@ function renderLessonDesc(text) {
 }
 
 function plItemHtml(l, i) {
+  const dur = l.duration ? `<span class="pl-dur">${fmtDur(l.duration)}</span>` : "";
   return `<button class="pl-item ${l.id === CURLESSON ? "on" : ""}" data-lid="${l.id}">
       <span class="pl-num ${DONE.has(l.id) ? "done" : ""}">${DONE.has(l.id) ? "✓" : i + 1}</span>
       <span class="pl-name">${esc(stripEmoji(l.title))}</span>
+      ${dur}
     </button>`;
 }
 function renderPlaylist(ls) {
@@ -342,7 +359,7 @@ function renderPlaylist(ls) {
       <button class="pl-fold-head" type="button">
         <span class="pl-fold-ic">${folderSvg}</span>
         <span class="pl-fold-name">${esc(stripEmoji(f))}</span>
-        <span class="pl-fold-meta">${doneN}/${group.length}</span>
+        <span class="pl-fold-meta">${doneN}/${group.length}${(() => { const fs = group.reduce((a, x) => a + (x.duration || 0), 0); return fs ? " · " + fmtDur(fs) : ""; })()}</span>
         <span class="pl-fold-arrow">${chevron}</span>
       </button>
       <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}</div>
