@@ -196,22 +196,29 @@
 .pl-item.on .pl-name{color:#fff}
 .pl-dur{flex:none;font-size:11.5px;font-weight:700;color:var(--text-subtle);background:rgba(255,255,255,.06);padding:2px 8px;border-radius:6px;font-variant-numeric:tabular-nums}
 .pl-item.on .pl-dur{color:#5BB8E8;background:rgba(91,184,232,.16)}
-/* مجلّدات الدروس */
-.pl-folder{border-bottom:1px solid rgba(255,255,255,.05)}
+/* ===== مجلّدات الدروس (مظهر متفرّع واضح) ===== */
+.pl-folder{border-bottom:1px solid rgba(255,255,255,.05);transition:background .25s}
 .pl-folder:last-child{border-bottom:0}
-.pl-fold-head{width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.03);border:0;padding:15px 17px;transition:background .2s}
-.pl-fold-head:hover{background:rgba(91,184,232,.08)}
-.pl-fold-ic{flex:none;width:25px;height:25px;border-radius:7px;display:grid;place-items:center;color:#5BB8E8;background:rgba(91,184,232,.14)}
+.pl-folder.open{background:rgba(91,184,232,.05)}
+.pl-fold-head{width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.035);border:0;padding:15px 17px;transition:background .2s}
+.pl-fold-head:hover{background:rgba(91,184,232,.1)}
+.pl-folder.open .pl-fold-head{background:rgba(91,184,232,.12)}
+.pl-fold-ic{flex:none;width:27px;height:27px;border-radius:8px;display:grid;place-items:center;color:#5BB8E8;background:rgba(91,184,232,.16);transition:.2s}
+.pl-folder.open .pl-fold-ic{background:var(--grad-cta);color:#04121d}
 .pl-fold-ic svg{width:16px;height:16px}
 .pl-fold-name{flex:1;font-size:14.5px;font-weight:800;color:#fff}
 .pl-fold-meta{flex:none;font-size:11.5px;font-weight:700;color:var(--text-subtle);background:rgba(255,255,255,.08);padding:2px 9px;border-radius:99px}
 .pl-fold-arrow{flex:none;color:var(--text-subtle);display:flex;transition:transform .25s}
 .pl-fold-arrow svg{width:16px;height:16px}
-.pl-folder.open .pl-fold-arrow{transform:rotate(180deg)}
-.pl-fold-body{display:none;background:rgba(0,0,0,.18)}
+.pl-folder.open .pl-fold-arrow{transform:rotate(180deg);color:#5BB8E8}
+/* جسم المجلّد: متداخل بخط رأسي متفرّع وخلفية مميّزة */
+.pl-fold-body{display:none;margin-inline-start:26px;border-inline-start:2px solid rgba(91,184,232,.4);background:linear-gradient(90deg,rgba(91,184,232,.06),transparent)}
 .pl-folder.open .pl-fold-body{display:block}
-.pl-fold-body .pl-item{padding-inline-start:30px}
-.pl-fold-body .pl-num{width:22px;height:22px;font-size:11px}
+.pl-fold-body .pl-item{padding-block:12px;padding-inline-start:16px;border-bottom:1px solid rgba(255,255,255,.04)}
+.pl-fold-body .pl-item:last-child{border-bottom:0}
+.pl-fold-body .pl-item.on{background:rgba(91,184,232,.18)}
+.pl-fold-body .pl-num{width:21px;height:21px;font-size:11px}
+.pl-fold-body .pl-name{font-size:13.5px}
 
 /* ===== الفوتر ===== */
 .acad-footer{border-top:1px solid rgba(255,255,255,.07);margin-top:30px;padding:26px 16px 36px;text-align:center}
