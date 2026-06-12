@@ -85,7 +85,7 @@ function renderSocials() {
 
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
-let PCT = {}, lastSaved = {};
+let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
@@ -96,11 +96,13 @@ async function loadAcademy() {
     let progress = [], members = [];
     try { progress = await dbGet("progress?select=lesson_id,percent,completed"); }
     catch (_) { try { progress = await dbGet("progress?select=lesson_id,completed"); } catch (_) {} }
-    try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {}
+    try { members = await dbGet("members?select=calls_total,calls_used,created_at"); }
+    catch (_) { try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {} }
     SECTIONS = sections || []; LESSONS = lessons || [];
     PCT = {}; DONE = new Set();
     (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
-    const m = members && members[0];
+    MEMBER = (members && members[0]) || null;
+    const m = MEMBER;
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
     renderCourses();
@@ -366,10 +368,12 @@ function stopCommPoll() { if (commTimer) { clearInterval(commTimer); commTimer =
 
 function switchView(view) {
   document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
-  const vc = $("viewCourses"), vm = $("viewCommunity");
+  const vc = $("viewCourses"), vm = $("viewCommunity"), va = $("viewAccount");
   if (vc) vc.hidden = view !== "courses";
   if (vm) vm.hidden = view !== "community";
+  if (va) va.hidden = view !== "account";
   if (view === "community") { registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
+  if (view === "account") loadAccount();
 }
 document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
 
@@ -457,5 +461,103 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
       await loadMessages(true);
     } catch (err) { alert("خطأ: " + err.message); }
     btn.disabled = false; btn.textContent = "إرسال"; inp.focus();
+  });
+})();
+
+// ====== حسابي ======
+function addMonths(d, n) { const x = new Date(d.getTime()); const day = x.getDate(); x.setMonth(x.getMonth() + n); if (x.getDate() < day) x.setDate(0); return x; }
+function fmtDate(d) {
+  const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+async function loadAccount() {
+  const name = myName();
+  const av = $("accAvatar");
+  if (av) { av.textContent = initialOf(name); av.style.background = avColor((USER && USER.id) || name); }
+  $("accName").textContent = name;
+  $("accEmail").textContent = (USER && USER.email) || "";
+
+  // تاريخ الاشتراك
+  const subRaw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at) || null;
+  const sub = subRaw ? new Date(subRaw) : null;
+  $("accSince").textContent = sub ? "مشترك منذ " + fmtDate(sub) : "";
+
+  // التقدّم العام
+  const total = LESSONS.length, done = DONE.size;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  $("accPct").textContent = pct + "%";
+  $("accDone").textContent = done;
+  $("accTotal").textContent = total;
+  const ring = $("accRing");
+  if (ring) ring.style.background = `conic-gradient(#5BB8E8 ${pct * 3.6}deg, rgba(255,255,255,.1) 0deg)`;
+
+  // تفصيل الدورات
+  $("accCourses").innerHTML = SECTIONS.map((sec) => {
+    const ls = LESSONS.filter((l) => l.section_id === sec.id);
+    const d = ls.filter((l) => DONE.has(l.id)).length;
+    const p = ls.length ? Math.round((d / ls.length) * 100) : 0;
+    return `<div class="acc-crow"><span class="acc-cname">${esc(sec.title)}</span>
+      <div class="acc-cbar"><span style="width:${p}%"></span></div>
+      <span class="acc-cpct">${d}/${ls.length}</span></div>`;
+  }).join("") || '<p class="hint">لا دورات بعد.</p>';
+
+  // المكالمات الشهرية (٣ أشهر من تاريخ الاشتراك)
+  const callsTotal = (MEMBER && MEMBER.calls_total) || 3;
+  const callsUsed = (MEMBER && MEMBER.calls_used) || 0;
+  const now = new Date();
+  const ord = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة"];
+  let calls = "";
+  for (let i = 0; i < callsTotal; i++) {
+    const date = sub ? addMonths(sub, i + 1) : null;
+    let state, cls;
+    if (i < callsUsed) { state = "تمّت ✓"; cls = "used"; }
+    else if (date && date <= now) { state = "متاحة الآن"; cls = "ready"; }
+    else { state = "قادمة"; cls = "soon"; }
+    calls += `<div class="acc-call ${cls}">
+      <div class="acc-call-n">${i + 1}</div>
+      <div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${date ? fmtDate(date) : "—"}</small></div>
+      <span class="acc-call-tag">${state}</span></div>`;
+  }
+  $("accCalls").innerHTML = calls;
+
+  // شارات الإنجاز
+  const fullCourses = SECTIONS.filter((s) => { const ls = LESSONS.filter((l) => l.section_id === s.id); return ls.length && ls.every((l) => DONE.has(l.id)); }).length;
+  const badges = [];
+  if (done >= 1) badges.push("🎬 أول درس");
+  if (done >= 5) badges.push("⚡ ٥ دروس");
+  if (done >= 10) badges.push("🔥 ١٠ دروس");
+  if (fullCourses >= 1) badges.push("🏅 أكملت دورة");
+  if (pct === 100 && total) badges.push("👑 أكملت كل الدورات");
+  $("accBadges").innerHTML = badges.length ? badges.map((b) => `<span class="acc-badge">${b}</span>`).join("") : '<p class="hint">ابدأ بمشاهدة الدروس لتفتح إنجازاتك 🚀</p>';
+
+  // إنجازاتي المنشورة بالمجتمع
+  try {
+    const posts = await dbGet(`community_messages?select=text,created_at,media_url&channel=eq.achievements&user_id=eq.${USER.id}&order=created_at.desc&limit=20`);
+    $("accAchPosts").innerHTML = (posts && posts.length)
+      ? `<h4 class="acc-sub">إنجازاتك المنشورة (${posts.length})</h4>` + posts.map((p) => `<div class="acc-post">${p.media_url ? "📎 " : "🏆 "}${esc((p.text || "مرفق").slice(0, 90))}<small>${fmtDate(new Date(p.created_at))}</small></div>`).join("")
+      : "";
+  } catch (_) { $("accAchPosts").innerHTML = ""; }
+}
+
+// تغيير كلمة السر
+(function () {
+  const btn = $("accPassBtn"); if (!btn) return;
+  btn.addEventListener("click", async () => {
+    const p1 = $("accPass1").value, p2 = $("accPass2").value, msg = $("accPassMsg");
+    if (p1.length < 6) { setMsg(msg, "كلمة السر قصيرة — ٦ أحرف على الأقل.", false); return; }
+    if (p1 !== p2) { setMsg(msg, "الكلمتان غير متطابقتين.", false); return; }
+    btn.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
+    try {
+      const r = await fetchT(`${SUPABASE_URL}/auth/v1/user`, {
+        method: "PUT", headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ password: p1 }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.msg || d.error_description || d.error || "تعذّر الحفظ");
+      setMsg(msg, "تم تغيير كلمة السر ✅", true);
+      $("accPass1").value = ""; $("accPass2").value = "";
+    } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+    btn.disabled = false;
   });
 })();

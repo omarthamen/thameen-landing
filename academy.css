@@ -204,4 +204,48 @@
   #coursesCol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
   .lessons-col #plList{grid-template-columns:1fr}
   .acad-nav{flex-wrap:wrap;gap:10px}
+  .acc-grid{grid-template-columns:1fr;padding:16px}
 }
+
+/* ===== حسابي ===== */
+.account-wrap{padding:6px 0}
+.acc-grid{max-width:1100px;margin:0 auto;padding:26px clamp(14px,3vw,30px);display:grid;grid-template-columns:repeat(2,1fr);gap:18px;align-items:start}
+.acc-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:22px}
+.acc-card h3{margin:0 0 14px;font-size:16px;color:#fff}
+.acc-card .fld{width:100%;margin-bottom:10px}
+.acc-profile{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;background:linear-gradient(160deg,rgba(44,141,208,.16),rgba(8,8,12,.2))}
+.acc-avatar{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}
+.acc-profile h2{margin:0;font-size:22px;color:#fff}
+.acc-email{color:var(--text-muted);font-size:14px;margin:0}
+.acc-since{color:var(--text-subtle);font-size:12.5px;margin:4px 0 0}
+/* التقدّم */
+.acc-overall{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.acc-ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;flex:none}
+.acc-ring b{width:64px;height:64px;border-radius:50%;background:var(--bg-soft);display:grid;place-items:center;font-size:18px;color:#fff}
+.acc-overall-txt{color:var(--text-muted);font-size:14px}
+.acc-overall-txt b{color:#5BB8E8;font-size:18px}
+.acc-crow{display:flex;align-items:center;gap:10px;margin:8px 0}
+.acc-cname{flex:1;font-size:13.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-cbar{width:110px;height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;flex:none}
+.acc-cbar span{display:block;height:100%;background:var(--grad-cta);border-radius:99px}
+.acc-cpct{font-size:12px;color:var(--text-subtle);flex:none;min-width:36px;text-align:left}
+/* المكالمات */
+.acc-calls{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.acc-call{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.acc-call-n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:rgba(255,255,255,.08);color:#fff;flex:none}
+.acc-call-body{flex:1}
+.acc-call-body b{display:block;font-size:14px;color:#fff}
+.acc-call-body small{color:var(--text-subtle);font-size:12px}
+.acc-call-tag{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:99px;flex:none}
+.acc-call.ready{border-color:rgba(91,184,232,.45)}
+.acc-call.ready .acc-call-n{background:var(--grad-cta);color:#04121d}
+.acc-call.ready .acc-call-tag{background:rgba(91,184,232,.18);color:#7cc6ee}
+.acc-call.used{opacity:.6}
+.acc-call.used .acc-call-tag{background:rgba(80,200,120,.16);color:#74d99a}
+.acc-call.soon .acc-call-tag{background:rgba(255,255,255,.07);color:var(--text-subtle)}
+/* الإنجازات */
+.acc-badges{display:flex;flex-wrap:wrap;gap:8px}
+.acc-badge{font-size:12.5px;font-weight:700;color:#fff;background:rgba(91,184,232,.14);border:1px solid rgba(91,184,232,.3);border-radius:99px;padding:6px 13px}
+.acc-sub{margin:16px 0 8px;font-size:13px;color:var(--text-muted)}
+.acc-post{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;color:var(--text-muted);padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.04);margin-bottom:7px}
+.acc-post small{color:var(--text-subtle);font-size:11px;flex:none}
