@@ -100,11 +100,34 @@ async function loadSubscribers() {
   const list = $("subsList"); if (!list) return;
   list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
   try {
-    const ps = await dbGet("profiles?select=name,created_at&order=created_at.desc&limit=500");
+    let ps;
+    try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id&order=created_at.desc&limit=500"); }
+    catch (_) { ps = await dbGet("profiles?select=user_id,name,created_at&order=created_at.desc&limit=500"); }
     $("subsCount").textContent = (ps?.length || 0) + " مشترك";
     if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
-    list.innerHTML = ps.map((p) => `<div class="crow"><div class="c-main"><b class="c-name">${esc(p.name || "—")}</b></div></div>`).join("");
+    list.innerHTML = ps.map((p) => {
+      const locked = !!p.device_id;
+      return `<div class="crow"><div class="c-main"><b class="c-name">${esc(p.name || "—")}</b>
+        <span class="hint">${locked ? "📱 مربوط بجهاز" : "— غير مربوط"}</span></div>
+        ${locked ? `<button class="btn btn-ghost btn-sm reset-dev" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">فك الجهاز</button>` : ""}</div>`;
+    }).join("");
+    list.querySelectorAll(".reset-dev").forEach((b) => b.addEventListener("click", () => resetDevice(b.dataset.uid, b.dataset.name, b)));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
+}
+
+async function resetDevice(uid, name, btn) {
+  if (!confirm(`فك ربط الجهاز عن «${name || "المشترك"}»؟\nراح يقدر يدخل من جهاز جديد.`)) return;
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "…";
+  try {
+    const r = await fetchT(`${SUPABASE_URL}/functions/v1/hyper-action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
+      body: JSON.stringify({ action: "reset_device", user_id: uid }),
+    }, 20000);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+    loadSubscribers();
+  } catch (e) { alert("خطأ: " + e.message); btn.disabled = false; btn.textContent = old; }
 }
 
 $("createSubBtn").addEventListener("click", async () => {

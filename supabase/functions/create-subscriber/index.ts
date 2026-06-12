@@ -1,5 +1,4 @@
-// ثَمين — Edge Function: إنشاء حساب مشترك (آمن، للأدمن فقط)
-// انشرها من Supabase ▸ Edge Functions ▸ Create a new function ▸ باسم: create-subscriber
+// ثَمين — Edge Function (hyper-action): إنشاء مشترك + فك ربط الجهاز (للأدمن فقط)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ADMIN_EMAIL = "omarthamen@gmail.com";
@@ -24,12 +23,22 @@ Deno.serve(async (req) => {
     const { data: { user } } = await caller.auth.getUser();
     if (!user || user.email !== ADMIN_EMAIL) return json({ error: "غير مصرّح — للأدمن فقط" }, 403);
 
-    // 2) أنشئ الحساب
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const admin = createClient(url, service);
+
+    // 2) فك ربط الجهاز
+    if (body.action === "reset_device") {
+      if (!body.user_id) return json({ error: "user_id مطلوب" }, 400);
+      const { error } = await admin.from("profiles").update({ device_id: null }).eq("user_id", body.user_id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, reset: true });
+    }
+
+    // 3) إنشاء حساب مشترك
+    const { name, email, password } = body;
     if (!email || !password) return json({ error: "الإيميل وكلمة السر مطلوبة" }, 400);
     const display = (name && String(name).trim()) || String(email).split("@")[0];
 
-    const admin = createClient(url, service);
     const { data, error } = await admin.auth.admin.createUser({
       email: String(email).trim(),
       password: String(password),
@@ -39,7 +48,6 @@ Deno.serve(async (req) => {
     if (error) return json({ error: error.message }, 400);
 
     const uid = data.user.id;
-    // 3) جهّز البروفايل وملف العضو (٣ مكالمات)
     await admin.from("profiles").upsert({ user_id: uid, name: display });
     await admin.from("members").upsert({ user_id: uid, name: display, calls_total: 3, calls_used: 0 });
 

@@ -2,6 +2,7 @@
 const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
 let TOKEN = null, USER = null, AVATARS = {};
+const ADMIN_EMAIL = "omarthamen@gmail.com";
 
 // روابط التواصل بالفوتر (عدّلها هنا) — معرّفة بالأعلى لتفادي مشكلة الترتيب
 const SOCIALS = [
@@ -83,10 +84,53 @@ function renderSocials() {
   el.innerHTML = SOCIALS.map((s) => `<a href="${s.u}"${s.u !== "#" ? ' target="_blank" rel="noopener"' : ""}>${s.n}</a>`).join("");
 }
 
+// ====== حماية: قفل الجهاز + علامة مائية ======
+function deviceId() {
+  let d = null; try { d = localStorage.getItem("thameen_device"); } catch (_) {}
+  if (!d) { d = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("d" + Date.now() + Math.floor(Math.random() * 1e6)); try { localStorage.setItem("thameen_device", d); } catch (_) {} }
+  return d;
+}
+// يرجّع true = مسموح، false = جهاز مختلف (محظور). يفشل "مفتوح" لو تعذّر الفحص حتى ما نقفل أحد بالغلط.
+async function guardDevice() {
+  if (USER && USER.email === ADMIN_EMAIL) return true;      // الأدمن مستثنى
+  const dev = deviceId();
+  let row = null;
+  try { const r = await dbGet(`profiles?select=device_id&user_id=eq.${USER.id}`); row = r && r[0]; }
+  catch (_) { return true; }                                 // تعذّر الفحص → لا نحظر
+  const stored = row && row.device_id;
+  if (!stored) {                                             // أول جهاز → اربطه
+    try { await dbSend("POST", "profiles?on_conflict=user_id", { user_id: USER.id, name: myName(), device_id: dev }, "resolution=merge-duplicates,return=minimal"); } catch (_) {}
+    return true;
+  }
+  if (stored === dev) return true;                           // نفس الجهاز
+  showBlocked();
+  return false;
+}
+function showBlocked() {
+  stopCommPoll();
+  try { localStorage.removeItem("thameen_acad"); } catch (_) {}
+  TOKEN = null; USER = null;
+  document.body.innerHTML = `<div class="blocked-screen"><div class="blocked-card">
+    <div class="blocked-ic">⛔</div>
+    <h1>الوصول ممنوع</h1>
+    <p>هذا الحساب مُفعّل على جهاز آخر.<br>مشاركة الحساب أو الدخول من أكثر من جهاز غير مسموح.</p>
+    <a class="blocked-btn" href="https://www.instagram.com/thameen.j/" target="_blank" rel="noopener">تواصل مع الدعم لفك الجهاز</a>
+  </div></div>`;
+}
+function setWatermark() {
+  const el = $("wmOverlay"); if (!el || !USER) return;
+  const raw = (USER.email || myName() || "ثَمين");
+  const label = raw.replace(/[&<>]/g, "");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='230'><text x='12' y='120' transform='rotate(-24 180 115)' fill='rgba(255,255,255,0.12)' font-size='27' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
+  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+}
+
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
+  if (!(await guardDevice())) return;   // قفل الجهاز — يوقف كل شي لو جهاز مختلف
+  setWatermark();                       // علامة مائية بهوية المشترك
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
   loadAvatars();
