@@ -398,10 +398,11 @@ function renderMessages(forceScroll) {
     prevUid = m.user_id; prevTime = dt;
   }
   box.innerHTML = html;
-  if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
+  box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-id]"); if (!el) return;
-    if (!confirm("حذف؟")) return;
-    try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); } catch (_) {}
+    if (!confirm("حذف الرسالة؟")) return;
+    try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); }
+    catch (err) { alert("ما قدرت تحذف هذي الرسالة (مو رسالتك)."); }
   }));
   if (forceScroll || atBottom) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
 }
@@ -417,19 +418,19 @@ function bubbleHtml(m, isAdmin, grouped) {
       <div class="cmsg-av-sp"></div>
       <div class="cmsg-body">
         <div class="cmsg-bubble">${inner}<span class="cmsg-t">${fmtTime(m.created_at)}</span></div>
-        ${isAdmin ? '<button class="del-msg mini" type="button" title="حذف">×</button>' : ""}
+        ${(isAdmin || me) ? '<button class="del-msg mini" type="button" title="حذف">×</button>' : ""}
       </div></div>`;
   }
   return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
     <div class="cmsg-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div>
     <div class="cmsg-body">
-      <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
+      <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
       <div class="cmsg-bubble">${inner}</div>
     </div></div>`;
 }
 function achCard(m, isAdmin) {
-  const nm = m.name || "متدرب";
-  return `<div class="ach-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
+  const nm = m.name || "متدرب", me = m.user_id === (USER && USER.id);
+  return `<div class="ach-card" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
     <div class="ach-head"><div class="ach-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
     ${mediaHtml(m)}${embedFor(m.text)}
     ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
@@ -453,9 +454,9 @@ function normLink(s) {
   return "https://" + s.replace(/^\/+/, "");
 }
 function jobCard(m, isAdmin) {
-  const nm = m.name || "متدرب", meta = m.meta || {};
+  const nm = m.name || "متدرب", meta = m.meta || {}, me = m.user_id === (USER && USER.id);
   const ch = normLink(meta.channel), ct = normLink(meta.contact);
-  return `<div class="job-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
+  return `<div class="job-card" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
     <div class="job-top"><div class="job-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div></div>
     <div class="job-desc">${linkify(m.text || "")}</div>
     ${meta.price ? `<span class="job-price">💰 ${esc(meta.price)}</span>` : ""}
