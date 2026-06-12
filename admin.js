@@ -378,6 +378,7 @@ async function loadCourses() {
             <button class="btn btn-primary btn-sm le-save">حفظ التعديلات</button>
             <span class="msg le-msg"></span>
           </div></div>`).join("") || '<p class="hint">لا دروس بعد.</p>'}</div>
+        <p class="hint folder-hint">📁 <b>تبي تجمع فيديوهات بمجلّد؟</b> اضغط ✏️ تعديل على الدروس واكتب لهم <b>نفس اسم المجلّد</b> في خانة «المجلد/الموضوع» — وراح يتجمّعون تلقائيًا تحت مجلّد واحد عند المشترك.</p>
         <details class="add-lesson">
           <summary>＋ إضافة درس</summary>
           <input type="text" class="fld l-title" placeholder="عنوان الدرس" />
