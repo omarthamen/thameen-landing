@@ -124,28 +124,11 @@ function showBlocked(kind) {
     <a class="blocked-btn" href="https://www.instagram.com/thameen.j/" target="_blank" rel="noopener">${btn}</a>
   </div></div>`;
 }
-// العلامة المائية تظهر خفيفة ومتحركة أثناء تشغيل الفيديو فقط، وتختفي بعد التوقف
-let wmTimer = null;
-function wmShow() {
-  const el = $("wmOverlay"); if (!el) return;
-  el.classList.add("show");
-  if (wmTimer) clearTimeout(wmTimer);
-  wmTimer = setTimeout(() => el.classList.remove("show"), 2500); // تختفي بعد توقّف التشغيل بثوانٍ
-}
-function setWatermark() {
-  const el = $("wmOverlay"); if (!el || !USER) return;
-  const raw = (USER.email || myName() || "ثَمين");
-  const label = raw.replace(/[&<>]/g, "");
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='170'><text x='10' y='90' transform='rotate(-22 150 85)' fill='rgba(255,255,255,0.16)' font-size='18' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
-  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-}
-
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
   if (!(await guardDevice())) return;   // قفل الجهاز — يوقف كل شي لو جهاز مختلف
-  setWatermark();                       // علامة مائية على الفيديو
   try { if (!localStorage.getItem("thameen_guide_hidden")) { const gm = $("guideModal"); if (gm) gm.hidden = false; } } catch (_) {}
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
@@ -269,7 +252,6 @@ function attachPlayer(ifr, id) {
       try { player.getDuration((d) => { if (d > 0) player.setCurrentTime(Math.max(0, (savedPct / 100) * d - 2)); }); } catch (_) {}
     }
     player.on("timeupdate", (e) => {
-      wmShow();   // العلامة المائية تظهر أثناء التشغيل فقط
       const t = (e && e.seconds) || 0;
       const d = (e && e.duration) || dur; dur = d;
       if (watched === null) watched = ((PCT[id] || 0) / 100) * (d || 0); // ابدأ من المحفوظ
