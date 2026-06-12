@@ -149,6 +149,7 @@ async function loadAcademy() {
     const m = MEMBER;
     $("callsLeft").textContent = m ? Math.max(0, (m.calls_total || 3) - (m.calls_used || 0)) : 3;
     renderProgress();
+    renderChallenge();
     renderCourses();
     if (SECTIONS.length) {
       let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
@@ -170,6 +171,71 @@ async function loadAcademy() {
 function renderProgress() {
   const total = LESSONS.length || 1;
   $("progPct").textContent = Math.round((DONE.size / total) * 100) + "%";
+}
+
+// ====== تحدّي ٩٠ يوم + الرسائل التحفيزية ======
+function toAr(n) { return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]); }
+const CHAL_MILE = {
+  1: "ألف مبروك بدء التحدّي! تذكّر ليش دخلت من البداية: قرّرت تطوّر نفسك وتصير مونتير محترف تشتغل بشغفك. اليوم قرار، و٩٠ يوم تحوّل كامل.",
+  7: "أسبوع كامل وأنت ثابت! الاستمرار هو اللي يفرّقك عن ٩٩٪ من الناس. كمّل بنفس الزخم ولا تكسر العادة.",
+  14: "أسبوعين! صارت عندك عادة تعلّم حقيقية. حافظ على توازنك: تعلّم + تطبيق + راحة، عشان توصل ٩٠ يوم بدون احتراق.",
+  21: "٢١ يوم — العلم يقول هنا تتكوّن العادة. صرت مونتير في طور التكوّن. لا توقف الآن أبدًا.",
+  30: "شهر كامل! خطوة مهمة. اكتب إنجازك بقسم «الإنجازات» في المجتمع وشارك المتدربين تطوّرك — تحفّزهم ويحفّزونك، وعلاقاتك تكبر.",
+  45: "نص الطريق! وصلت لمنتصف التحدّي. ارجع لورقة هدفك وتخيّل نفسك يوم ٩٠ — أنت أقرب مما تتصوّر.",
+  60: "شهرين! مستواك صار يأهّلك لفرص حقيقية. افتح قسم «فرص عمل» في المجتمع، جهّز معرض أعمالك، واستعد لأول عميل.",
+  75: "باقي ١٥ يوم فقط! النهاية قريبة جدًا. اعطِ هالأيام أقوى ما عندك — هي اللي تصنع الفرق.",
+  90: "أكملت تحدّي ٩٠ يوم! صدقت وعدك لنفسك وصرت مونتير محترف. شارك إنجازك الكامل في المجتمع، وابدأ تشتغل بشغفك من قسم فرص العمل.",
+};
+const CHAL_POOL = [
+  "كل يوم تتعلّم فيه مونتاج تقترب خطوة من الاحتراف. لا توقف الزخم اليوم.",
+  "تذكّر ليش بدأت — قرّرت تغيّر مستواك. كمّل درس اليوم ولو بسيط.",
+  "ساعة تركيز اليوم أفضل من عشر ساعات تسويف بكرة. ابدأ الحين.",
+  "الموهبة تبدأ بالتكرار. أعد الدرس وطبّق بيدك على لقطة.",
+  "ما تحتاج تكون مثالي، تحتاج تكون مستمر. درس واحد اليوم يكفي.",
+  "وازن وقتك: تعلّم + تطبيق + راحة — التوازن سرّ الاستمرار ٩٠ يوم.",
+  "كل محترف بدأ مبتدئ، الفرق إنه ما وقف. لا توقف أنت.",
+  "تقدّمك اليوم مو واضح، بس بعد ٩٠ يوم بتشوف فرق جبّار. ثق بالعملية.",
+  "طبّق اللي تعلّمته اليوم — العمل بيدك أهم بكثير من مجرّد المشاهدة.",
+  "اكتب هدفك وحطه قدامك: وين تبي توصل بعد ٩٠ يوم؟",
+  "الإتقان يجي من التفاصيل الصغيرة. ركّز على درس اليوم بكل تركيزك.",
+  "ما في يوم ضائع طول ما تتعلّم فيه شي جديد. خلّ اليوم نقلة.",
+  "نفس النَفَس اللي بدأت فيه — احتفظ فيه للنهاية. أنت قادر.",
+];
+const CHAL_COMM = [
+  "شارك تطبيقك اليوم في قسم المجتمع — التغذية الراجعة تسرّع تطوّرك أضعاف.",
+  "ادخل المجتمع، علّق على شغل غيرك وكوّن علاقات — شبكتك اليوم = فرصك بكرة.",
+  "اكتب سؤالك أو فكرتك في المجتمع، ما أحد يكمّل لحاله. نحن وياك.",
+];
+const CHAL_JOBS = [
+  "تذكّر: في قسم «فرص عمل» بالمجتمع مشاريع وفرص حقيقية — جهّز نفسك لها.",
+  "كل ما تطوّرت، قربت من أول عميل. تابع فرص العمل في المجتمع باستمرار.",
+];
+function challengeMsg(day) {
+  if (CHAL_MILE[day]) return CHAL_MILE[day];
+  if (day % 7 === 0) return CHAL_COMM[(day / 7) % CHAL_COMM.length];
+  if (day % 5 === 0) return CHAL_JOBS[Math.floor(day / 5) % CHAL_JOBS.length];
+  return CHAL_POOL[day % CHAL_POOL.length];
+}
+function renderChallenge() {
+  const banner = $("challengeBanner"); if (!banner) return;
+  const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
+  if (!raw) { banner.hidden = true; return; }
+  const start = new Date(raw), now = new Date();
+  const elapsed = (now - start) / 86400000;
+  const dayNum = Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
+  const done = elapsed >= 90;
+  const left = Math.max(0, 90 - dayNum);
+  const pct = Math.round((dayNum / 90) * 100);
+  $("chalDay").textContent = done ? "٩٠" : toAr(dayNum);
+  $("chalLeft").textContent = done ? "اكتمل التحدّي ✓" : `باقي ${toAr(left)} يوم`;
+  $("chalBar").style.width = pct + "%";
+  const ring = $("chalRing");
+  if (ring) ring.style.background = `conic-gradient(#5BB8E8 ${pct * 3.6}deg, rgba(255,255,255,.1) 0deg)`;
+  $("chalMsg").textContent = done ? CHAL_MILE[90] : challengeMsg(dayNum);
+  let dis = null; try { dis = localStorage.getItem("thameen_chal_dismiss"); } catch (_) {}
+  banner.hidden = (dis === String(dayNum));
+  const x = $("chalX");
+  if (x && !x._wired) { x._wired = true; x.addEventListener("click", () => { try { localStorage.setItem("thameen_chal_dismiss", String(dayNum)); } catch (_) {} banner.hidden = true; }); }
 }
 
 // ====== عمود دوراتي ======

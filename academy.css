@@ -210,6 +210,27 @@
   .lessons-col #plList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
   .lessons-col .pl-item{border:1px solid rgba(255,255,255,.06);border-radius:12px}
 }
+/* ===== بانر تحدّي ٩٠ يوم ===== */
+.chal-banner{position:relative;display:flex;align-items:center;gap:20px;max-width:1640px;margin:18px auto 0;padding:20px 24px;background:linear-gradient(120deg,rgba(44,141,208,.16),rgba(91,184,232,.06),rgba(8,8,12,.2));border:1px solid rgba(91,184,232,.28);border-radius:20px}
+.chal-x{position:absolute;top:12px;inset-inline-start:14px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--text-muted);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.chal-x:hover{background:rgba(255,255,255,.14);color:#fff}
+.chal-x svg{width:14px;height:14px}
+.chal-ring{width:84px;height:84px;border-radius:50%;flex:none;display:grid;place-items:center}
+.chal-ring-in{width:66px;height:66px;border-radius:50%;background:#0c0e15;display:grid;place-items:center;text-align:center;line-height:1.1}
+.chal-ring-in b{font-size:24px;color:#fff;font-weight:800}
+.chal-ring-in small{font-size:10px;color:var(--text-subtle);display:block}
+.chal-main{flex:1;min-width:0}
+.chal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.chal-head h3{margin:0;font-size:17px;font-weight:800;color:#fff}
+.chal-left{font-size:12.5px;font-weight:700;color:#5BB8E8;background:rgba(91,184,232,.14);padding:4px 12px;border-radius:99px;white-space:nowrap;flex:none}
+.chal-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:11px}
+.chal-bar span{display:block;height:100%;border-radius:99px;background:var(--grad-cta);transition:width .5s ease}
+.chal-msg{margin:0;font-size:14.5px;line-height:1.8;color:var(--text)}
+@media(max-width:760px){
+  .chal-banner{flex-direction:column;text-align:center;gap:14px;margin:14px;padding:20px 16px}
+  .chal-head{flex-direction:column;gap:6px}
+}
+
 /* جوال: كل شي عمود واحد، الفيديو فوق */
 @media(max-width:760px){
   .acad-grid{grid-template-columns:1fr;gap:22px;padding:16px}

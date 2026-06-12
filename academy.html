@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=5" />
-  <link rel="stylesheet" href="academy.css?v=20" />
+  <link rel="stylesheet" href="academy.css?v=21" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -50,6 +50,20 @@
 
     <!-- ===== عرض الدورات ===== -->
     <div id="viewCourses">
+      <div id="challengeBanner" class="chal-banner" hidden>
+        <button class="chal-x" id="chalX" type="button" aria-label="إخفاء اليوم">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="chal-ring" id="chalRing"><div class="chal-ring-in"><b id="chalDay">١</b><small>اليوم</small></div></div>
+        <div class="chal-main">
+          <div class="chal-head">
+            <h3>تحدّي ٩٠ يوم</h3>
+            <span class="chal-left" id="chalLeft">باقي ٨٩ يوم</span>
+          </div>
+          <div class="chal-bar"><span id="chalBar"></span></div>
+          <p class="chal-msg" id="chalMsg"></p>
+        </div>
+      </div>
       <div class="acad-grid" id="acadGrid">
         <aside class="col courses-col">
           <h3 class="col-h">دوراتي</h3>
@@ -213,6 +227,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=35"></script>
+  <script src="academy.js?v=36"></script>
 </body>
 </html>
