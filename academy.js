@@ -90,22 +90,26 @@ function deviceId() {
   if (!d) { d = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("d" + Date.now() + Math.floor(Math.random() * 1e6)); try { localStorage.setItem("thameen_device", d); } catch (_) {} }
   return d;
 }
-// يرجّع true = مسموح، false = جهاز مختلف (محظور). يفشل "مفتوح" لو تعذّر الفحص حتى ما نقفل أحد بالغلط.
-async function guardDevice() {
+// مراقبة بدل حظر تلقائي: نفحص الإيقاف اليدوي فقط، ونسجّل الدخول (جهاز + IP) للأدمن
+async function guardAccess() {
   if (USER && USER.email === ADMIN_EMAIL) return true;      // الأدمن مستثنى
-  const dev = deviceId();
-  let row = null;
-  try { const r = await dbGet(`profiles?select=device_id,suspended&user_id=eq.${USER.id}`); row = r && r[0]; }
-  catch (_) { try { const r = await dbGet(`profiles?select=device_id&user_id=eq.${USER.id}`); row = r && r[0]; } catch (_) { return true; } }
-  if (row && row.suspended) { showBlocked("suspended"); return false; }   // موقوف من الأدمن
-  const stored = row && row.device_id;
-  if (!stored) {                                             // أول جهاز → اربطه
-    try { await dbSend("POST", "profiles?on_conflict=user_id", { user_id: USER.id, name: myName(), device_id: dev }, "resolution=merge-duplicates,return=minimal"); } catch (_) {}
-    return true;
-  }
-  if (stored === dev) return true;                           // نفس الجهاز
-  showBlocked();
-  return false;
+  try {
+    const r = await dbGet(`profiles?select=suspended&user_id=eq.${USER.id}`);
+    if (r && r[0] && r[0].suspended) { showBlocked("suspended"); return false; }  // إيقاف يدوي من الأدمن فقط
+  } catch (_) {}
+  recordLogin();                                            // تسجيل الدخول للمراقبة (لا يحظر)
+  return true;
+}
+// سجّل الدخول: الجهاز + IP + الوقت (مرة كل ٣٠ دقيقة) — للمراقبة فقط
+async function recordLogin() {
+  try {
+    let last = 0; try { last = parseInt(localStorage.getItem("thameen_login_log") || "0", 10); } catch (_) {}
+    if (Date.now() - last < 30 * 60 * 1000) return;          // ما نكرّر كل رفرش
+    let ip = null;
+    try { const r = await fetchT("https://api.ipify.org?format=json", {}, 6000); ip = (await r.json()).ip; } catch (_) {}
+    await dbSend("POST", "login_events", { user_id: USER.id, ip, device: deviceId() }, "return=minimal");
+    try { localStorage.setItem("thameen_login_log", String(Date.now())); } catch (_) {}
+  } catch (_) {}
 }
 function showBlocked(kind) {
   stopCommPoll();
@@ -129,7 +133,7 @@ let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = nu
 let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
   // افحص الجهاز واجلب البيانات بالتوازي (بدل ما ينتظرون بعض) — أسرع بكثير
-  const guardP = guardDevice();
+  const guardP = guardAccess();
   const dataP = Promise.all([
     dbGet("sections?select=*&order=sort.asc,created_at.asc").catch(() => []),
     dbGet("lessons?select=*&order=sort.asc,created_at.asc").catch(() => []),

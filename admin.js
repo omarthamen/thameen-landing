@@ -109,10 +109,13 @@ async function loadSubscribers() {
     $("subsCount").textContent = (ps?.length || 0) + " مشترك";
     if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
     list.innerHTML = ps.map((p) => {
-      const locked = !!p.device_id, susp = !!p.suspended;
-      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>' : (locked ? '<span class="sub-badge lock">📱 جهاز</span>' : '<span class="sub-badge ok">● نشط</span>');
+      const susp = !!p.suspended;
+      const devN = p.devices || 0, ipN = p.ips || 0;
+      const sharing = devN > 2 || ipN > 3;   // اشتباه مشاركة حساب
+      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>'
+        : (sharing ? '<span class="sub-badge warn">⚠ مشاركة محتملة</span>' : '<span class="sub-badge ok">● نشط</span>');
       const pct = p.total ? Math.round((p.completed / p.total) * 100) : 0;
-      return `<div class="crow sub-row ${susp ? "is-susp" : ""}">
+      return `<div class="crow sub-row ${susp ? "is-susp" : ""} ${sharing ? "is-sharing" : ""}">
         <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}
           <div class="sub-stats">
             <span title="تاريخ الاشتراك">📅 ${fmtJoin(p.joined)}</span>
@@ -120,15 +123,16 @@ async function loadSubscribers() {
             <span title="رسائل بالمجتمع">💬 ${p.messages || 0}</span>
             <span title="إنجازات منشورة">🏆 ${p.achievements || 0}</span>
             <span title="فرص عمل نشرها">💼 ${p.jobs || 0}</span>
+            <span title="عدد الأجهزة" class="${devN > 2 ? "stat-warn" : ""}">📱 ${devN} جهاز</span>
+            <span title="عدد عناوين IP" class="${ipN > 3 ? "stat-warn" : ""}">🌐 ${ipN} IP</span>
+            ${p.last_ip ? `<span title="آخر IP" style="direction:ltr">${esc(p.last_ip)}</span>` : ""}
           </div>
         </div>
         <div class="c-actions">
-          ${locked ? `<button class="btn btn-ghost btn-sm reset-dev" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">فك الجهاز</button>` : ""}
           <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "▶ تفعيل" : "⏸ إيقاف"}</button>
           <button class="btn btn-danger btn-sm del-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">حذف</button>
         </div></div>`;
     }).join("");
-    list.querySelectorAll(".reset-dev").forEach((b) => b.addEventListener("click", () => subAction(b, "reset_device")));
     list.querySelectorAll(".susp-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "set_suspended")));
     list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
