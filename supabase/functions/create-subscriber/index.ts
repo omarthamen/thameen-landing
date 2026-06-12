@@ -34,6 +34,27 @@ Deno.serve(async (req) => {
       return json({ ok: true, reset: true });
     }
 
+    // إيقاف/تفعيل مشترك
+    if (body.action === "set_suspended") {
+      if (!body.user_id) return json({ error: "user_id مطلوب" }, 400);
+      const { error } = await admin.from("profiles").update({ suspended: !!body.suspended }).eq("user_id", body.user_id);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, suspended: !!body.suspended });
+    }
+
+    // حذف مشترك نهائيًا
+    if (body.action === "delete_subscriber") {
+      if (!body.user_id) return json({ error: "user_id مطلوب" }, 400);
+      const uid = body.user_id;
+      await admin.from("community_messages").delete().eq("user_id", uid);
+      await admin.from("progress").delete().eq("user_id", uid);
+      await admin.from("members").delete().eq("user_id", uid);
+      await admin.from("profiles").delete().eq("user_id", uid);
+      const { error } = await admin.auth.admin.deleteUser(uid);
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, deleted: true });
+    }
+
     // 3) إنشاء حساب مشترك
     const { name, email, password } = body;
     if (!email || !password) return json({ error: "الإيميل وكلمة السر مطلوبة" }, 400);

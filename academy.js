@@ -95,8 +95,9 @@ async function guardDevice() {
   if (USER && USER.email === ADMIN_EMAIL) return true;      // الأدمن مستثنى
   const dev = deviceId();
   let row = null;
-  try { const r = await dbGet(`profiles?select=device_id&user_id=eq.${USER.id}`); row = r && r[0]; }
-  catch (_) { return true; }                                 // تعذّر الفحص → لا نحظر
+  try { const r = await dbGet(`profiles?select=device_id,suspended&user_id=eq.${USER.id}`); row = r && r[0]; }
+  catch (_) { try { const r = await dbGet(`profiles?select=device_id&user_id=eq.${USER.id}`); row = r && r[0]; } catch (_) { return true; } }
+  if (row && row.suspended) { showBlocked("suspended"); return false; }   // موقوف من الأدمن
   const stored = row && row.device_id;
   if (!stored) {                                             // أول جهاز → اربطه
     try { await dbSend("POST", "profiles?on_conflict=user_id", { user_id: USER.id, name: myName(), device_id: dev }, "resolution=merge-duplicates,return=minimal"); } catch (_) {}
@@ -106,15 +107,21 @@ async function guardDevice() {
   showBlocked();
   return false;
 }
-function showBlocked() {
+function showBlocked(kind) {
   stopCommPoll();
   try { localStorage.removeItem("thameen_acad"); } catch (_) {}
   TOKEN = null; USER = null;
+  const suspended = kind === "suspended";
+  const title = suspended ? "تم إيقاف الحساب" : "الوصول ممنوع";
+  const msg = suspended
+    ? "تم إيقاف وصولك للدورات.<br>للاستفسار تواصل مع الدعم."
+    : "هذا الحساب مُفعّل على جهاز آخر.<br>مشاركة الحساب أو الدخول من أكثر من جهاز غير مسموح.";
+  const btn = suspended ? "تواصل مع الدعم" : "تواصل مع الدعم لفك الجهاز";
   document.body.innerHTML = `<div class="blocked-screen"><div class="blocked-card">
     <div class="blocked-ic">⛔</div>
-    <h1>الوصول ممنوع</h1>
-    <p>هذا الحساب مُفعّل على جهاز آخر.<br>مشاركة الحساب أو الدخول من أكثر من جهاز غير مسموح.</p>
-    <a class="blocked-btn" href="https://www.instagram.com/thameen.j/" target="_blank" rel="noopener">تواصل مع الدعم لفك الجهاز</a>
+    <h1>${title}</h1>
+    <p>${msg}</p>
+    <a class="blocked-btn" href="https://www.instagram.com/thameen.j/" target="_blank" rel="noopener">${btn}</a>
   </div></div>`;
 }
 // العلامة المائية تظهر خفيفة ومتحركة أثناء تشغيل الفيديو فقط، وتختفي بعد التوقف

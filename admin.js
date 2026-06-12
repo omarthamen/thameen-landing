@@ -101,33 +101,48 @@ async function loadSubscribers() {
   list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
   try {
     let ps;
-    try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id&order=created_at.desc&limit=500"); }
-    catch (_) { ps = await dbGet("profiles?select=user_id,name,created_at&order=created_at.desc&limit=500"); }
+    try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id,suspended&order=created_at.desc&limit=500"); }
+    catch (_) { try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id&order=created_at.desc&limit=500"); } catch (_) { ps = await dbGet("profiles?select=user_id,name,created_at&order=created_at.desc&limit=500"); } }
     $("subsCount").textContent = (ps?.length || 0) + " مشترك";
     if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
     list.innerHTML = ps.map((p) => {
-      const locked = !!p.device_id;
-      return `<div class="crow"><div class="c-main"><b class="c-name">${esc(p.name || "—")}</b>
-        <span class="hint">${locked ? "📱 مربوط بجهاز" : "— غير مربوط"}</span></div>
-        ${locked ? `<button class="btn btn-ghost btn-sm reset-dev" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">فك الجهاز</button>` : ""}</div>`;
+      const locked = !!p.device_id, susp = !!p.suspended;
+      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>' : (locked ? '<span class="sub-badge lock">📱 مربوط بجهاز</span>' : '<span class="sub-badge ok">● نشط</span>');
+      return `<div class="crow sub-row ${susp ? "is-susp" : ""}">
+        <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}</div>
+        <div class="c-actions">
+          ${locked ? `<button class="btn btn-ghost btn-sm reset-dev" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">فك الجهاز</button>` : ""}
+          <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "▶ تفعيل" : "⏸ إيقاف"}</button>
+          <button class="btn btn-danger btn-sm del-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">حذف</button>
+        </div></div>`;
     }).join("");
-    list.querySelectorAll(".reset-dev").forEach((b) => b.addEventListener("click", () => resetDevice(b.dataset.uid, b.dataset.name, b)));
+    list.querySelectorAll(".reset-dev").forEach((b) => b.addEventListener("click", () => subAction(b, "reset_device")));
+    list.querySelectorAll(".susp-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "set_suspended")));
+    list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }
 
-async function resetDevice(uid, name, btn) {
-  if (!confirm(`فك ربط الجهاز عن «${name || "المشترك"}»؟\nراح يقدر يدخل من جهاز جديد.`)) return;
+async function callEdge(body, ms = 20000) {
+  const r = await fetchT(`${SUPABASE_URL}/functions/v1/hyper-action`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
+    body: JSON.stringify(body),
+  }, ms);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+  return d;
+}
+
+async function subAction(btn, action) {
+  const uid = btn.dataset.uid, name = btn.dataset.name || "المشترك";
+  const susp = btn.dataset.susp === "1";
+  let body, ok;
+  if (action === "reset_device") { if (!confirm(`فك ربط الجهاز عن «${name}»؟\nراح يقدر يدخل من جهاز جديد.`)) return; body = { action, user_id: uid }; }
+  else if (action === "set_suspended") { const turnOn = !susp; if (!confirm(turnOn ? `إيقاف «${name}»؟\nراح ينحظر وصوله للدورات فورًا.` : `تفعيل «${name}» من جديد؟`)) return; body = { action, user_id: uid, suspended: turnOn }; }
+  else if (action === "delete_subscriber") { if (!confirm(`⚠️ حذف «${name}» نهائيًا؟\nراح ينحذف حسابه وكل بياناته ولا يقدر يدخل أبدًا.\nهذا الإجراء لا يمكن التراجع عنه.`)) return; body = { action, user_id: uid }; }
   btn.disabled = true; const old = btn.textContent; btn.textContent = "…";
-  try {
-    const r = await fetchT(`${SUPABASE_URL}/functions/v1/hyper-action`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
-      body: JSON.stringify({ action: "reset_device", user_id: uid }),
-    }, 20000);
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
-    loadSubscribers();
-  } catch (e) { alert("خطأ: " + e.message); btn.disabled = false; btn.textContent = old; }
+  try { await callEdge(body); loadSubscribers(); }
+  catch (e) { alert("خطأ: " + e.message); btn.disabled = false; btn.textContent = old; }
 }
 
 $("createSubBtn").addEventListener("click", async () => {
@@ -348,8 +363,19 @@ async function loadCourses() {
         </div>
         <div class="lessons">${ls.map((l) => `<div class="lesson-row" data-lid="${l.id}">
           ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">🎬</div>`}
-          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}</small></div>
-          <button class="btn btn-danger btn-sm lesson-del">حذف</button></div>`).join("") || '<p class="hint">لا دروس بعد.</p>'}</div>
+          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}${l.description ? " · وصف ✔" : ""}</small></div>
+          <button class="btn btn-ghost btn-sm lesson-edit">✏️ تعديل</button>
+          <button class="btn btn-danger btn-sm lesson-del">حذف</button>
+          <div class="lesson-editor" hidden>
+            <label class="lbl">عنوان الفيديو</label>
+            <input type="text" class="fld le-title" value="${esc(l.title)}" />
+            <label class="lbl">رابط Bunny (iframe) — اتركه فاضي إذا ما تبي تغيّره</label>
+            <input type="text" class="fld le-embed" value="${esc(l.embed_url || "")}" placeholder="https://iframe.mediadelivery.net/embed/..." />
+            <label class="lbl">الوصف / الروابط والمرفقات (يظهر تحت الفيديو للمشترك)</label>
+            <textarea class="fld le-desc" rows="4" placeholder="اكتب الوصف والروابط هنا...">${esc(l.description || "")}</textarea>
+            <button class="btn btn-primary btn-sm le-save">حفظ التعديلات</button>
+            <span class="msg le-msg"></span>
+          </div></div>`).join("") || '<p class="hint">لا دروس بعد.</p>'}</div>
         <details class="add-lesson">
           <summary>＋ إضافة درس</summary>
           <input type="text" class="fld l-title" placeholder="عنوان الدرس" />
@@ -386,6 +412,25 @@ async function loadCourses() {
         row.querySelector(".lesson-del").addEventListener("click", async () => {
           if (!confirm("حذف الدرس؟")) return;
           try { await dbSend("DELETE", `lessons?id=eq.${row.dataset.lid}`); loadCourses(); } catch (x) { alert("خطأ: " + x.message); }
+        });
+        const editBtn = row.querySelector(".lesson-edit"), editor = row.querySelector(".lesson-editor");
+        if (editBtn && editor) editBtn.addEventListener("click", () => { editor.hidden = !editor.hidden; });
+        const saveBtn = row.querySelector(".le-save");
+        if (saveBtn) saveBtn.addEventListener("click", async () => {
+          const msg = row.querySelector(".le-msg");
+          const title = row.querySelector(".le-title").value.trim();
+          if (!title) { setMsg(msg, "العنوان مطلوب.", false); return; }
+          const embedRaw = row.querySelector(".le-embed").value.trim();
+          const desc = row.querySelector(".le-desc").value.trim();
+          const patch = { title, description: desc || null };
+          if (embedRaw) patch.embed_url = parseEmbed(embedRaw);
+          saveBtn.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
+          try {
+            await dbSend("PATCH", `lessons?id=eq.${row.dataset.lid}`, patch);
+            setMsg(msg, "تم الحفظ ✅", true);
+            row.querySelector(".lesson-info b").textContent = title;
+          } catch (x) { setMsg(msg, "خطأ: " + x.message, false); }
+          saveBtn.disabled = false;
         });
       });
       const addBtn = card.querySelector(".l-add");
