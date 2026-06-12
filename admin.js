@@ -113,13 +113,13 @@ $("createSubBtn").addEventListener("click", async () => {
   if (!email || !password) { setMsg(msg, "اكتب الإيميل وكلمة السر.", false); return; }
   btn.disabled = true; setMsg(msg, "جارٍ إنشاء الحساب…", true);
   try {
-    const r = await fetchT(`${SUPABASE_URL}/functions/v1/create-subscriber`, {
+    const r = await fetchT(`${SUPABASE_URL}/functions/v1/hyper-action`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
       body: JSON.stringify({ name, email, password }),
     }, 25000);
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status + " — تأكّد إنك نشرت الدالة create-subscriber"));
+    if (!r.ok) throw new Error(d.error || ("HTTP " + r.status + " — تأكّد إنك نشرت الدالة hyper-action"));
     setMsg(msg, `تم إنشاء حساب «${d.name || email}» ✅ — أرسل له الإيميل وكلمة السر.`, true);
     $("subName").value = ""; $("subEmail").value = ""; $("subPass").value = "";
     loadSubscribers();
