@@ -131,9 +131,10 @@ function showBlocked(kind) {
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
 // جلب درس/قسم مع إعادة محاولة — يرجّع null لو فشل فعلاً (مو فاضي)
+let lastLoadErr = "";
 async function fetchRetry(path, tries) {
   for (let i = 0; i < (tries || 2); i++) {
-    try { return await dbGet(path); } catch (_) { if (i < (tries || 2) - 1) await new Promise((r) => setTimeout(r, 600)); }
+    try { return await dbGet(path); } catch (e) { lastLoadErr = (e && e.message) ? String(e.message) : String(e); if (i < (tries || 2) - 1) await new Promise((r) => setTimeout(r, 600)); }
   }
   return null;
 }
@@ -155,7 +156,7 @@ async function loadAcademy() {
     const [sections, lessons, progress, members] = await dataP;
     // فشل تحميل حقيقي (null) — اعرض زر إعادة بدل "لا دورات"
     if (sections === null || lessons === null) {
-      wrap.innerHTML = '<p class="hint" style="padding:14px">تعذّر تحميل الدورات (اتصال). <button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>';
+      wrap.innerHTML = `<p class="hint" style="padding:14px">تعذّر تحميل الدورات.<br><b style="color:#ff8f8f;font-size:12px;word-break:break-all">${esc(lastLoadErr || "خطأ غير معروف")}</b><br><button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>`;
       $("lTitle").textContent = "—";
       return;
     }
