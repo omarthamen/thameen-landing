@@ -194,6 +194,26 @@
 .watch-label{text-align:center;font-size:14px;color:var(--text-muted);margin-top:10px;font-weight:600}
 .watch-label.done{color:#7ee0a0}
 .lesson-desc{margin-top:20px}
+/* ملاحظات الدرس */
+.notes-box{margin-top:20px;background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px}
+.notes-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.notes-head h4{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:800;color:#fff}
+.notes-head h4 svg{width:18px;height:18px;color:#5BB8E8}
+#addNoteBtn b{font-variant-numeric:tabular-nums}
+.note-editor{margin-top:14px}
+.note-at{font-size:13px;color:var(--primary-soft);margin-bottom:8px;font-weight:700}
+.note-at b{font-variant-numeric:tabular-nums}
+.note-editor textarea{width:100%;font-family:inherit;font-size:15px;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 14px;resize:vertical}
+.note-editor textarea:focus{outline:none;border-color:var(--primary-light)}
+.note-ed-actions{display:flex;gap:9px;margin-top:9px}
+.notes-list{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.notes-empty{color:var(--text-subtle);font-size:13.5px;text-align:center;padding:14px;border:1px dashed rgba(255,255,255,.16);border-radius:12px}
+.note-item{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.note-time{flex:none;font-family:inherit;font-weight:800;font-size:13px;color:#04121d;background:var(--grad-cta);border:none;border-radius:8px;padding:5px 11px;cursor:pointer;font-variant-numeric:tabular-nums;transition:.18s}
+.note-time:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(44,141,208,.35)}
+.note-body{flex:1;min-width:0;font-size:14.5px;color:var(--text-muted);word-break:break-word;white-space:pre-wrap;line-height:1.7}
+.note-del{flex:none;width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,90,90,.3);background:rgba(255,90,90,.1);color:#ff9b9b;cursor:pointer;font-size:13px}
+.note-del:hover{background:rgba(255,90,90,.25)}
 .desc-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 18px}
 .desc-h{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:15px;font-weight:800;color:#fff}
 .desc-list{display:flex;flex-direction:column;gap:8px}

@@ -146,6 +146,7 @@ function showBlocked(kind) {
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
+let curPlayer = null, curPlayerTime = 0, noteCaptureT = 0;
 // جلب درس/قسم مع إعادة محاولة — يرجّع null لو فشل فعلاً (مو فاضي)
 let lastLoadErr = "";
 async function fetchRetry(path, tries) {
@@ -436,6 +437,7 @@ function playLesson(id) {
   renderLessonDesc(l.description);
   updateWatchUI(id);
   renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+  loadNotes(id);
 }
 
 // تحديث شريط المشاهدة
@@ -476,6 +478,7 @@ function maybeCaptureDuration(id, d) {
 // مشغّل Bunny عبر مكتبة player.js + عدّاد مشاهدة مضاد للتخطّي
 function attachPlayer(ifr, id) {
   const player = new playerjs.Player(ifr);
+  curPlayer = player; curPlayerTime = 0;
   let lastT = null, watched = null, dur = 0;
   player.on("ready", () => {
     // التقط مدة الفيديو تلقائيًا وسجّلها (مرة وحدة لكل درس)
@@ -488,6 +491,8 @@ function attachPlayer(ifr, id) {
     player.on("timeupdate", (e) => {
       const t = (e && e.seconds) || 0;
       const d = (e && e.duration) || dur; dur = d;
+      curPlayerTime = t;
+      const nl = $("noteAtLabel"); if (nl) nl.textContent = fmtDur(Math.floor(t));
       if (d > 0) maybeCaptureDuration(id, d);
       if (watched === null) watched = ((PCT[id] || 0) / 100) * (d || 0); // ابدأ من المحفوظ
       // احسب فقط المشاهدة الطبيعية (تقدّم ≤ ثانيتين) — السكِب ما ينحسب
@@ -525,6 +530,53 @@ async function recordWatch(id, pct) {
     }
   }
 }
+
+// ====== ملاحظات الدرس (Notes على اللحظة) ======
+async function loadNotes(lessonId) {
+  const list = $("notesList"); if (!list) return;
+  const ed = $("noteEditor"); if (ed) ed.hidden = true;
+  let notes = [];
+  try { notes = await dbGet(`notes?select=id,seconds,text&lesson_id=eq.${lessonId}&user_id=eq.${USER.id}&order=seconds.asc`); } catch (_) {}
+  if (!notes || !notes.length) {
+    list.innerHTML = '<p class="notes-empty">ما عندك ملاحظات على هذا الدرس بعد — شغّل الفيديو وأضف ملاحظة على أي لحظة تحبها 👆</p>';
+    return;
+  }
+  list.innerHTML = notes.map((n) => `<div class="note-item">
+    <button class="note-time" data-s="${n.seconds}" title="انتقل لهذه اللحظة">▸ ${fmtDur(n.seconds)}</button>
+    <div class="note-body">${esc(n.text)}</div>
+    <button class="note-del" data-id="${n.id}" title="حذف الملاحظة">✕</button>
+  </div>`).join("");
+  list.querySelectorAll(".note-time").forEach((b) => b.addEventListener("click", () => jumpToTime(parseInt(b.dataset.s, 10))));
+  list.querySelectorAll(".note-del").forEach((b) => b.addEventListener("click", async () => {
+    if (!confirm("حذف هذه الملاحظة؟")) return;
+    try { await dbSend("DELETE", `notes?id=eq.${b.dataset.id}`, null, "return=minimal"); loadNotes(lessonId); } catch (e) { alert("تعذّر الحذف"); }
+  }));
+}
+function jumpToTime(seconds) {
+  if (curPlayer) { try { curPlayer.setCurrentTime(seconds); curPlayer.play(); } catch (_) {} }
+  const pb = document.querySelector(".player-box"); if (pb) pb.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+(function () {
+  const addBtn = $("addNoteBtn"), ed = $("noteEditor"), save = $("saveNoteBtn"), cancel = $("cancelNoteBtn"), txt = $("noteText"), atFixed = $("noteAtFixed");
+  if (!addBtn) return;
+  addBtn.addEventListener("click", () => {
+    noteCaptureT = Math.floor(curPlayerTime || 0);
+    if (atFixed) atFixed.textContent = fmtDur(noteCaptureT);
+    ed.hidden = false; txt.value = ""; txt.focus();
+  });
+  if (cancel) cancel.addEventListener("click", () => { ed.hidden = true; });
+  if (save) save.addEventListener("click", async () => {
+    const t = txt.value.trim();
+    if (!t || !CURLESSON || !USER) { ed.hidden = true; return; }
+    save.disabled = true;
+    try {
+      await dbSend("POST", "notes", { user_id: USER.id, lesson_id: CURLESSON, seconds: noteCaptureT, text: t }, "return=minimal");
+      ed.hidden = true;
+      loadNotes(CURLESSON);
+    } catch (e) { alert("تعذّر حفظ الملاحظة: " + (e.message || "")); }
+    save.disabled = false;
+  });
+})();
 
 // ====== المجتمع ======
 let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
@@ -1099,28 +1151,12 @@ async function loadCalls() {
   renderCallWhen("groupWhen", "groupCount", "groupNote", "joinGroupCall", groupAt);
   renderCallsSchedule();
 }
-function startCall(room, title) {
-  const host = $("jitsiHost"); if (!host) return;
-  $("callRoomTitle").textContent = title;
-  $("callRoom").hidden = false;
-  host.innerHTML = "";
-  if (!window.JitsiMeetExternalAPI) { host.innerHTML = '<p class="hint" style="padding:30px;text-align:center">جارٍ تحميل المكالمة… أعد المحاولة بعد ثانية.</p>'; return; }
-  try {
-    jitsiApi = new window.JitsiMeetExternalAPI("meet.jit.si", {
-      roomName: room, parentNode: host, width: "100%", height: "100%",
-      userInfo: { displayName: myName() },
-      configOverwrite: { prejoinPageEnabled: false, disableDeepLinking: true, startWithVideoMuted: false },
-      interfaceConfigOverwrite: { MOBILE_APP_PROMO: false, SHOW_JITSI_WATERMARK: false },
-    });
-    jitsiApi.addEventListener("readyToClose", endCall);
-  } catch (e) { host.innerHTML = '<p class="hint" style="padding:30px;text-align:center">تعذّر بدء المكالمة. جرّب تحديث الصفحة.</p>'; }
-  $("callRoom").scrollIntoView({ behavior: "smooth", block: "start" });
+// تفتح بنافذة جديدة (بدون حد ٥ دقائق، مجاني تمامًا)
+function startCall(room) {
+  const url = "https://meet.jit.si/" + room + "#userInfo.displayName=" + encodeURIComponent('"' + myName() + '"') + "&config.prejoinPageEnabled=false";
+  window.open(url, "_blank", "noopener");
 }
-function endCall() {
-  if (jitsiApi) { try { jitsiApi.dispose(); } catch (_) {} jitsiApi = null; }
-  const h = $("jitsiHost"); if (h) h.innerHTML = "";
-  const cr = $("callRoom"); if (cr) cr.hidden = true;
-}
+function endCall() {}
 (function () {
   const sp = $("startPrivCall"); if (sp) sp.addEventListener("click", () => { if (USER) startCall("thameenPrv" + String(USER.id).replace(/-/g, ""), "مكالمتك الخاصة"); });
   const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => startCall("thameenAcademyGroupCall2026", "المكالمة الجماعية"));
