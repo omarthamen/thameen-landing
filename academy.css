@@ -214,7 +214,14 @@
 .acc-card h3{margin:0 0 14px;font-size:16px;color:#fff}
 .acc-card .fld{width:100%;margin-bottom:10px}
 .acc-profile{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;background:linear-gradient(160deg,rgba(44,141,208,.16),rgba(8,8,12,.2))}
-.acc-avatar{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:32px;font-weight:800;color:#fff;margin-bottom:8px}
+.acc-avatar-wrap{position:relative;width:88px;height:88px;margin-bottom:8px}
+.acc-avatar{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-size:34px;font-weight:800;color:#fff;overflow:hidden;border:2px solid rgba(255,255,255,.14)}
+.acc-av-btn{position:absolute;bottom:-2px;inset-inline-end:-2px;width:32px;height:32px;border-radius:50%;border:2px solid #0a0a0f;background:var(--grad-cta);color:#04121d;display:grid;place-items:center;cursor:pointer;transition:.2s}
+.acc-av-btn:hover{transform:scale(1.1)}
+.acc-av-btn svg{width:15px;height:15px}
+/* صورة البروفايل داخل أي دائرة أفتار */
+.av-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.cmsg-av,.ach-av,.job-av,.mem-av{overflow:hidden}
 .acc-profile h2{margin:0;font-size:22px;color:#fff}
 .acc-email{color:var(--text-muted);font-size:14px;margin:0}
 .acc-since{color:var(--text-subtle);font-size:12.5px;margin:4px 0 0}

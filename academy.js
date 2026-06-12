@@ -1,7 +1,7 @@
 // ثَمين — أكاديمية المشتركين (REST مباشر)
 const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
-let TOKEN = null, USER = null;
+let TOKEN = null, USER = null, AVATARS = {};
 
 // روابط التواصل بالفوتر (عدّلها هنا) — معرّفة بالأعلى لتفادي مشكلة الترتيب
 const SOCIALS = [
@@ -89,6 +89,7 @@ let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
+  loadAvatars();
   const wrap = $("coursesCol");
   try {
     const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
@@ -258,6 +259,13 @@ function myName() {
 }
 function avColor(s) { let h = 0; s = s || ""; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return `linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h + 40) % 360},65%,42%))`; }
 function initialOf(n) { return (n || "؟").trim().charAt(0) || "؟"; }
+// صورة البروفايل: img لو موجودة، وإلا أول حرف بخلفية ملوّنة
+function avInner(uid, nm) { const u = AVATARS[uid]; return u ? `<img src="${esc(u)}" alt="" class="av-img" loading="lazy">` : esc(initialOf(nm)); }
+function avStyle(uid, nm) { return AVATARS[uid] ? "" : `background:${avColor(uid || nm)}`; }
+async function loadAvatars() {
+  try { const ps = await dbGet("profiles?select=user_id,avatar_url&limit=500"); AVATARS = {}; (ps || []).forEach((p) => { if (p.avatar_url) AVATARS[p.user_id] = p.avatar_url; }); }
+  catch (_) {}
+}
 function fmtTime(iso) { try { const d = new Date(iso); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${h}:${String(d.getMinutes()).padStart(2, "0")} ${ap}`; } catch (_) { return ""; } }
 
 // رفع ملف للمجتمع
@@ -279,9 +287,11 @@ async function registerProfile() {
 }
 async function loadMembers() {
   const el = $("memList"); if (!el) return;
-  let ps; try { ps = await dbGet("profiles?select=user_id,name&order=created_at.asc&limit=300"); } catch (_) { return; }
+  let ps; try { ps = await dbGet("profiles?select=user_id,name,avatar_url&order=created_at.asc&limit=300"); }
+  catch (_) { try { ps = await dbGet("profiles?select=user_id,name&order=created_at.asc&limit=300"); } catch (_) { return; } }
+  ps.forEach((p) => { if (p.avatar_url) AVATARS[p.user_id] = p.avatar_url; });
   const c = $("memCount"); if (c) c.textContent = `(${ps.length})`;
-  el.innerHTML = ps.map((p) => `<div class="mem"><div class="mem-av" style="background:${avColor(p.user_id || p.name)}">${esc(initialOf(p.name))}</div><span class="mem-name">${esc(p.name || "متدرب")}</span></div>`).join("");
+  el.innerHTML = ps.map((p) => `<div class="mem"><div class="mem-av" style="${avStyle(p.user_id, p.name)}">${avInner(p.user_id, p.name)}</div><span class="mem-name">${esc(p.name || "متدرب")}</span></div>`).join("");
 }
 
 // تضمين الروابط داخل الرسالة (يوتيوب/إنستقرام/تيك توك/فيديو مباشر)
@@ -321,7 +331,7 @@ function mediaHtml(m) {
 function bubbleHtml(m, isAdmin) {
   const me = m.user_id === (USER && USER.id), nm = m.name || "متدرب";
   return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
-    <div class="cmsg-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div>
+    <div class="cmsg-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div>
     <div class="cmsg-body">
       <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
       <div class="cmsg-bubble">${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}</div>
@@ -330,7 +340,7 @@ function bubbleHtml(m, isAdmin) {
 function achCard(m, isAdmin) {
   const nm = m.name || "متدرب";
   return `<div class="ach-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
-    <div class="ach-head"><div class="ach-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
+    <div class="ach-head"><div class="ach-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
     ${mediaHtml(m)}${embedFor(m.text)}
     ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
 }
@@ -339,7 +349,7 @@ function jobCard(m, isAdmin) {
   const nm = m.name || "متدرب", meta = m.meta || {};
   const ch = normLink(meta.channel), ct = normLink(meta.contact);
   return `<div class="job-card" data-id="${m.id}">${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}
-    <div class="job-top"><div class="job-av" style="background:${avColor(m.user_id || nm)}">${esc(initialOf(nm))}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div></div>
+    <div class="job-top"><div class="job-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div></div>
     <div class="job-desc">${linkify(m.text || "")}</div>
     ${meta.price ? `<span class="job-price">💰 ${esc(meta.price)}</span>` : ""}
     <div class="job-actions">${ch ? `<a class="job-btn" href="${esc(ch)}" target="_blank" rel="noopener">معرض الأعمال</a>` : ""}${ct ? `<a class="job-btn primary" href="${esc(ct)}" target="_blank" rel="noopener">📞 تواصل مباشر</a>` : ""}</div></div>`;
@@ -472,9 +482,14 @@ function fmtDate(d) {
 }
 
 async function loadAccount() {
+  await loadAvatars();
   const name = myName();
   const av = $("accAvatar");
-  if (av) { av.textContent = initialOf(name); av.style.background = avColor((USER && USER.id) || name); }
+  if (av) {
+    const myUrl = AVATARS[USER && USER.id];
+    if (myUrl) { av.style.background = ""; av.innerHTML = `<img src="${esc(myUrl)}" alt="" class="av-img">`; }
+    else { av.textContent = initialOf(name); av.style.background = avColor((USER && USER.id) || name); }
+  }
   $("accName").textContent = name;
   $("accEmail").textContent = (USER && USER.email) || "";
 
@@ -559,5 +574,30 @@ async function loadAccount() {
       $("accPass1").value = ""; $("accPass2").value = "";
     } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
     btn.disabled = false;
+  });
+})();
+
+// تغيير صورة البروفايل
+(function () {
+  const btn = $("accAvBtn"), fi = $("accAvFile"); if (!btn || !fi) return;
+  btn.addEventListener("click", () => fi.click());
+  fi.addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const msg = $("accAvMsg");
+    if (!f.type.startsWith("image")) { setMsg(msg, "اختر صورة فقط.", false); fi.value = ""; return; }
+    if (f.size > 5 * 1024 * 1024) { setMsg(msg, "الصورة كبيرة — الحد ٥ م.ب.", false); fi.value = ""; return; }
+    setMsg(msg, "جارٍ رفع الصورة…", true);
+    try {
+      const url = await uploadCommFile(f);
+      await dbSend("POST", "profiles?on_conflict=user_id",
+        { user_id: USER.id, name: myName(), avatar_url: url }, "resolution=merge-duplicates,return=minimal");
+      AVATARS[USER.id] = url;
+      const av = $("accAvatar"); if (av) { av.style.background = ""; av.innerHTML = `<img src="${esc(url)}" alt="" class="av-img">`; }
+      setMsg(msg, "تم تحديث صورتك ✅", true);
+    } catch (err) {
+      const m = String(err.message || err);
+      setMsg(msg, /avatar_url/.test(m) ? "لازم تضيف عمود avatar_url بقاعدة البيانات أول (راجع الخطوة)." : "خطأ: " + m, false);
+    }
+    fi.value = "";
   });
 })();

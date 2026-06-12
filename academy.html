@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=11" />
+  <link rel="stylesheet" href="academy.css?v=12" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -130,10 +130,17 @@
     <div id="viewAccount" class="account-wrap" hidden>
       <div class="acc-grid">
         <section class="acc-card acc-profile">
-          <div class="acc-avatar" id="accAvatar">؟</div>
+          <div class="acc-avatar-wrap">
+            <div class="acc-avatar" id="accAvatar">؟</div>
+            <button type="button" class="acc-av-btn" id="accAvBtn" title="تغيير الصورة" aria-label="تغيير الصورة">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+            <input type="file" id="accAvFile" accept="image/*" hidden />
+          </div>
           <h2 id="accName">—</h2>
           <p class="acc-email" id="accEmail">—</p>
           <p class="acc-since" id="accSince"></p>
+          <p class="msg" id="accAvMsg" role="status"></p>
         </section>
 
         <section class="acc-card">
@@ -174,6 +181,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=22"></script>
+  <script src="academy.js?v=23"></script>
 </body>
 </html>
