@@ -156,7 +156,14 @@ async function loadAcademy() {
     const [sections, lessons, progress, members] = await dataP;
     // فشل تحميل حقيقي (null) — اعرض زر إعادة بدل "لا دورات"
     if (sections === null || lessons === null) {
-      wrap.innerHTML = `<p class="hint" style="padding:14px">تعذّر تحميل الدورات.<br><b style="color:#ff8f8f;font-size:12px;word-break:break-all">${esc(lastLoadErr || "خطأ غير معروف")}</b><br><button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>`;
+      // غالبًا التوكن قديم → جدّده تلقائيًا وأعد التحميل مرة وحدة
+      if (!window.__acadRetried) {
+        window.__acadRetried = true;
+        let s = null; try { s = JSON.parse(localStorage.getItem("thameen_acad") || "null"); } catch (_) {}
+        if (s && s.rt && await refresh(s.rt)) { return loadAcademy(); }   // بالتوكن الجديد
+        logout(); return;                                                 // التوكن منتهي → سجّل دخول من جديد
+      }
+      wrap.innerHTML = `<p class="hint" style="padding:14px">تعذّر تحميل الدورات.<br><b style="color:#ff8f8f;font-size:12px;word-break:break-all">${esc(lastLoadErr || "خطأ")}</b><br><button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>`;
       $("lTitle").textContent = "—";
       return;
     }
