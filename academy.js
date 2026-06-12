@@ -373,7 +373,18 @@ function achCard(m, isAdmin) {
     ${mediaHtml(m)}${embedFor(m.text)}
     ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
 }
-function normLink(s) { s = (s || "").trim(); if (!s) return ""; if (/^https?:\/\//i.test(s)) return s; if (/^\+?[\d\s-]{7,}$/.test(s)) return "https://wa.me/" + s.replace(/[^\d]/g, ""); return "https://" + s; }
+function normLink(s) {
+  s = (s || "").trim();
+  if (!s) return "";
+  if (/^https?:\/\//i.test(s)) return s;                       // رابط كامل
+  if (/wa\.me|whatsapp\.com|t\.me|instagram\.com|youtube\.com|tiktok\.com/i.test(s)) return "https://" + s.replace(/^\/+/, "");
+  if (/^\+?[\d\s\-().]{7,}$/.test(s)) {                          // رقم هاتف/واتساب
+    let d = s.replace(/[^\d]/g, "");
+    if (d.startsWith("00")) d = d.slice(2);                     // إزالة بادئة الاتصال الدولي 00
+    return "https://wa.me/" + d;
+  }
+  return "https://" + s.replace(/^\/+/, "");
+}
 function jobCard(m, isAdmin) {
   const nm = m.name || "متدرب", meta = m.meta || {};
   const ch = normLink(meta.channel), ct = normLink(meta.contact);
