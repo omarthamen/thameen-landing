@@ -108,8 +108,11 @@ async function loadAcademy() {
     renderProgress();
     renderCourses();
     if (SECTIONS.length) {
-      const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0];
-      openCourse(firstSec.id);
+      let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
+      const savedLesson = savedLid && LESSONS.find((l) => l.id === savedLid);
+      if (savedLesson) { CURSEC = savedLesson.section_id; renderCourses(); playLesson(savedLesson.id); }
+      else { const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0]; openCourse(firstSec.id); }
+      restoreView();
     } else {
       const dbg = `توكن:${TOKEN ? "موجود ✓" : "مفقود ✗"} · أقسام:${SECTIONS.length} · دروس:${LESSONS.length}`;
       wrap.innerHTML = `<p class="hint" style="padding:14px">لا توجد دورات.<br><b style="color:#ffb84d">${dbg}</b></p>`;
@@ -170,6 +173,7 @@ function renderPlaylist(ls) {
 function playLesson(id) {
   const l = LESSONS.find((x) => x.id === id); if (!l) return;
   CURLESSON = id;
+  try { localStorage.setItem("thameen_lesson", id); } catch (_) {}
   $("lTitle").textContent = l.title;
   const host = $("playerHost");
   host.innerHTML = l.embed_url
@@ -308,6 +312,14 @@ function embedFor(text) {
   if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return `<video src="${esc(url)}" controls preload="metadata"></video>`;
   return "";
 }
+function dayKey(d) { return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+function dayLabel(d) {
+  const now = new Date();
+  if (dayKey(d) === dayKey(now)) return "اليوم";
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (dayKey(d) === dayKey(y)) return "أمس";
+  return fmtDate(d);
+}
 function renderMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
   let list = MSGS;
@@ -315,26 +327,43 @@ function renderMessages(forceScroll) {
   if (!list.length) { box.innerHTML = `<p class="comm-empty">${commSearch ? "لا نتائج للبحث" : "لا رسائل بعد — كن أول من يبدأ 👋"}</p>`; return; }
   const isAdmin = USER && USER.email === "omarthamen@gmail.com";
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  const fn = CURCHAN === "jobs" ? jobCard : CURCHAN === "achievements" ? achCard : bubbleHtml;
-  box.innerHTML = list.map((m) => fn(m, isAdmin)).join("");
+  let html = "", prevUid = null, prevTime = 0, prevDay = null;
+  for (const m of list) {
+    const dt = new Date(m.created_at), dk = dayKey(dt);
+    if (dk !== prevDay) { html += `<div class="day-sep"><span>${dayLabel(dt)}</span></div>`; prevDay = dk; prevUid = null; }
+    if (CURCHAN === "jobs") html += jobCard(m, isAdmin);
+    else if (CURCHAN === "achievements") html += achCard(m, isAdmin);
+    else { html += bubbleHtml(m, isAdmin, m.user_id === prevUid && (dt - prevTime) < 5 * 60 * 1000); }
+    prevUid = m.user_id; prevTime = dt;
+  }
+  box.innerHTML = html;
   if (isAdmin) box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-id]"); if (!el) return;
     if (!confirm("حذف؟")) return;
     try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); } catch (_) {}
   }));
-  if (forceScroll || atBottom) box.scrollTop = box.scrollHeight;
+  if (forceScroll || atBottom) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
 }
 function mediaHtml(m) {
   if (!m.media_url) return "";
   return m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
 }
-function bubbleHtml(m, isAdmin) {
+function bubbleHtml(m, isAdmin, grouped) {
   const me = m.user_id === (USER && USER.id), nm = m.name || "متدرب";
+  const inner = `${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}`;
+  if (grouped) {
+    return `<div class="cmsg grouped ${me ? "me" : ""}" data-id="${m.id}">
+      <div class="cmsg-av-sp"></div>
+      <div class="cmsg-body">
+        <div class="cmsg-bubble">${inner}<span class="cmsg-t">${fmtTime(m.created_at)}</span></div>
+        ${isAdmin ? '<button class="del-msg mini" type="button" title="حذف">×</button>' : ""}
+      </div></div>`;
+  }
   return `<div class="cmsg ${me ? "me" : ""}" data-id="${m.id}">
     <div class="cmsg-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div>
     <div class="cmsg-body">
       <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${isAdmin ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
-      <div class="cmsg-bubble">${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}</div>
+      <div class="cmsg-bubble">${inner}</div>
     </div></div>`;
 }
 function achCard(m, isAdmin) {
@@ -373,10 +402,34 @@ async function loadMessages(forceScroll) {
   lastSig = sig;
   renderMessages(forceScroll);
 }
+function updateScrollBtn() {
+  const box = $("commMessages"), btn = $("commScrollBtn"); if (!box || !btn) return;
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  btn.hidden = atBottom;
+}
+(function () {
+  const box = $("commMessages"), btn = $("commScrollBtn"); if (!box || !btn) return;
+  box.addEventListener("scroll", updateScrollBtn);
+  btn.addEventListener("click", () => { box.scrollTop = box.scrollHeight; updateScrollBtn(); });
+})();
 function startCommPoll() { stopCommPoll(); commTimer = setInterval(() => loadMessages(false), 4000); }
 function stopCommPoll() { if (commTimer) { clearInterval(commTimer); commTimer = null; } }
 
+function restoreView() {
+  let sc = null, v = null;
+  try { sc = localStorage.getItem("thameen_chan"); v = localStorage.getItem("thameen_view"); } catch (_) {}
+  if (sc && CHAN_INFO[sc]) {
+    CURCHAN = sc;
+    document.querySelectorAll("#commChannels .chan").forEach((x) => x.classList.toggle("on", x.dataset.ch === sc));
+    const info = CHAN_INFO[sc];
+    if ($("chanTitle")) $("chanTitle").textContent = info.t;
+    if ($("chanDesc")) $("chanDesc").textContent = info.d;
+    applyChannelUI();
+  }
+  if (v && v !== "courses") switchView(v);
+}
 function switchView(view) {
+  try { localStorage.setItem("thameen_view", view); } catch (_) {}
   document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
   const vc = $("viewCourses"), vm = $("viewCommunity"), va = $("viewAccount");
   if (vc) vc.hidden = view !== "courses";
@@ -390,6 +443,7 @@ document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click",
 // القنوات
 document.querySelectorAll("#commChannels .chan").forEach((c) => c.addEventListener("click", () => {
   CURCHAN = c.dataset.ch;
+  try { localStorage.setItem("thameen_chan", CURCHAN); } catch (_) {}
   document.querySelectorAll("#commChannels .chan").forEach((x) => x.classList.toggle("on", x === c));
   const info = CHAN_INFO[CURCHAN]; $("chanTitle").textContent = info.t; $("chanDesc").textContent = info.d;
   commSearch = ""; if ($("commSearch")) $("commSearch").value = "";

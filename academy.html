@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=4" />
-  <link rel="stylesheet" href="academy.css?v=12" />
+  <link rel="stylesheet" href="academy.css?v=13" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -98,6 +98,9 @@
           <div class="comm-messages" id="commMessages">
             <p class="hint" style="text-align:center;padding:30px">جارٍ التحميل…</p>
           </div>
+          <button type="button" id="commScrollBtn" class="comm-scroll-btn" hidden aria-label="النزول لآخر الرسائل">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          </button>
           <div id="filePreview" class="file-preview" hidden></div>
           <div id="emojiPanel" class="emoji-panel" hidden></div>
           <form class="comm-compose" id="commForm">
@@ -181,6 +184,6 @@
   </section>
 
   <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-  <script src="academy.js?v=23"></script>
+  <script src="academy.js?v=24"></script>
 </body>
 </html>

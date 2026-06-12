@@ -222,6 +222,21 @@
 /* صورة البروفايل داخل أي دائرة أفتار */
 .av-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
 .cmsg-av,.ach-av,.job-av,.mem-av{overflow:hidden}
+
+/* ===== تحسينات المجتمع: فواصل تواريخ + تجميع + زر النزول ===== */
+.day-sep{display:flex;justify-content:center;margin:2px 0}
+.day-sep span{font-size:11.5px;font-weight:700;color:var(--text-subtle);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:4px 14px;border-radius:99px}
+.cmsg.grouped{margin-top:-11px}
+.cmsg-av-sp{flex:none;width:40px}
+.cmsg.grouped .cmsg-body{display:flex;align-items:center;gap:6px}
+.cmsg.grouped .cmsg-bubble{border-radius:14px}
+.cmsg.me.grouped .cmsg-bubble{border-radius:14px}
+.cmsg-t{font-size:10px;color:var(--text-subtle);opacity:.65;margin-inline-start:10px;float:inline-end}
+.cmsg .del-msg.mini{opacity:0;font-size:18px;line-height:1;padding:0 4px}
+.cmsg:hover .del-msg.mini{opacity:.7}
+.comm-scroll-btn{position:absolute;inset-inline-end:18px;bottom:90px;width:42px;height:42px;border-radius:50%;background:var(--grad-cta);color:#04121d;border:0;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.55);z-index:6;transition:transform .2s,opacity .2s}
+.comm-scroll-btn:hover{transform:translateY(-2px)}
+.comm-scroll-btn svg{width:20px;height:20px}
 .acc-profile h2{margin:0;font-size:22px;color:#fff}
 .acc-email{color:var(--text-muted);font-size:14px;margin:0}
 .acc-since{color:var(--text-subtle);font-size:12.5px;margin:4px 0 0}
