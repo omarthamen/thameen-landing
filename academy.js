@@ -138,12 +138,21 @@ async function fetchRetry(path, tries) {
   }
   return null;
 }
+// تحميل الدورات عبر دالة RPC (تتجاوز مشاكل القراءة المباشرة) مع احتياط
+async function loadCourseData() {
+  try {
+    const r = await fetchT(`${SUPABASE_URL}/rest/v1/rpc/get_academy_data`, {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: "{}",
+    }, 25000);
+    if (r.ok) { const d = await r.json(); if (d && Array.isArray(d.sections)) return { sections: d.sections, lessons: d.lessons || [] }; }
+  } catch (e) { lastLoadErr = (e && e.message) ? String(e.message) : String(e); }
+  // احتياط: قراءة مباشرة
+  return { sections: await fetchRetry("sections?select=*&order=sort.asc,created_at.asc"), lessons: await fetchRetry("lessons?select=*&order=sort.asc,created_at.asc") };
+}
 async function loadAcademy() {
   const guardP = guardAccess();
-  // الأقسام والدروس أهم شي — مع إعادة محاولة. والباقي عادي.
   const dataP = Promise.all([
-    fetchRetry("sections?select=*&order=sort.asc,created_at.asc"),
-    fetchRetry("lessons?select=*&order=sort.asc,created_at.asc"),
+    loadCourseData(),
     dbGet("progress?select=lesson_id,percent,completed").catch(() => dbGet("progress?select=lesson_id,completed").catch(() => [])),
     dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => [])),
   ]);
@@ -153,7 +162,8 @@ async function loadAcademy() {
   renderSocials();
   const wrap = $("coursesCol");
   try {
-    const [sections, lessons, progress, members] = await dataP;
+    const [courses, progress, members] = await dataP;
+    const sections = courses.sections, lessons = courses.lessons;
     // فشل تحميل حقيقي (null) — اعرض زر إعادة بدل "لا دورات"
     if (sections === null || lessons === null) {
       // غالبًا التوكن قديم → جدّده تلقائيًا وأعد التحميل مرة وحدة
