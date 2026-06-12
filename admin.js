@@ -119,7 +119,8 @@ async function loadSubscribers() {
         <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}
           <div class="sub-stats">
             <span title="تاريخ الاشتراك">📅 ${fmtJoin(p.joined)}</span>
-            <span title="الإنجاز">📈 ${p.completed || 0}/${p.total || 0} (${pct}%)</span>
+            <span title="دروس مكتملة (٩٠٪+)">📈 ${p.completed || 0}/${p.total || 0} مكتمل</span>
+            <span title="دروس بدأها + أعلى نسبة وصلها">📊 بدأ ${p.started || 0} · أعلى ${p.top_percent || 0}%</span>
             <span title="رسائل بالمجتمع">💬 ${p.messages || 0}</span>
             <span title="إنجازات منشورة">🏆 ${p.achievements || 0}</span>
             <span title="فرص عمل نشرها">💼 ${p.jobs || 0}</span>
