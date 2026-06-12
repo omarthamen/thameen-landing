@@ -137,7 +137,7 @@ async function loadAcademy() {
     dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => [])),
   ]);
   if (!(await guardP)) return;           // قفل الجهاز — يوقف كل شي لو جهاز مختلف
-  try { if (!localStorage.getItem("thameen_guide_hidden")) { const gm = $("guideModal"); if (gm) gm.hidden = false; } } catch (_) {}
+  showOnboarding();
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
   loadAvatars();
@@ -477,7 +477,8 @@ async function recordWatch(id, pct) {
 }
 
 // ====== المجتمع ======
-let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [], lastSig = "";
+let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
+let renderedIds = new Set(), rLastDay = null, rLastUid = null, rLastTime = 0, rChan = null;
 const CHAN_INFO = {
   general: { t: "العام", d: "شارك، اسأل، وتفاعل مع باقي المتدربين" },
   achievements: { t: "الإنجازات", d: "اعرض شغلك وإنجازاتك وارفع فيديوهاتك 🚀" },
@@ -548,30 +549,57 @@ function dayLabel(d) {
   if (dayKey(d) === dayKey(y)) return "أمس";
   return fmtDate(d);
 }
+function msgHtml(m, isAdmin, grouped) {
+  if (CURCHAN === "jobs") return jobCard(m, isAdmin);
+  if (CURCHAN === "achievements") return achCard(m, isAdmin);
+  return bubbleHtml(m, isAdmin, grouped);
+}
+function wireDeletes(box) {
+  box.querySelectorAll(".del-msg").forEach((b) => {
+    if (b._wired) return; b._wired = true;
+    b.addEventListener("click", async (e) => {
+      const el = e.target.closest("[data-id]"); if (!el) return;
+      if (!confirm("حذف الرسالة؟")) return;
+      try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); }
+      catch (err) { alert("ما قدرت تحذف هذي الرسالة (مو رسالتك)."); }
+    });
+  });
+}
+// رسم كامل (تبديل قناة / بحث / حذف / أول تحميل)
 function renderMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
   let list = MSGS;
   if (commSearch) { const q = commSearch.toLowerCase(); list = list.filter((m) => (m.text || "").toLowerCase().includes(q) || (m.name || "").toLowerCase().includes(q)); }
+  renderedIds = new Set(); rLastDay = null; rLastUid = null; rLastTime = 0; rChan = CURCHAN;
   if (!list.length) { box.innerHTML = `<p class="comm-empty">${commSearch ? "لا نتائج للبحث" : "لا رسائل بعد — كن أول من يبدأ 👋"}</p>`; return; }
-  const isAdmin = USER && USER.email === "omarthamen@gmail.com";
-  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  let html = "", prevUid = null, prevTime = 0, prevDay = null;
+  const isAdmin = USER && USER.email === ADMIN_EMAIL;
+  let html = "";
   for (const m of list) {
     const dt = new Date(m.created_at), dk = dayKey(dt);
-    if (dk !== prevDay) { html += `<div class="day-sep"><span>${dayLabel(dt)}</span></div>`; prevDay = dk; prevUid = null; }
-    if (CURCHAN === "jobs") html += jobCard(m, isAdmin);
-    else if (CURCHAN === "achievements") html += achCard(m, isAdmin);
-    else { html += bubbleHtml(m, isAdmin, m.user_id === prevUid && (dt - prevTime) < 5 * 60 * 1000); }
-    prevUid = m.user_id; prevTime = dt;
+    if (dk !== rLastDay) { html += `<div class="day-sep"><span>${dayLabel(dt)}</span></div>`; rLastDay = dk; rLastUid = null; }
+    html += msgHtml(m, isAdmin, m.user_id === rLastUid && (dt - rLastTime) < 5 * 60 * 1000);
+    rLastUid = m.user_id; rLastTime = dt; renderedIds.add(m.id);
   }
   box.innerHTML = html;
-  box.querySelectorAll(".del-msg").forEach((b) => b.addEventListener("click", async (e) => {
-    const el = e.target.closest("[data-id]"); if (!el) return;
-    if (!confirm("حذف الرسالة؟")) return;
-    try { await dbSend("DELETE", `community_messages?id=eq.${el.dataset.id}`); loadMessages(false); }
-    catch (err) { alert("ما قدرت تحذف هذي الرسالة (مو رسالتك)."); }
-  }));
-  if (forceScroll || atBottom) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
+  wireDeletes(box);
+  if (forceScroll) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
+}
+// إضافة الرسائل الجديدة فقط — بدون إعادة رسم (يمنع الوميض وقفز التمرير)
+function appendNew(newMsgs) {
+  const box = $("commMessages"); if (!box || commSearch) return;
+  if (!renderedIds.size) { renderMessages(false); box.scrollTop = box.scrollHeight; updateScrollBtn(); return; }
+  const isAdmin = USER && USER.email === ADMIN_EMAIL;
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  let html = "";
+  for (const m of newMsgs) {
+    const dt = new Date(m.created_at), dk = dayKey(dt);
+    if (dk !== rLastDay) { html += `<div class="day-sep"><span>${dayLabel(dt)}</span></div>`; rLastDay = dk; rLastUid = null; }
+    html += msgHtml(m, isAdmin, m.user_id === rLastUid && (dt - rLastTime) < 5 * 60 * 1000);
+    rLastUid = m.user_id; rLastTime = dt; renderedIds.add(m.id);
+  }
+  box.insertAdjacentHTML("beforeend", html);
+  wireDeletes(box);
+  if (atBottom) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
 }
 function mediaHtml(m) {
   if (!m.media_url) return "";
@@ -639,14 +667,16 @@ function applyChannelUI() {
 }
 async function loadMessages(forceScroll) {
   const box = $("commMessages"); if (!box) return;
-  try { MSGS = await dbGet(`community_messages?select=*&channel=eq.${CURCHAN}&order=created_at.asc&limit=200`); }
+  let data;
+  try { data = await dbGet(`community_messages?select=*&channel=eq.${CURCHAN}&order=created_at.asc&limit=200`); }
   catch (e) { box.innerHTML = `<p class="comm-empty">تعذّر التحميل:<br>${esc(e.message)}</p>`; return; }
-  // وقّع البيانات — لا تعيد الرسم إلا إذا فيه تغيير فعلي (يمنع وميض الروابط وقفز التمرير)
-  const last = MSGS[MSGS.length - 1];
-  const sig = CURCHAN + ":" + MSGS.length + ":" + (last ? last.id : "");
-  if (!forceScroll && sig === lastSig) return;
-  lastSig = sig;
-  renderMessages(forceScroll);
+  MSGS = data || [];
+  if (commSearch && !forceScroll) return;                  // أثناء البحث: حدّث البيانات بصمت بدون إزعاج
+  if (forceScroll || rChan !== CURCHAN) { renderMessages(forceScroll); return; }  // تبديل قناة / أول تحميل
+  const curIds = new Set(MSGS.map((m) => m.id));
+  for (const id of renderedIds) { if (!curIds.has(id)) { renderMessages(false); return; } }  // حُذفت رسالة → رسم كامل
+  const newMsgs = MSGS.filter((m) => !renderedIds.has(m.id));
+  if (newMsgs.length) appendNew(newMsgs);                  // رسائل جديدة فقط → إضافة سلسة
 }
 function updateScrollBtn() {
   const box = $("commMessages"), btn = $("commScrollBtn"); if (!box || !btn) return;
@@ -818,12 +848,20 @@ function channelsHtml() {
   const list = $("channelsList"); if (list) list.innerHTML = html;
   const inGuide = $("guideChannels"); if (inGuide) inGuide.innerHTML = '<h3 class="guide-sub">انضم لقنواتنا</h3>' + html;
   const modal = $("channelsModal"); if (!modal) return;
-  const open = () => { modal.hidden = false; };
   const close = () => { modal.hidden = true; };
   const x = $("channelsX"); if (x) x.addEventListener("click", close);
-  const cb = $("channelsBtn"); if (cb) cb.addEventListener("click", open);
+  const cb = $("channelsBtn"); if (cb) cb.addEventListener("click", () => { modal.hidden = false; });
+  const joined = $("channelsJoined"); if (joined) joined.addEventListener("click", () => { try { localStorage.setItem("thameen_channels_joined", "1"); } catch (_) {} close(); });
+  const later = $("channelsLater"); if (later) later.addEventListener("click", close);
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
+// أول دخول: اعرض القنوات (لين ينضم)، وإذا انضم اعرض التعليمات (لين يخفيها)
+function showOnboarding() {
+  let chJoined = null, guideHidden = null;
+  try { chJoined = localStorage.getItem("thameen_channels_joined"); guideHidden = localStorage.getItem("thameen_guide_hidden"); } catch (_) {}
+  if (!chJoined) { const c = $("channelsModal"); if (c) c.hidden = false; }
+  else if (!guideHidden) { const g = $("guideModal"); if (g) g.hidden = false; }
+}
 
 // ====== حسابي ======
 function addMonths(d, n) { const x = new Date(d.getTime()); const day = x.getDate(); x.setMonth(x.getMonth() + n); if (x.getDate() < day) x.setDate(0); return x; }

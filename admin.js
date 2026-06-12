@@ -101,15 +101,27 @@ async function loadSubscribers() {
   list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
   try {
     let ps;
-    try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id,suspended&order=created_at.desc&limit=500"); }
-    catch (_) { try { ps = await dbGet("profiles?select=user_id,name,created_at,device_id&order=created_at.desc&limit=500"); } catch (_) { ps = await dbGet("profiles?select=user_id,name,created_at&order=created_at.desc&limit=500"); } }
+    try { ps = await rpc("admin_subscriber_stats"); }
+    catch (_) {
+      const raw = await dbGet("profiles?select=user_id,name,created_at,device_id,suspended&order=created_at.desc&limit=500").catch(() => []);
+      ps = (raw || []).map((p) => ({ user_id: p.user_id, name: p.name, joined: p.created_at, device_id: p.device_id, suspended: p.suspended, completed: 0, total: 0, messages: 0, achievements: 0, jobs: 0 }));
+    }
     $("subsCount").textContent = (ps?.length || 0) + " مشترك";
     if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
     list.innerHTML = ps.map((p) => {
       const locked = !!p.device_id, susp = !!p.suspended;
-      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>' : (locked ? '<span class="sub-badge lock">📱 مربوط بجهاز</span>' : '<span class="sub-badge ok">● نشط</span>');
+      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>' : (locked ? '<span class="sub-badge lock">📱 جهاز</span>' : '<span class="sub-badge ok">● نشط</span>');
+      const pct = p.total ? Math.round((p.completed / p.total) * 100) : 0;
       return `<div class="crow sub-row ${susp ? "is-susp" : ""}">
-        <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}</div>
+        <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}
+          <div class="sub-stats">
+            <span title="تاريخ الاشتراك">📅 ${fmtJoin(p.joined)}</span>
+            <span title="الإنجاز">📈 ${p.completed || 0}/${p.total || 0} (${pct}%)</span>
+            <span title="رسائل بالمجتمع">💬 ${p.messages || 0}</span>
+            <span title="إنجازات منشورة">🏆 ${p.achievements || 0}</span>
+            <span title="فرص عمل نشرها">💼 ${p.jobs || 0}</span>
+          </div>
+        </div>
         <div class="c-actions">
           ${locked ? `<button class="btn btn-ghost btn-sm reset-dev" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">فك الجهاز</button>` : ""}
           <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "▶ تفعيل" : "⏸ إيقاف"}</button>
@@ -122,6 +134,16 @@ async function loadSubscribers() {
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }
 
+function fmtJoin(iso) { try { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; } catch (_) { return "—"; } }
+async function rpc(fn, body) {
+  const r = await fetchT(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY, Authorization: "Bearer " + TOKEN },
+    body: JSON.stringify(body || {}),
+  }, 20000);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
 async function callEdge(body, ms = 20000) {
   const r = await fetchT(`${SUPABASE_URL}/functions/v1/hyper-action`, {
     method: "POST",
