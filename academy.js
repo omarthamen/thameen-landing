@@ -97,7 +97,6 @@ async function guardAccess() {
     const r = await dbGet(`profiles?select=suspended&user_id=eq.${USER.id}`);
     if (r && r[0] && r[0].suspended) { showBlocked("suspended"); return false; }  // إيقاف يدوي من الأدمن فقط
   } catch (_) {}
-  recordLogin();                                            // تسجيل الدخول للمراقبة (لا يحظر)
   return true;
 }
 // سجّل الدخول: الجهاز + IP + الوقت (مرة كل ٣٠ دقيقة) — للمراقبة فقط
@@ -131,23 +130,35 @@ function showBlocked(kind) {
 // ====== تحميل المنصّة ======
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
+// جلب درس/قسم مع إعادة محاولة — يرجّع null لو فشل فعلاً (مو فاضي)
+async function fetchRetry(path, tries) {
+  for (let i = 0; i < (tries || 2); i++) {
+    try { return await dbGet(path); } catch (_) { if (i < (tries || 2) - 1) await new Promise((r) => setTimeout(r, 600)); }
+  }
+  return null;
+}
 async function loadAcademy() {
-  // افحص الجهاز واجلب البيانات بالتوازي (بدل ما ينتظرون بعض) — أسرع بكثير
   const guardP = guardAccess();
+  // الأقسام والدروس أهم شي — مع إعادة محاولة. والباقي عادي.
   const dataP = Promise.all([
-    dbGet("sections?select=*&order=sort.asc,created_at.asc").catch(() => []),
-    dbGet("lessons?select=*&order=sort.asc,created_at.asc").catch(() => []),
+    fetchRetry("sections?select=*&order=sort.asc,created_at.asc"),
+    fetchRetry("lessons?select=*&order=sort.asc,created_at.asc"),
     dbGet("progress?select=lesson_id,percent,completed").catch(() => dbGet("progress?select=lesson_id,completed").catch(() => [])),
     dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => [])),
   ]);
-  if (!(await guardP)) return;           // قفل الجهاز — يوقف كل شي لو جهاز مختلف
+  if (!(await guardP)) return;           // موقوف من الأدمن
   showOnboarding();
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
-  loadAvatars();
   const wrap = $("coursesCol");
   try {
     const [sections, lessons, progress, members] = await dataP;
+    // فشل تحميل حقيقي (null) — اعرض زر إعادة بدل "لا دورات"
+    if (sections === null || lessons === null) {
+      wrap.innerHTML = '<p class="hint" style="padding:14px">تعذّر تحميل الدورات (اتصال). <button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>';
+      $("lTitle").textContent = "—";
+      return;
+    }
     SECTIONS = sections || []; LESSONS = lessons || [];
     PCT = {}; DONE = new Set();
     (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
@@ -157,6 +168,8 @@ async function loadAcademy() {
     renderProgress();
     renderChallenge();
     renderCourses();
+    loadAvatars();                       // مؤجّل — بعد عرض الدورات (يقلل التزاحم)
+    recordLogin();                       // تسجيل الدخول للمراقبة — مؤجّل وغير حاجب
     if (SECTIONS.length) {
       let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
       const savedLesson = savedLid && LESSONS.find((l) => l.id === savedLid);
@@ -164,13 +177,12 @@ async function loadAcademy() {
       else { const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0]; openCourse(firstSec.id); }
       restoreView();
     } else {
-      const dbg = `توكن:${TOKEN ? "موجود ✓" : "مفقود ✗"} · أقسام:${SECTIONS.length} · دروس:${LESSONS.length}`;
-      wrap.innerHTML = `<p class="hint" style="padding:14px">لا توجد دورات.<br><b style="color:#ffb84d">${dbg}</b></p>`;
-      $("lTitle").textContent = "تشخيص v8 — " + dbg;
+      wrap.innerHTML = '<p class="hint" style="padding:14px">لا توجد دورات بعد.</p>';
+      $("lTitle").textContent = "—";
     }
   } catch (e) {
-    wrap.innerHTML = `<p class="hint" style="padding:14px">خطأ التحميل:<br><b style="color:#ff8f8f">${esc(e.message)}</b></p>`;
-    $("lTitle").textContent = "خطأ v8 — توكن:" + (TOKEN ? "موجود" : "مفقود");
+    wrap.innerHTML = '<p class="hint" style="padding:14px">تعذّر التحميل. <button class="btn btn-primary btn-sm" onclick="location.reload()">إعادة المحاولة</button></p>';
+    $("lTitle").textContent = "—";
   }
 }
 
