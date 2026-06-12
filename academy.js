@@ -402,17 +402,21 @@ function plItemHtml(l, i) {
 }
 // بوكس «قريبًا» — يحمّس لحلقات الذكاء الاصطناعي والأدوات
 const SOON_TOOLS = [
-  { n: "Claude AI", c: "cs-claude", ic: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.5 4 1.5 5 5.5 5.5-4 .5-5 1.5-5.5 5.5-.5-4-1.5-5-5.5-5.5 4-.5 5-1.5 5.5-5.5z"/><path d="M18.7 13.2c.25 1.9.7 2.35 2.3 2.6-1.6.25-2.05.7-2.3 2.6-.25-1.9-.7-2.35-2.3-2.6 1.6-.25 2.05-.7 2.3-2.6z"/></svg>' },
+  // شعار Claude الرسمي (وميض/سَنبرست)
+  { n: "Claude", c: "cs-claude", ic: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.2 5.2l13.6 13.6M18.8 5.2L5.2 18.8"/></svg>' },
+  // شعار Figma الرسمي
   { n: "Figma", c: "cs-figma", ic: '<svg viewBox="0 0 38 57"><path fill="#1abcfe" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/><path fill="#0acf83" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/><path fill="#ff7262" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/><path fill="#f24e1e" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/><path fill="#a259ff" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/></svg>' },
-  { n: "Premiere Pro", c: "cs-pr", ic: "<b>Pr</b>" },
+  // شعار Adobe Premiere Pro الحديث (مونوغرام Pr)
+  { n: "Premiere", c: "cs-pr", ic: "<b>Pr</b>" },
+  // شعار Adobe After Effects الحديث (مونوغرام Ae)
   { n: "After Effects", c: "cs-ae", ic: "<b>Ae</b>" },
 ];
 function comingSoonBox() {
   return `<div class="pl-soon">
     <span class="pl-soon-badge">قريبًا</span>
     <h4 class="pl-soon-title">سلسلة الاحتراف بالذكاء الاصطناعي</h4>
-    <p class="pl-soon-sub">حلقات جديدة تربط أقوى الأدوات مع الـAI وترفع شغلك لمستوى ثاني:</p>
-    <div class="pl-soon-tools">${SOON_TOOLS.map((t) => `<div class="cs-tool"><span class="cs-ic ${t.c}">${t.ic}</span><span class="cs-n">${t.n}</span></div>`).join("")}</div>
+    <p class="pl-soon-sub">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
+    <div class="pl-soon-stack">${SOON_TOOLS.map((t) => `<div class="cs-logo"><span class="cs-ic ${t.c}">${t.ic}</span><span class="cs-n">${esc(t.n)}</span></div>`).join("")}</div>
     <p class="pl-soon-foot">⚡ الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — استعدّوا!</p>
   </div>`;
 }
