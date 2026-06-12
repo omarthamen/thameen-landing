@@ -17,9 +17,16 @@ const authHeaders = (extra) => Object.assign(
   { apikey: SUPABASE_KEY, Authorization: "Bearer " + (TOKEN || SUPABASE_KEY) }, extra || {});
 
 async function dbGet(path) {
-  const r = await fetchT(`${SUPABASE_URL}/rest/v1/${path}`, { headers: authHeaders() });
-  if (!r.ok) { if (r.status === 401) logout(); throw new Error(await r.text()); }
-  return r.json();
+  // إعادة محاولة تلقائية (٣ مرات) لتحمّل تذبذب الشبكة
+  let lastErr;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetchT(`${SUPABASE_URL}/rest/v1/${path}`, { headers: authHeaders() }, 22000);
+      if (!r.ok) { if (r.status === 401) { logout(); throw new Error(await r.text()); } throw new Error(await r.text()); }
+      return r.json();
+    } catch (e) { lastErr = e; if (i < 2) await new Promise((res) => setTimeout(res, 700)); }
+  }
+  throw lastErr;
 }
 async function dbSend(method, path, body, prefer) {
   const r = await fetchT(`${SUPABASE_URL}/rest/v1/${path}`, {
