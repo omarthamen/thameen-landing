@@ -303,8 +303,11 @@
 /* ===== نافذة التعليمات ===== */
 .btn-guide{font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;color:#5BB8E8;background:rgba(91,184,232,.12);border:1px solid rgba(91,184,232,.32);border-radius:999px;padding:7px 15px;transition:.2s;white-space:nowrap}
 .btn-guide:hover{background:rgba(91,184,232,.22);color:#fff}
-.guide-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,6,10,.74);backdrop-filter:blur(7px)}
-.guide-card{position:relative;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;background:linear-gradient(165deg,#14161f,#0c0d13);border:1px solid rgba(91,184,232,.26);border-radius:26px;padding:36px 30px 30px;box-shadow:0 40px 100px rgba(0,0,0,.65)}
+.guide-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,6,10,.74);backdrop-filter:blur(7px);opacity:0;transition:opacity .3s ease}
+.guide-overlay.show{opacity:1}
+.guide-card{position:relative;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;background:linear-gradient(165deg,#14161f,#0c0d13);border:1px solid rgba(91,184,232,.26);border-radius:26px;padding:36px 30px 30px;box-shadow:0 40px 100px rgba(0,0,0,.65);transform-origin:top center;transform:scale(.9) translateY(14px);opacity:0;transition:transform .42s cubic-bezier(.2,.85,.25,1),opacity .35s ease}
+.guide-overlay.show .guide-card{transform:scale(1) translateY(0);opacity:1}
+.guide-overlay.closing .guide-card{transform:scale(.3) translateY(-44vh);opacity:0;transition:transform .46s cubic-bezier(.55,.08,.68,.2),opacity .4s ease}
 .guide-x{position:absolute;top:15px;inset-inline-start:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text-muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;transition:.2s}
 .guide-x:hover{background:rgba(255,255,255,.15);color:#fff}
 .guide-emoji{font-size:46px;text-align:center;line-height:1;margin-bottom:8px}

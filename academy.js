@@ -810,16 +810,25 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
   });
 })();
 
+// ====== نوافذ بأنميشن سموث (فتح/إغلاق) ======
+function openM(modal) { if (!modal) return; modal.classList.remove("closing"); modal.hidden = false; void modal.offsetWidth; modal.classList.add("show"); }
+function closeM(modal, cb) { if (!modal) return; modal.classList.remove("show"); modal.classList.add("closing"); setTimeout(() => { modal.hidden = true; modal.classList.remove("closing"); if (cb) cb(); }, 430); }
+function maybeShowChannels() {
+  let joined = null; try { joined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
+  if (!joined) openM($("channelsModal"));
+}
+
 // ====== نافذة التعليمات الترحيبية ======
+let onboarding = false;
 (function () {
   const modal = $("guideModal"); if (!modal) return;
-  const open = () => { modal.hidden = false; };
-  const close = () => { modal.hidden = true; };
+  const done = () => { const wasOnb = onboarding; onboarding = false; if (wasOnb) maybeShowChannels(); };  // بعد الترحيب → القنوات
+  const close = () => closeM(modal, done);
   const hideForever = () => { try { localStorage.setItem("thameen_guide_hidden", "1"); } catch (_) {} close(); };
   const x = $("guideX"); if (x) x.addEventListener("click", close);
   const ok = $("guideOk"); if (ok) ok.addEventListener("click", close);
   const hide = $("guideHide"); if (hide) hide.addEventListener("click", hideForever);
-  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", open);
+  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { onboarding = false; openM(modal); });
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
@@ -844,23 +853,21 @@ function channelsHtml() {
     `</div>`).join("");
 }
 (function () {
-  const html = channelsHtml();
-  const list = $("channelsList"); if (list) list.innerHTML = html;
-  const inGuide = $("guideChannels"); if (inGuide) inGuide.innerHTML = '<h3 class="guide-sub">انضم لقنواتنا</h3>' + html;
+  const list = $("channelsList"); if (list) list.innerHTML = channelsHtml();
   const modal = $("channelsModal"); if (!modal) return;
-  const close = () => { modal.hidden = true; };
+  const close = () => closeM(modal);
   const x = $("channelsX"); if (x) x.addEventListener("click", close);
-  const cb = $("channelsBtn"); if (cb) cb.addEventListener("click", () => { modal.hidden = false; });
+  const cb = $("channelsBtn"); if (cb) cb.addEventListener("click", () => openM(modal));
   const joined = $("channelsJoined"); if (joined) joined.addEventListener("click", () => { try { localStorage.setItem("thameen_channels_joined", "1"); } catch (_) {} close(); });
   const later = $("channelsLater"); if (later) later.addEventListener("click", close);
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
-// أول دخول: اعرض القنوات (لين ينضم)، وإذا انضم اعرض التعليمات (لين يخفيها)
+// أول دخول: الترحيب أولاً، وبعد إغلاقه تظهر القنوات تلقائيًا
 function showOnboarding() {
-  let chJoined = null, guideHidden = null;
-  try { chJoined = localStorage.getItem("thameen_channels_joined"); guideHidden = localStorage.getItem("thameen_guide_hidden"); } catch (_) {}
-  if (!chJoined) { const c = $("channelsModal"); if (c) c.hidden = false; }
-  else if (!guideHidden) { const g = $("guideModal"); if (g) g.hidden = false; }
+  let guideHidden = null, chJoined = null;
+  try { guideHidden = localStorage.getItem("thameen_guide_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
+  if (!guideHidden) { onboarding = true; openM($("guideModal")); }
+  else if (!chJoined) { openM($("channelsModal")); }
 }
 
 // ====== حسابي ======
