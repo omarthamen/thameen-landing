@@ -1446,3 +1446,28 @@ body {
 .offer-quote svg{width:18px;height:18px;color:var(--primary-light);vertical-align:-4px;margin-inline-start:4px}
 .ba-arrow svg{width:34px;height:34px}
 #openReview svg{width:17px;height:17px;vertical-align:-3px;margin-inline-start:5px}
+
+/* ===== كرت المشاهدات المميّز (featured) ===== */
+.pstat.featured{
+  position:relative; overflow:hidden;
+  background:linear-gradient(155deg, rgba(91,184,232,.16), rgba(139,124,246,.13) 55%, rgba(16,14,26,.35));
+  border-color:rgba(139,124,246,.4);
+  box-shadow:0 22px 55px rgba(86,64,170,.28), inset 0 0 46px rgba(139,124,246,.07);
+}
+.pstat.featured::before{
+  content:""; position:absolute; top:-34%; left:50%; transform:translateX(-50%);
+  width:180px; height:180px; border-radius:50%;
+  background:radial-gradient(circle, rgba(139,124,246,.4), transparent 70%);
+  filter:blur(22px); pointer-events:none; z-index:0;
+}
+.pstat.featured > *{ position:relative; z-index:1; }
+.pstat.featured .pstat-ic{
+  background:linear-gradient(135deg, #5BB8E8, #8B7CF6);
+  border-color:transparent; color:#fff;
+  box-shadow:0 8px 24px rgba(139,124,246,.5);
+}
+.pstat.featured .pstat-num b{
+  background:linear-gradient(115deg, #aed6ff, #c4b3ff 70%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.pstat.featured small{ color:#c9c3e8; }
