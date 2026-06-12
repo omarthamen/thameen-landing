@@ -128,20 +128,22 @@ function showBlocked(kind) {
 let SECTIONS = [], LESSONS = [], DONE = new Set(), CURSEC = null, CURLESSON = null;
 let PCT = {}, lastSaved = {}, MEMBER = null;
 async function loadAcademy() {
-  if (!(await guardDevice())) return;   // قفل الجهاز — يوقف كل شي لو جهاز مختلف
+  // افحص الجهاز واجلب البيانات بالتوازي (بدل ما ينتظرون بعض) — أسرع بكثير
+  const guardP = guardDevice();
+  const dataP = Promise.all([
+    dbGet("sections?select=*&order=sort.asc,created_at.asc").catch(() => []),
+    dbGet("lessons?select=*&order=sort.asc,created_at.asc").catch(() => []),
+    dbGet("progress?select=lesson_id,percent,completed").catch(() => dbGet("progress?select=lesson_id,completed").catch(() => [])),
+    dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => [])),
+  ]);
+  if (!(await guardP)) return;           // قفل الجهاز — يوقف كل شي لو جهاز مختلف
   try { if (!localStorage.getItem("thameen_guide_hidden")) { const gm = $("guideModal"); if (gm) gm.hidden = false; } } catch (_) {}
   $("meName").textContent = (USER && (USER.user_metadata?.name || USER.email)) || "";
   renderSocials();
   loadAvatars();
   const wrap = $("coursesCol");
   try {
-    const sections = await dbGet("sections?select=*&order=sort.asc,created_at.asc");
-    const lessons = await dbGet("lessons?select=*&order=sort.asc,created_at.asc");
-    let progress = [], members = [];
-    try { progress = await dbGet("progress?select=lesson_id,percent,completed"); }
-    catch (_) { try { progress = await dbGet("progress?select=lesson_id,completed"); } catch (_) {} }
-    try { members = await dbGet("members?select=calls_total,calls_used,created_at"); }
-    catch (_) { try { members = await dbGet("members?select=calls_total,calls_used"); } catch (_) {} }
+    const [sections, lessons, progress, members] = await dataP;
     SECTIONS = sections || []; LESSONS = lessons || [];
     PCT = {}; DONE = new Set();
     (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
@@ -260,7 +262,7 @@ function renderCourses() {
     const done = ls.filter((l) => DONE.has(l.id)).length;
     const pct = ls.length ? Math.round((done / ls.length) * 100) : 0;
     const full = ls.length && done === ls.length;
-    const cover = sec.cover_url ? `<img src="${esc(sec.cover_url)}" alt="">` : `<span class="crs-ph">📚</span>`;
+    const cover = sec.cover_url ? `<img src="${esc(sec.cover_url)}" alt="" loading="lazy" decoding="async">` : `<span class="crs-ph">📚</span>`;
     const secs = ls.reduce((a, l) => a + (l.duration || 0), 0);
     const durTxt = secs ? ` · ${fmtDurAr(secs)}` : "";
     return `<button class="crs-card ${sec.id === CURSEC ? "on" : ""}" data-sid="${sec.id}">
@@ -657,6 +659,12 @@ function updateScrollBtn() {
   btn.addEventListener("click", () => { box.scrollTop = box.scrollHeight; updateScrollBtn(); });
 })();
 function startCommPoll() { stopCommPoll(); commTimer = setInterval(() => loadMessages(false), 4000); }
+// أوقف التحديث الدوري لما المستخدم يغادر التبويب، وارجّعه لما يرجع (يوفّر طلبات ويسرّع)
+document.addEventListener("visibilitychange", () => {
+  const onComm = document.querySelector(".nav-tab.on")?.dataset.view === "community";
+  if (document.hidden) stopCommPoll();
+  else if (onComm && appView && !appView.hidden) { loadMessages(false); startCommPoll(); }
+});
 function stopCommPoll() { if (commTimer) { clearInterval(commTimer); commTimer = null; } }
 
 function restoreView() {
