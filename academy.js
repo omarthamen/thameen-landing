@@ -373,8 +373,14 @@ function achCard(m, isAdmin) {
     ${mediaHtml(m)}${embedFor(m.text)}
     ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
 }
+// تحويل الأرقام العربية/الفارسية (٠١٢٣ / ۰۱۲۳) إلى إنجليزية (0123)
+function toLatinDigits(s) {
+  return String(s || "")
+    .replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x0660)
+    .replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 0x06F0);
+}
 function normLink(s) {
-  s = (s || "").trim();
+  s = toLatinDigits((s || "").trim());
   if (!s) return "";
   if (/^https?:\/\//i.test(s)) return s;                       // رابط كامل
   if (/wa\.me|whatsapp\.com|t\.me|instagram\.com|youtube\.com|tiktok\.com/i.test(s)) return "https://" + s.replace(/^\/+/, "");
