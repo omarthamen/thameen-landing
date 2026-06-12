@@ -6,9 +6,15 @@ const ADMIN_EMAIL = "omarthamen@gmail.com";
 
 // روابط التواصل بالفوتر (عدّلها هنا) — معرّفة بالأعلى لتفادي مشكلة الترتيب
 const SOCIALS = [
-  { n: "📷 إنستقرام", u: "https://www.instagram.com/thameen.j/" },
-  { n: "▶️ يوتيوب", u: "https://www.youtube.com/channel/UCMeR85JgB5jXCZTQy1C69pA" },
+  { n: "إنستقرام", u: "https://www.instagram.com/thameen.j/", ic: "instagram" },
+  { n: "يوتيوب", u: "https://www.youtube.com/channel/UCMeR85JgB5jXCZTQy1C69pA", ic: "youtube" },
 ];
+const SOCIAL_SVG = {
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.3 9.2l5 2.8-5 2.8z" fill="currentColor" stroke="none"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.3 2.1 1.5 3.4 3.5 3.6v2.4c-1.2.1-2.3-.3-3.4-.9v4.9c0 4.6-5 6-7.4 2.7-1.6-2.1-.8-5.7 3-5.8v2.5c-.3.05-.6.13-.9.25-.9.4-1.2 1.3-1 2 .4 1.4 2.9 1.3 2.9-.9V3z"/></svg>',
+  whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.1-.3.2-.5.1-.7-.3-1.5-.6-2.1-1.4-.2-.3.2-.3.5-1 .1-.1 0-.3 0-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.1 1.6 2.5 4 3.4 1.4.6 2 .6 2.7.5.4-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1z"/></svg>',
+};
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -97,7 +103,7 @@ function setNavProfile() {
 // ====== الفوتر: روابط التواصل ======
 function renderSocials() {
   const el = $("footSocials"); if (!el) return;
-  el.innerHTML = SOCIALS.map((s) => `<a href="${s.u}"${s.u !== "#" ? ' target="_blank" rel="noopener"' : ""}>${s.n}</a>`).join("");
+  el.innerHTML = SOCIALS.map((s) => `<a class="soc-link" href="${s.u}"${s.u !== "#" ? ' target="_blank" rel="noopener"' : ""}><span class="soc-ic ${s.ic ? "si-" + s.ic : ""}">${SOCIAL_SVG[s.ic] || ""}</span><span>${esc(s.n)}</span></a>`).join("");
 }
 
 // ====== حماية: قفل الجهاز + علامة مائية ======
@@ -1206,6 +1212,16 @@ async function loadNotifs() {
   try { NOTIFS = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=30"); } catch (_) { NOTIFS = []; }
   renderNotifs();
 }
+const NOTIF_ICONS = {
+  call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.2l5 2.8-5 2.8z"/></svg>',
+  general: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+};
+function notifIcon(kind) {
+  if (kind === "call") return { cls: "ni-call", svg: NOTIF_ICONS.call };
+  if (kind === "video") return { cls: "ni-video", svg: NOTIF_ICONS.video };
+  return { cls: "ni-gen", svg: NOTIF_ICONS.general };
+}
 function renderNotifs() {
   const list = $("notifList"), badge = $("bellBadge"); if (!list) return;
   const seen = notifSeenTs(); let unread = 0;
@@ -1213,8 +1229,12 @@ function renderNotifs() {
   else {
     list.innerHTML = NOTIFS.map((n) => {
       const ts = new Date(n.created_at).getTime(), isNew = ts > seen; if (isNew) unread++;
-      const ic = n.kind === "call" ? "📞" : (n.kind === "video" ? "🎬" : "🔔");
-      return `<div class="notif-item ${isNew ? "unread" : ""}"><span class="notif-ic">${ic}</span><div class="notif-c"><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ""}<small>${timeAgo(ts)}</small></div></div>`;
+      const ic = notifIcon(n.kind);
+      return `<div class="notif-item ${isNew ? "unread" : ""}">
+        <span class="notif-ic ${ic.cls}">${ic.svg}</span>
+        <div class="notif-c"><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ""}<small>${timeAgo(ts)}</small></div>
+        ${isNew ? '<span class="notif-dot"></span>' : ""}
+      </div>`;
     }).join("");
   }
   if (badge) { if (unread > 0) { badge.textContent = toAr(unread); badge.hidden = false; } else badge.hidden = true; }

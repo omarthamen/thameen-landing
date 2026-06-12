@@ -187,7 +187,7 @@ function toLocalNum(n) { return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥
       // مكالمة جديدة تتراكم في الأرشيف (تظهر مكتملة تلقائيًا بعد انتهاء وقتها)
       await dbSend("POST", "group_calls", { call_at: iso, duration_min: dur }, "return=minimal");
       // إشعار تلقائي لكل المشتركين
-      await dbSend("POST", "notifications", { title: "📞 موعد مكالمة جماعية جديدة", body: `المكالمة يوم ${fmtCallDate(iso)}. جهّز أسئلتك من صفحة «مكالماتي».`, kind: "call" }, "return=minimal");
+      await dbSend("POST", "notifications", { title: "موعد مكالمة جماعية جديدة", body: `المكالمة يوم ${fmtCallDate(iso)} — جهّز أسئلتك من صفحة «مكالماتي».`, kind: "call" }, "return=minimal");
       setMsg(msg, "تم — وانرسل إشعار لكل المشتركين ✅", true);
       loadGroupCall();
     } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
