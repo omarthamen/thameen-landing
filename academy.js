@@ -398,7 +398,7 @@ function renderPlaylist(ls) {
         <span class="pl-fold-meta">${doneN}/${group.length}${(() => { const fs = group.reduce((a, x) => a + (x.duration || 0), 0); return fs ? " · " + fmtDur(fs) : ""; })()}</span>
         <span class="pl-fold-arrow">${chevron}</span>
       </button>
-      <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}</div>
+      <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}<div class="pl-fold-end">نهاية المجلّد</div></div>
     </div>`;
   });
   wrap.innerHTML = html;
