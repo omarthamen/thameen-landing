@@ -202,15 +202,22 @@ function openCourse(sid) {
   else { CURLESSON = null; renderPlaylist([]); $("lTitle").textContent = "—"; $("playerHost").innerHTML = '<p class="hint" style="padding:30px;text-align:center">لا دروس في هذا القسم بعد.</p>'; $("lDesc").innerHTML = ""; }
 }
 
+// إزالة الإيموجي من النصوص (عناوين أنظف)
+function stripEmoji(s) {
+  return String(s || "")
+    .replace(/[\u{1F000}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2300}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{2122}\u{2139}]/gu, "")
+    .replace(/\s{2,}/g, " ").trim();
+}
 // وصف الدرس: روابط كبطاقات مرتبة + زر عرض المزيد/أقل
+function svgIc(paths) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`; }
 function descIcon(u) {
-  if (/youtube\.com|youtu\.be/i.test(u)) return "▶️";
-  if (/drive\.google|docs\.google/i.test(u)) return "📁";
-  if (/notion\./i.test(u)) return "📝";
-  if (/github\./i.test(u)) return "💻";
-  if (/thameen\.shop/i.test(u)) return "🛒";
-  if (/figma|freepik|flaticon|pixabay|epidemicsound|artlist|sketchfab|cgtrader|polyhaven|listary|blender|malloy/i.test(u)) return "🌐";
-  return "🔗";
+  if (/youtube\.com|youtu\.be/i.test(u)) return svgIc('<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5-5.5 3.5z" fill="currentColor" stroke="none"/>');
+  if (/drive\.google|docs\.google/i.test(u)) return svgIc('<path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>');
+  if (/notion\.|notion\.site/i.test(u)) return svgIc('<path d="M7 3h8l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 12h6M9 16h4"/>');
+  if (/github\./i.test(u)) return svgIc('<path d="M9 8l-4 4 4 4"/><path d="M15 8l4 4-4 4"/>');
+  if (/thameen\.shop/i.test(u)) return svgIc('<path d="M9 7V6a3 3 0 0 1 6 0v1"/><path d="M4.5 7h15l-1.1 12.1a1 1 0 0 1-1 .9H6.6a1 1 0 0 1-1-.9z"/>');
+  if (/\.(com|io|net|org|sg|shop|site|sa)\b/i.test(u)) return svgIc('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/>');
+  return svgIc('<path d="M9.5 14.5l5-5"/><path d="M10.8 7.2l1-1a3.5 3.5 0 0 1 5 5l-2 2"/><path d="M13.2 16.8l-1 1a3.5 3.5 0 0 1-5-5l2-2"/>');
 }
 function descHost(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (_) { return u; } }
 function renderLessonDesc(text) {
@@ -227,15 +234,16 @@ function renderLessonDesc(text) {
   const LIMIT = 4;
   const rows = items.map((it, i) => {
     const extra = i >= LIMIT ? " desc-extra" : "";
-    if (!it.link) return `<div class="desc-note${extra}">${esc(it.text)}</div>`;
+    if (!it.link) return `<div class="desc-note${extra}">${esc(stripEmoji(it.text))}</div>`;
     return `<a class="desc-item${extra}" href="${esc(it.url)}" target="_blank" rel="noopener">
       <span class="desc-ic">${descIcon(it.url)}</span>
-      <span class="desc-label">${esc(it.label)}</span>
-      <span class="desc-open">فتح ↗</span></a>`;
+      <span class="desc-label">${esc(stripEmoji(it.label))}</span>
+      <span class="desc-open">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>`;
   }).join("");
   const hidden = items.length - LIMIT;
   const more = hidden > 0 ? `<button type="button" class="desc-toggle" data-n="${hidden}">عرض جميع التفاصيل (${hidden}+)</button>` : "";
-  box.innerHTML = `<div class="desc-card"><h4 class="desc-h"><span>📎</span> الروابط والمرفقات</h4><div class="desc-list">${rows}</div>${more}</div>`;
+  const hIcon = '<svg class="desc-h-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3l7.8-7.8"/></svg>';
+  box.innerHTML = `<div class="desc-card"><h4 class="desc-h">${hIcon} الروابط والمرفقات</h4><div class="desc-list">${rows}</div>${more}</div>`;
   const tg = box.querySelector(".desc-toggle");
   if (tg) tg.addEventListener("click", () => {
     const exp = box.classList.toggle("desc-expanded");
@@ -249,7 +257,7 @@ function renderPlaylist(ls) {
   wrap.innerHTML = ls.length ? ls.map((l, i) => `
     <button class="pl-item ${l.id === CURLESSON ? "on" : ""}" data-lid="${l.id}">
       <span class="pl-num ${DONE.has(l.id) ? "done" : ""}">${DONE.has(l.id) ? "✓" : i + 1}</span>
-      <span class="pl-name">${esc(l.title)}</span>
+      <span class="pl-name">${esc(stripEmoji(l.title))}</span>
     </button>`).join("") : '<p class="hint" style="padding:14px">لا دروس بعد.</p>';
   wrap.querySelectorAll(".pl-item").forEach((b) => b.addEventListener("click", () => playLesson(b.dataset.lid)));
 }
@@ -258,7 +266,7 @@ function playLesson(id) {
   const l = LESSONS.find((x) => x.id === id); if (!l) return;
   CURLESSON = id;
   try { localStorage.setItem("thameen_lesson", id); } catch (_) {}
-  $("lTitle").textContent = l.title;
+  $("lTitle").textContent = stripEmoji(l.title);
   const host = $("playerHost");
   host.innerHTML = l.embed_url
     ? `<iframe src="${esc(l.embed_url)}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
