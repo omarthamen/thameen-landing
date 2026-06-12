@@ -117,45 +117,20 @@ function showBlocked() {
     <a class="blocked-btn" href="https://www.instagram.com/thameen.j/" target="_blank" rel="noopener">تواصل مع الدعم لفك الجهاز</a>
   </div></div>`;
 }
-// العلامة المائية مخفية دائمًا، وتظهر فقط لحظة الاشتباه بتسجيل/تصوير الشاشة
-let wmTimer = null, wmWired = false;
-function wmShow(holdMs) {
+// العلامة المائية تظهر خفيفة ومتحركة أثناء تشغيل الفيديو فقط، وتختفي بعد التوقف
+let wmTimer = null;
+function wmShow() {
   const el = $("wmOverlay"); if (!el) return;
   el.classList.add("show");
-  if (wmTimer) { clearTimeout(wmTimer); wmTimer = null; }
-  if (holdMs) wmTimer = setTimeout(() => el.classList.remove("show"), holdMs);
-}
-function wmHideSoon() {
-  const el = $("wmOverlay"); if (!el) return;
   if (wmTimer) clearTimeout(wmTimer);
-  wmTimer = setTimeout(() => el.classList.remove("show"), 2500);
+  wmTimer = setTimeout(() => el.classList.remove("show"), 2500); // تختفي بعد توقّف التشغيل بثوانٍ
 }
 function setWatermark() {
   const el = $("wmOverlay"); if (!el || !USER) return;
   const raw = (USER.email || myName() || "ثَمين");
   const label = raw.replace(/[&<>]/g, "");
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='170'><text x='10' y='90' transform='rotate(-22 150 85)' fill='rgba(255,255,255,0.22)' font-size='19' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
-  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;  // جاهزة بس مخفية
-  if (wmWired) return; wmWired = true;
-
-  // ١) اختصارات لقطة/تسجيل الشاشة → اعرضها فورًا وثبّتها ١٢ ثانية
-  window.addEventListener("keydown", (e) => {
-    const k = e.key || "";
-    const macShot = e.metaKey && e.shiftKey && ["3", "4", "5", "#", "$", "%"].includes(k); // ماك: لقطة/تسجيل
-    const winShot = k === "PrintScreen" || (e.metaKey && (k === "g" || k === "G")); // ويندوز/Game Bar
-    if (macShot || winShot) wmShow(12000);
-  });
-
-  // ٢) خروج من المتصفح لأداة تسجيل (فقد التركيز) — مع تجاهل التركيز على الفيديو نفسه
-  window.addEventListener("blur", () => setTimeout(() => {
-    const ae = document.activeElement;
-    if (ae && ae.tagName === "IFRAME") return; // مجرد ضغط على الفيديو — طبيعي
-    wmShow();
-  }, 0));
-  window.addEventListener("focus", wmHideSoon);
-
-  // ٣) إخفاء التبويب/تبديل التطبيق (احتمال فتح مسجّل شاشة)
-  document.addEventListener("visibilitychange", () => { if (document.hidden) wmShow(); else wmHideSoon(); });
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='170'><text x='10' y='90' transform='rotate(-22 150 85)' fill='rgba(255,255,255,0.16)' font-size='18' font-weight='700' font-family='IBM Plex Sans Arabic, Arial, sans-serif'>${label}</text></svg>`;
+  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
 // ====== تحميل المنصّة ======
@@ -287,6 +262,7 @@ function attachPlayer(ifr, id) {
       try { player.getDuration((d) => { if (d > 0) player.setCurrentTime(Math.max(0, (savedPct / 100) * d - 2)); }); } catch (_) {}
     }
     player.on("timeupdate", (e) => {
+      wmShow();   // العلامة المائية تظهر أثناء التشغيل فقط
       const t = (e && e.seconds) || 0;
       const d = (e && e.duration) || dur; dur = d;
       if (watched === null) watched = ((PCT[id] || 0) / 100) * (d || 0); // ابدأ من المحفوظ
