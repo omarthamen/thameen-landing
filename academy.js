@@ -398,11 +398,36 @@ function updateWatchUI(id) {
   }
 }
 
+// التقاط مدة الفيديو تلقائيًا وحفظها (مرة وحدة لكل درس) — يزيد الإجمالي تلقائيًا
+let savedDur = {};
+async function saveDuration(id, secs) {
+  try {
+    await fetchT(`${SUPABASE_URL}/rest/v1/rpc/set_lesson_duration`, {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ p_id: id, p_secs: secs }),
+    });
+  } catch (_) {}
+}
+function maybeCaptureDuration(id, d) {
+  d = Math.round(d || 0);
+  if (d <= 0 || savedDur[id]) return;
+  const lo = LESSONS.find((x) => x.id === id);
+  if (lo && (!lo.duration || lo.duration === 0)) {
+    savedDur[id] = true;
+    lo.duration = d;
+    saveDuration(id, d);
+    renderCourses();
+    renderPlaylist(LESSONS.filter((x) => x.section_id === CURSEC));
+  }
+}
+
 // مشغّل Bunny عبر مكتبة player.js + عدّاد مشاهدة مضاد للتخطّي
 function attachPlayer(ifr, id) {
   const player = new playerjs.Player(ifr);
   let lastT = null, watched = null, dur = 0;
   player.on("ready", () => {
+    // التقط مدة الفيديو تلقائيًا وسجّلها (مرة وحدة لكل درس)
+    try { player.getDuration((d) => maybeCaptureDuration(id, d)); } catch (_) {}
     // كمّل من مكان ما وقف (لو فيه تقدّم محفوظ بين ١٪ و٩٠٪)
     const savedPct = PCT[id] || 0;
     if (savedPct > 1 && savedPct < 90) {
@@ -411,6 +436,7 @@ function attachPlayer(ifr, id) {
     player.on("timeupdate", (e) => {
       const t = (e && e.seconds) || 0;
       const d = (e && e.duration) || dur; dur = d;
+      if (d > 0) maybeCaptureDuration(id, d);
       if (watched === null) watched = ((PCT[id] || 0) / 100) * (d || 0); // ابدأ من المحفوظ
       // احسب فقط المشاهدة الطبيعية (تقدّم ≤ ثانيتين) — السكِب ما ينحسب
       if (lastT !== null && t > lastT && (t - lastT) <= 2) watched += (t - lastT);
