@@ -363,12 +363,14 @@ async function loadCourses() {
         </div>
         <div class="lessons">${ls.map((l) => `<div class="lesson-row" data-lid="${l.id}">
           ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">🎬</div>`}
-          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}${l.description ? " · وصف ✔" : ""}</small></div>
+          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}${l.description ? " · وصف ✔" : ""}${l.folder ? ` · 📁 ${esc(l.folder)}` : ""}</small></div>
           <button class="btn btn-ghost btn-sm lesson-edit">✏️ تعديل</button>
           <button class="btn btn-danger btn-sm lesson-del">حذف</button>
           <div class="lesson-editor" hidden>
             <label class="lbl">عنوان الفيديو</label>
             <input type="text" class="fld le-title" value="${esc(l.title)}" />
+            <label class="lbl">📁 المجلد / الموضوع (اختياري) — اكتب نفس الاسم لعدة دروس ليتجمّعون تحت مجلّد واحد</label>
+            <input type="text" class="fld le-folder" value="${esc(l.folder || "")}" placeholder="مثلاً: أساسيات التلوين" />
             <label class="lbl">رابط Bunny (iframe) — اتركه فاضي إذا ما تبي تغيّره</label>
             <input type="text" class="fld le-embed" value="${esc(l.embed_url || "")}" placeholder="https://iframe.mediadelivery.net/embed/..." />
             <label class="lbl">الوصف / الروابط والمرفقات (يظهر تحت الفيديو للمشترك)</label>
@@ -379,6 +381,7 @@ async function loadCourses() {
         <details class="add-lesson">
           <summary>＋ إضافة درس</summary>
           <input type="text" class="fld l-title" placeholder="عنوان الدرس" />
+          <input type="text" class="fld l-folder" placeholder="📁 المجلد/الموضوع (اختياري) — نفس الاسم يجمع عدة دروس" />
           <input type="text" class="fld l-embed" placeholder="رابط Bunny (iframe embed) أو الصق كود iframe" />
           <label class="lbl">صورة مصغّرة (ثَمنيل)</label>
           <input type="file" class="fld l-thumb" accept="image/*" />
@@ -422,7 +425,8 @@ async function loadCourses() {
           if (!title) { setMsg(msg, "العنوان مطلوب.", false); return; }
           const embedRaw = row.querySelector(".le-embed").value.trim();
           const desc = row.querySelector(".le-desc").value.trim();
-          const patch = { title, description: desc || null };
+          const folder = row.querySelector(".le-folder").value.trim();
+          const patch = { title, description: desc || null, folder: folder || null };
           if (embedRaw) patch.embed_url = parseEmbed(embedRaw);
           saveBtn.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
           try {
@@ -439,13 +443,14 @@ async function loadCourses() {
         const title = card.querySelector(".l-title").value.trim();
         if (!title) { setMsg(msg, "اكتب عنوان الدرس.", false); return; }
         const embed = parseEmbed(card.querySelector(".l-embed").value);
+        const folder = card.querySelector(".l-folder").value.trim();
         const chapters = parseChapters(card.querySelector(".l-chapters").value);
         const file = card.querySelector(".l-thumb").files[0];
         addBtn.disabled = true; setMsg(msg, "جارٍ الحفظ…", true);
         try {
           let thumb = null;
           if (file) thumb = await uploadFile(file);
-          await dbSend("POST", "lessons", { section_id: sid, title, embed_url: embed || null, thumb_url: thumb, chapters }, "return=minimal");
+          await dbSend("POST", "lessons", { section_id: sid, title, embed_url: embed || null, thumb_url: thumb, chapters, folder: folder || null }, "return=minimal");
           loadCourses();
         } catch (x) { setMsg(msg, "خطأ: " + x.message, false); addBtn.disabled = false; }
       });

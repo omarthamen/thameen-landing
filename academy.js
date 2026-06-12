@@ -317,15 +317,40 @@ function renderLessonDesc(text) {
   });
 }
 
+function plItemHtml(l, i) {
+  return `<button class="pl-item ${l.id === CURLESSON ? "on" : ""}" data-lid="${l.id}">
+      <span class="pl-num ${DONE.has(l.id) ? "done" : ""}">${DONE.has(l.id) ? "✓" : i + 1}</span>
+      <span class="pl-name">${esc(stripEmoji(l.title))}</span>
+    </button>`;
+}
 function renderPlaylist(ls) {
   const wrap = $("plList");
   if (!wrap) return;
-  wrap.innerHTML = ls.length ? ls.map((l, i) => `
-    <button class="pl-item ${l.id === CURLESSON ? "on" : ""}" data-lid="${l.id}">
-      <span class="pl-num ${DONE.has(l.id) ? "done" : ""}">${DONE.has(l.id) ? "✓" : i + 1}</span>
-      <span class="pl-name">${esc(stripEmoji(l.title))}</span>
-    </button>`).join("") : '<p class="hint" style="padding:14px">لا دروس بعد.</p>';
+  if (!ls.length) { wrap.innerHTML = '<p class="hint" style="padding:14px">لا دروس بعد.</p>'; return; }
+  const folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>';
+  const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
+  const seen = new Set(); let html = "";
+  ls.forEach((l, idx) => {
+    const f = (l.folder || "").trim();
+    if (!f) { html += plItemHtml(l, idx); return; }
+    if (seen.has(f)) return;
+    seen.add(f);
+    const group = ls.filter((x) => (x.folder || "").trim() === f);
+    const doneN = group.filter((x) => DONE.has(x.id)).length;
+    const open = group.some((x) => x.id === CURLESSON);
+    html += `<div class="pl-folder ${open ? "open" : ""}">
+      <button class="pl-fold-head" type="button">
+        <span class="pl-fold-ic">${folderSvg}</span>
+        <span class="pl-fold-name">${esc(stripEmoji(f))}</span>
+        <span class="pl-fold-meta">${doneN}/${group.length}</span>
+        <span class="pl-fold-arrow">${chevron}</span>
+      </button>
+      <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}</div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
   wrap.querySelectorAll(".pl-item").forEach((b) => b.addEventListener("click", () => playLesson(b.dataset.lid)));
+  wrap.querySelectorAll(".pl-fold-head").forEach((b) => b.addEventListener("click", () => b.closest(".pl-folder").classList.toggle("open")));
 }
 
 function playLesson(id) {
