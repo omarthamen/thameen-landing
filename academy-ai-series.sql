@@ -21,12 +21,12 @@ insert into public.lessons (section_id, title, embed_url, description, folder, s
 select s.id, v.title, v.embed_url, v.description, 'سلسلة الذكاء الاصطناعي', v.sort
 from (select id from public.sections where title ilike '%محترف%' order by sort, created_at limit 1) s
 cross join (values
-  ('Claude + فيقما + الأفتر إفكتس',
-   'https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb',
-   'تصميم وحركة بالذكاء الاصطناعي.', 901),
   ('تحميل التطبيقات وربطها بالـ MCP',
    'https://iframe.mediadelivery.net/embed/281396/5b04f5da-9b96-480a-81c1-11d1776faea1',
-   'التأسيس — تحميل التطبيقات وربطها بالـ MCP مرة واحدة.', 902),
+   'التأسيس — تحميل التطبيقات وربطها بالـ MCP مرة واحدة.', 901),
+  ('Claude + فيقما + الأفتر إفكتس',
+   'https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb',
+   'تصميم وحركة بالذكاء الاصطناعي.', 902),
   ('Claude AI + بريمير برو',
    'https://iframe.mediadelivery.net/embed/281396/e4a8f102-c0c8-4e0c-a89e-ccab446d7b8a',
    'مونتاج وتحكم كامل في التايملاين.', 903)
