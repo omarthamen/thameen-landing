@@ -18,7 +18,7 @@
   <link rel="dns-prefetch" href="https://cdn.embed.ly" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=12" />
-  <link rel="stylesheet" href="academy.css?v=42" />
+  <link rel="stylesheet" href="academy.css?v=43" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -78,8 +78,8 @@
             القنوات والتحديثات
           </button>
           <button class="nav-menu-item" id="guideBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h6"/></svg>
-            تعليمات مهمة
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg>
+            رسائلي
           </button>
           <button class="nav-menu-item danger" id="logoutBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -287,27 +287,29 @@
     <div id="guideModal" class="guide-overlay" hidden>
       <div class="guide-card">
         <button class="guide-x" id="guideX" type="button" aria-label="إغلاق">✕</button>
-        <div class="guide-emoji">🌹</div>
-        <h2 class="guide-title">ألف مبروك على حصولك على الدورة</h2>
-        <p class="guide-lead">تقدر تدخل الموقع وتروح لقسم «دوراتي» وراح تلقاها جاهزة إلك.</p>
-        <h3 class="guide-sub">نصائح سريعة للاستفادة القصوى</h3>
+        <div class="guide-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg></div>
+        <h2 class="guide-title">رسائلي</h2>
+        <p class="guide-lead">أهلاً فيك في أكاديمية ثَمين 🤍 — هنا تلقى تعليمات البداية، وكل رسائل ثَمين التحفيزية توصلك يوم بيوم حسب رحلتك.</p>
+
+        <h3 class="guide-sub">ابدأ من هنا</h3>
         <ul class="guide-list">
-          <li>شاهد الدروس بتركيز ويفضّل تعيدها أكثر من مرة</li>
-          <li>امشِ خطوة بخطوة بدون ما تتجاوز أي مقطع</li>
-          <li>طبّق مباشرة بعد المشاهدة (خصوصاً التلوين والموسيقى)</li>
-          <li>استخدم لقطاتك أو من مواقع مثل Pixels وجرّب تسوي سيناريو كامل</li>
-          <li>شارك تطبيقاتك بالواتساب حتى نساعدك ونصحّح الأخطاء</li>
-          <li>دوّن ملاحظاتك حتى ترجع لها لاحقاً</li>
-          <li>خصّص وقت ثابت للتعلم حتى تستمر</li>
-          <li>إذا صعب عليك شي، ارجع وكرّر الدرس</li>
-          <li>لا تستعجل النتائج، التطور يحتاج ممارسة مستمرة</li>
+          <li>ادخل قسم «الدورات» وابدأ من أول درس — تقدّمك ينحفظ تلقائيًا وتقدر تكمّل من وين وقفت.</li>
+          <li>شاهد الدروس بتركيز ويفضّل تعيدها أكثر من مرة.</li>
+          <li>امشِ خطوة بخطوة بدون ما تتجاوز أي مقطع.</li>
+          <li>طبّق مباشرة بعد المشاهدة (خصوصاً التلوين والموسيقى).</li>
+          <li>استخدم لقطاتك أو من مواقع مثل Pixels وجرّب تسوي سيناريو كامل.</li>
+          <li>شارك تطبيقاتك في «المجتمع» حتى نساعدك ونصحّح الأخطاء، وتابع «فرص العمل».</li>
+          <li>دوّن ملاحظاتك، خصّص وقت ثابت للتعلم، ولا تستعجل النتائج — التطور يحتاج استمرار.</li>
         </ul>
-        <p class="guide-foot">وأي سؤال أو فكرة عندك، شاركها ويانا بالقروب 🤍</p>
-        <p class="guide-enjoy">مشاهدة ممتعة</p>
+
+        <h3 class="guide-sub">رسائل ثَمين</h3>
+        <p class="hint" style="margin:-6px 0 12px">رسالة تحفيزية تجيك كل يوم من بداية رحلتك. الأحدث بالأعلى.</p>
+        <div id="inboxList" class="inbox-list"></div>
         <div id="guideChannels"></div>
+
         <div class="guide-actions">
           <button class="btn btn-primary" id="guideOk" type="button">فهمت، نبدأ</button>
-          <button class="btn btn-ghost" id="guideHide" type="button">عدم الإظهار مجددًا</button>
+          <button class="btn btn-ghost" id="guideHide" type="button">عدم الإظهار تلقائيًا</button>
         </div>
       </div>
     </div>
@@ -330,6 +332,6 @@
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
   <script defer src="https://meet.jit.si/external_api.js"></script>
-  <script defer src="academy.js?v=69"></script>
+  <script defer src="academy.js?v=44"></script>
 </body>
 </html>

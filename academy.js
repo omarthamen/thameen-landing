@@ -317,6 +317,27 @@ function renderChallenge() {
   if (x && !x._wired) { x._wired = true; x.addEventListener("click", () => { try { localStorage.setItem("thameen_chal_dismiss", String(dayNum)); } catch (_) {} banner.hidden = true; }); }
 }
 
+// صندوق «رسائلي»: كل الرسائل التحفيزية المستلمة حسب تاريخ الانضمام (الأحدث فوق)
+function renderInbox() {
+  const box = $("inboxList"); if (!box) return;
+  const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
+  if (!raw) { box.innerHTML = '<p class="hint">رسائلك التحفيزية بتبدأ توصلك من أول يوم اشتراك.</p>'; return; }
+  const start = new Date(raw), now = new Date();
+  const elapsed = (now - start) / 86400000;
+  const today = Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
+  let html = "";
+  for (let d = today; d >= 1; d--) {
+    const date = new Date(start.getTime() + (d - 1) * 86400000);
+    const msg = d >= 90 ? CHAL_MILE[90] : challengeMsg(d);
+    const mile = !!CHAL_MILE[d];
+    html += `<div class="inbox-msg ${mile ? "mile" : ""} ${d === today ? "new" : ""}">
+      <div class="inbox-meta"><span class="inbox-day">اليوم ${toAr(d)}</span><span class="inbox-date">${fmtDate(date)}</span>${d === today ? '<span class="inbox-new">جديد</span>' : ""}</div>
+      <p>${esc(msg)}</p>
+    </div>`;
+  }
+  box.innerHTML = html;
+}
+
 // ====== عمود دوراتي ======
 function renderCourses() {
   const wrap = $("coursesCol");
@@ -1010,7 +1031,7 @@ let onboarding = false;
   const x = $("guideX"); if (x) x.addEventListener("click", close);
   const ok = $("guideOk"); if (ok) ok.addEventListener("click", close);
   const hide = $("guideHide"); if (hide) hide.addEventListener("click", hideForever);
-  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { onboarding = false; openM(modal); });
+  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { onboarding = false; renderInbox(); openM(modal); });
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
@@ -1048,7 +1069,7 @@ function channelsHtml() {
 function showOnboarding() {
   let guideHidden = null, chJoined = null;
   try { guideHidden = localStorage.getItem("thameen_guide_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
-  if (!guideHidden) { onboarding = true; openM($("guideModal")); }
+  if (!guideHidden) { onboarding = true; renderInbox(); openM($("guideModal")); }
   else if (!chJoined) { openM($("channelsModal")); }
 }
 
