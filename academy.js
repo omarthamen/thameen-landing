@@ -422,11 +422,16 @@ const AI_SERIES = [
 // تُحقن في قائمة الدروس كمجلّد داخل القسم الاحترافي — تظهر وتشتغل فورًا بدون قاعدة بيانات
 function injectAISeries() {
   const pro = SECTIONS.find((s) => /محترف|احتراف|تطوير|pro/i.test(s.title || ""));
-  if (!pro || LESSONS.some((l) => l.id === AI_SERIES[0].id)) return;
-  AI_SERIES.forEach((v, i) => LESSONS.push({
-    id: v.id, section_id: pro.id, title: v.title, embed_url: v.embed_url,
-    description: v.description, folder: AI_SERIES_FOLDER, sort: 900 + i, duration: 0,
-  }));
+  if (!pro) return;
+  // لو الحلقات مضافة في قاعدة البيانات (نفس رابط Bunny) لا تُكرَّر — نسخة الكود احتياطية فقط
+  const have = new Set(LESSONS.map((l) => (l.embed_url || "").split("?")[0]));
+  AI_SERIES.forEach((v, i) => {
+    if (have.has(v.embed_url.split("?")[0])) return;
+    LESSONS.push({
+      id: v.id, section_id: pro.id, title: v.title, embed_url: v.embed_url,
+      description: v.description, folder: AI_SERIES_FOLDER, sort: 900 + i, duration: 0,
+    });
+  });
 }
 function renderPlaylist(ls) {
   const wrap = $("plList");
