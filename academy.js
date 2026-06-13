@@ -389,10 +389,11 @@ function renderLessonDesc(text) {
     if (it.code) return `<div class="desc-code"><button type="button" class="desc-code-copy" title="نسخ">${copyIc}<span>نسخ</span></button><pre>${esc(it.text)}</pre></div>`;
     if (!it.link) return `<div class="desc-note">${esc(stripEmoji(it.text))}</div>`;
     const extra = nLink >= LIMIT ? " desc-extra" : ""; nLink++;
-    return `<a class="desc-item${extra}" href="${esc(it.url)}" target="_blank" rel="noopener">
+    return `<div class="desc-item${extra}">
       <span class="desc-ic">${descIcon(it.url)}</span>
-      <span class="desc-label">${esc(stripEmoji(it.label))}</span>
-      <span class="desc-open">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>`;
+      <a class="desc-label" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(stripEmoji(it.label))}</a>
+      <button type="button" class="desc-copy-url" data-url="${esc(it.url)}" title="نسخ الرابط">${copyIc}<span>نسخ</span></button>
+      <a class="desc-open" href="${esc(it.url)}" target="_blank" rel="noopener">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>`;
   }).join("");
   const hidden = Math.max(0, nLink - LIMIT);
   const more = hidden > 0 ? `<button type="button" class="desc-toggle" data-n="${hidden}">عرض جميع التفاصيل (${hidden}+)</button>` : "";
@@ -404,14 +405,18 @@ function renderLessonDesc(text) {
     tg.textContent = exp ? "عرض أقل ▲" : `عرض جميع التفاصيل (${tg.dataset.n}+)`;
   });
 }
-// نسخ أوامر صناديق الكود في وصف الدرس
+// نسخ أوامر صناديق الكود + روابط التحميل في وصف الدرس
+function descCopy(text, btn) {
+  const s = btn.querySelector("span"); const o = s ? s.textContent : "";
+  const done = () => { btn.classList.add("ok"); if (s) s.textContent = "تم النسخ ✓"; setTimeout(() => { btn.classList.remove("ok"); if (s) s.textContent = o; }, 1500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => {});
+  else { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (_) {} ta.remove(); done(); }
+}
 document.addEventListener("click", (e) => {
-  const b = e.target.closest(".desc-code-copy"); if (!b) return;
-  const pre = b.parentElement.querySelector("pre"); if (!pre) return;
-  const done = () => { const s = b.querySelector("span"); const o = s ? s.textContent : ""; b.classList.add("ok"); if (s) s.textContent = "تم النسخ ✓"; setTimeout(() => { b.classList.remove("ok"); if (s) s.textContent = o; }, 1500); };
-  const txt = pre.innerText;
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done).catch(() => {});
-  else { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (_) {} ta.remove(); done(); }
+  const u = e.target.closest(".desc-copy-url");
+  if (u) { e.preventDefault(); descCopy(u.dataset.url, u); return; }
+  const b = e.target.closest(".desc-code-copy");
+  if (b) { const pre = b.parentElement.querySelector("pre"); if (pre) descCopy(pre.innerText, b); }
 });
 
 function plItemHtml(l, i) {

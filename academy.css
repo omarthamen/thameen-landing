@@ -287,6 +287,11 @@
 .desc-code-copy:hover{background:rgba(91,184,232,.25);color:#fff}
 .desc-code-copy.ok{color:#7CE0A8;border-color:rgba(124,224,168,.5);background:rgba(124,224,168,.12)}
 .desc-code-copy svg{width:13px;height:13px}
+.desc-label{text-decoration:none;color:var(--text)}
+.desc-copy-url{flex:none;display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:12px;font-weight:700;color:#9fc7e6;background:rgba(91,184,232,.12);border:1px solid rgba(91,184,232,.3);border-radius:999px;padding:7px 12px;cursor:pointer;transition:.18s}
+.desc-copy-url:hover{background:rgba(91,184,232,.25);color:#fff}
+.desc-copy-url.ok{color:#7CE0A8;border-color:rgba(124,224,168,.5);background:rgba(124,224,168,.12)}
+.desc-copy-url svg{width:13px;height:13px}
 
 /* عمود الدروس (يسار) */
 .lessons-col #plList{background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
