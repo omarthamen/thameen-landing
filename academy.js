@@ -370,24 +370,31 @@ function descHost(u) { try { return new URL(u).hostname.replace(/^www\./, ""); }
 function renderLessonDesc(text) {
   const box = $("lDesc"); if (!box) return;
   box.classList.remove("desc-expanded");
-  const lines = String(text || "").split("\n").map((s) => s.trim()).filter(Boolean);
-  if (!lines.length) { box.innerHTML = ""; return; }
-  const items = []; let pending = null; const urlRe = /^https?:\/\//i;
-  for (const ln of lines) {
-    if (urlRe.test(ln)) { items.push({ link: true, label: pending || descHost(ln), url: ln }); pending = null; }
-    else { if (pending) items.push({ link: false, text: pending }); pending = ln; }
-  }
-  if (pending) items.push({ link: false, text: pending });
-  const LIMIT = 4;
-  const rows = items.map((it, i) => {
-    const extra = i >= LIMIT ? " desc-extra" : "";
-    if (!it.link) return `<div class="desc-note${extra}">${esc(stripEmoji(it.text))}</div>`;
+  const raw = String(text || "");
+  if (!raw.trim()) { box.innerHTML = ""; return; }
+  const urlRe = /^https?:\/\//i; const items = [];
+  // ```...``` = صندوق أوامر قابل للنسخ، وبقية النص روابط/ملاحظات (سطر عنوان ثم سطر رابط)
+  raw.split("```").forEach((seg, si) => {
+    if (si % 2 === 1) { const code = seg.replace(/^\n+/, "").replace(/\s+$/, ""); if (code) items.push({ code: true, text: code }); return; }
+    let pending = null;
+    seg.split("\n").map((s) => s.trim()).filter(Boolean).forEach((ln) => {
+      if (urlRe.test(ln)) { items.push({ link: true, label: pending || descHost(ln), url: ln }); pending = null; }
+      else { if (pending) items.push({ link: false, text: pending }); pending = ln; }
+    });
+    if (pending) items.push({ link: false, text: pending });
+  });
+  const copyIc = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  const LIMIT = 8; let nLink = 0;
+  const rows = items.map((it) => {
+    if (it.code) return `<div class="desc-code"><button type="button" class="desc-code-copy" title="نسخ">${copyIc}<span>نسخ</span></button><pre>${esc(it.text)}</pre></div>`;
+    if (!it.link) return `<div class="desc-note">${esc(stripEmoji(it.text))}</div>`;
+    const extra = nLink >= LIMIT ? " desc-extra" : ""; nLink++;
     return `<a class="desc-item${extra}" href="${esc(it.url)}" target="_blank" rel="noopener">
       <span class="desc-ic">${descIcon(it.url)}</span>
       <span class="desc-label">${esc(stripEmoji(it.label))}</span>
       <span class="desc-open">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>`;
   }).join("");
-  const hidden = items.length - LIMIT;
+  const hidden = Math.max(0, nLink - LIMIT);
   const more = hidden > 0 ? `<button type="button" class="desc-toggle" data-n="${hidden}">عرض جميع التفاصيل (${hidden}+)</button>` : "";
   const hIcon = '<svg class="desc-h-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3l7.8-7.8"/></svg>';
   box.innerHTML = `<div class="desc-card"><h4 class="desc-h">${hIcon} الروابط والمرفقات</h4><div class="desc-list">${rows}</div>${more}</div>`;
@@ -397,6 +404,15 @@ function renderLessonDesc(text) {
     tg.textContent = exp ? "عرض أقل ▲" : `عرض جميع التفاصيل (${tg.dataset.n}+)`;
   });
 }
+// نسخ أوامر صناديق الكود في وصف الدرس
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".desc-code-copy"); if (!b) return;
+  const pre = b.parentElement.querySelector("pre"); if (!pre) return;
+  const done = () => { const s = b.querySelector("span"); const o = s ? s.textContent : ""; b.classList.add("ok"); if (s) s.textContent = "تم النسخ ✓"; setTimeout(() => { b.classList.remove("ok"); if (s) s.textContent = o; }, 1500); };
+  const txt = pre.innerText;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done).catch(() => {});
+  else { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (_) {} ta.remove(); done(); }
+});
 
 function plItemHtml(l, i) {
   const dur = l.duration ? `<span class="pl-dur">${fmtDur(l.duration)}</span>` : "";
@@ -411,7 +427,19 @@ const AI_SERIES_FOLDER = "سلسلة الذكاء الاصطناعي";
 const AI_SERIES = [
   { id: "ai-mcp-setup", title: "تحميل التطبيقات وربطها بالـ MCP",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/5b04f5da-9b96-480a-81c1-11d1776faea1",
-    description: "التأسيس — تحميل التطبيقات وربطها بالـ MCP مرة واحدة." },
+    description: [
+      "Claude Desktop", "https://claude.ai/download",
+      "VS Code", "https://code.visualstudio.com",
+      "Node.js (LTS)", "https://nodejs.org",
+      "Git for Windows — ويندوز فقط", "https://git-scm.com/download/win",
+      "Premiere MCP", "https://github.com/hetpatel-11/Adobe_Premiere_Pro_MCP",
+      "After Effects MCP", "https://github.com/ishu86/after-effects-mcp",
+      "طريقة تثبيت الـ MCP — انسخ والصق في التيرمنال:",
+      "```", "cd ~/Downloads", "git clone https://github.com/ishu86/Adobe_Premiere_Pro_MCP-main.git", "cd after-effects-mcp", "npm install", "npm run build", "cd scripts", "```",
+      "على ماك:", "```", "bash install-cep.sh", "```",
+      "على ويندوز:", "```", "./install-cep.bat", "```",
+      "ربط بريمير برو على ماك:", "```", "cd ~/Downloads/Adobe_Premiere_Pro_MCP", "npm run setup:mac", "```",
+    ].join("\n") },
   { id: "ai-figma-ae", title: "Claude + فيقما + الأفتر إفكتس",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb",
     description: "تصميم وحركة بالذكاء الاصطناعي." },

@@ -281,6 +281,12 @@
 .desc-extra{display:none}
 .desc-expanded .desc-item.desc-extra{display:flex}
 .desc-expanded .desc-note.desc-extra{display:block}
+.desc-code{position:relative;background:#08080c;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin:4px 0;overflow:hidden}
+.desc-code pre{margin:0;padding:46px 16px 16px;overflow-x:auto;direction:ltr;text-align:left;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.85;color:#d7e8f5;white-space:pre}
+.desc-code-copy{position:absolute;top:9px;left:9px;display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:12px;font-weight:700;color:#9fc7e6;background:rgba(91,184,232,.14);border:1px solid rgba(91,184,232,.3);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.18s}
+.desc-code-copy:hover{background:rgba(91,184,232,.25);color:#fff}
+.desc-code-copy.ok{color:#7CE0A8;border-color:rgba(124,224,168,.5);background:rgba(124,224,168,.12)}
+.desc-code-copy svg{width:13px;height:13px}
 
 /* عمود الدروس (يسار) */
 .lessons-col #plList{background:var(--bg-panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
