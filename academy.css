@@ -450,6 +450,15 @@
 .guide-list li::before{content:"✓";position:absolute;inset-inline-start:0;top:1px;width:21px;height:21px;border-radius:50%;background:rgba(91,184,232,.18);color:#5BB8E8;font-size:12px;font-weight:800;display:grid;place-items:center}
 .guide-foot{color:var(--text-muted);font-size:14.5px;line-height:1.8;text-align:center;margin:0 0 6px}
 .guide-enjoy{text-align:center;color:#5BB8E8;font-weight:800;font-size:16px;margin:0 0 24px}
+/* تنبيه حماية الحساب */
+.guide-warn{background:rgba(255,90,90,.08);border:1px solid rgba(255,90,90,.32);border-radius:14px;padding:14px 16px;margin:0 0 4px}
+.guide-warn-head{display:flex;align-items:center;gap:8px;color:#ff8f8f;font-weight:800;font-size:14.5px;margin-bottom:10px}
+.guide-warn-head svg{width:20px;height:20px;flex:none}
+.guide-warn ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.guide-warn li{position:relative;padding-inline-start:18px;font-size:13.5px;line-height:1.75;color:var(--text-muted)}
+.guide-warn li::before{content:"•";position:absolute;inset-inline-start:0;color:#ff8f8f;font-weight:800}
+.guide-warn b{color:#ffc0c0}
+
 /* صندوق رسائلي */
 .inbox-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .inbox-msg{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:13px 15px}
