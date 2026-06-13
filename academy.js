@@ -393,7 +393,8 @@ function renderLessonDesc(text) {
       <span class="desc-ic">${descIcon(it.url)}</span>
       <a class="desc-label" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(stripEmoji(it.label))}</a>
       <button type="button" class="desc-copy-url" data-url="${esc(it.url)}" title="نسخ الرابط">${copyIc}<span>نسخ</span></button>
-      <a class="desc-open" href="${esc(it.url)}" target="_blank" rel="noopener">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>`;
+      <a class="desc-open" href="${esc(it.url)}" target="_blank" rel="noopener">فتح <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>`;
   }).join("");
   const hidden = Math.max(0, nLink - LIMIT);
   const more = hidden > 0 ? `<button type="button" class="desc-toggle" data-n="${hidden}">عرض جميع التفاصيل (${hidden}+)</button>` : "";
