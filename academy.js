@@ -338,6 +338,22 @@ function renderInbox() {
   box.innerHTML = html;
 }
 
+// تتبّع الرسائل الجديدة + نقطة التنبيه على البروفايل
+function currentChalDay() {
+  const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
+  if (!raw) return 0;
+  const elapsed = (new Date() - new Date(raw)) / 86400000;
+  return Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
+}
+function inboxSeen() { try { return parseInt(localStorage.getItem("thameen_inbox_seen") || "0", 10) || 0; } catch (_) { return 0; } }
+function hasNewInbox() { return currentChalDay() > inboxSeen(); }
+function updateInboxBadge() {
+  const on = hasNewInbox();
+  const mb = $("navMenuBtn"); if (mb) mb.classList.toggle("has-new", on);
+  const gi = $("guideBtn"); if (gi) gi.classList.toggle("has-new", on);
+}
+function markInboxSeen() { try { localStorage.setItem("thameen_inbox_seen", String(currentChalDay())); } catch (_) {} updateInboxBadge(); }
+
 // ====== عمود دوراتي ======
 function renderCourses() {
   const wrap = $("coursesCol");
@@ -1025,7 +1041,7 @@ function maybeShowChannels() {
 let onboarding = false;
 (function () {
   const modal = $("guideModal"); if (!modal) return;
-  const done = () => { const wasOnb = onboarding; onboarding = false; if (wasOnb) maybeShowChannels(); };  // بعد الترحيب → القنوات
+  const done = () => { const wasOnb = onboarding; onboarding = false; markInboxSeen(); if (wasOnb) maybeShowChannels(); };  // بعد الترحيب → القنوات + علّم الرسائل مقروءة
   const close = () => closeM(modal, done);
   const hideForever = () => { try { localStorage.setItem("thameen_guide_hidden", "1"); } catch (_) {} close(); };
   const x = $("guideX"); if (x) x.addEventListener("click", close);
@@ -1069,7 +1085,9 @@ function channelsHtml() {
 function showOnboarding() {
   let guideHidden = null, chJoined = null;
   try { guideHidden = localStorage.getItem("thameen_guide_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
-  if (!guideHidden) { onboarding = true; renderInbox(); openM($("guideModal")); }
+  updateInboxBadge();   // نقطة «جديد» على البروفايل لو فيه رسالة ما انقرت
+  if (hasNewInbox()) { onboarding = !guideHidden; renderInbox(); openM($("guideModal")); }   // رسالة جديدة → تنفتح تلقائيًا أول دخول
+  else if (!guideHidden) { onboarding = true; renderInbox(); openM($("guideModal")); }
   else if (!chJoined) { openM($("channelsModal")); }
 }
 
