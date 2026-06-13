@@ -438,10 +438,12 @@
 .guide-overlay.closing .guide-card{transform:scale(.3) translateY(-44vh);opacity:0;transition:transform .46s cubic-bezier(.55,.08,.68,.2),opacity .4s ease}
 .guide-x{position:absolute;top:15px;inset-inline-start:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text-muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;transition:.2s}
 .guide-x:hover{background:rgba(255,255,255,.15);color:#fff}
-.guide-emoji{font-size:46px;text-align:center;line-height:1;margin-bottom:8px}
-.guide-title{text-align:center;color:#fff;font-size:23px;font-weight:800;margin:0 0 10px}
-.guide-lead{text-align:center;color:var(--text-muted);font-size:15px;line-height:1.8;margin:0 0 24px}
-.guide-sub{color:#5BB8E8;font-size:15px;font-weight:800;margin:0 0 15px;display:flex;align-items:center;gap:8px}
+.guide-emoji{font-size:30px;text-align:center;line-height:1;width:56px;height:56px;margin:0 auto 12px;border-radius:16px;display:grid;place-items:center;background:rgba(91,184,232,.14);color:#5BB8E8}
+.guide-emoji svg{width:28px;height:28px}
+.guide-title{text-align:center;color:#fff;font-size:22px;font-weight:800;margin:0 0 8px}
+.guide-lead{text-align:center;color:var(--text-muted);font-size:14.5px;line-height:1.8;margin:0 0 22px;max-width:420px;margin-inline:auto}
+.guide-sub{color:#5BB8E8;font-size:14px;font-weight:800;margin:26px 0 14px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:8px}
+.guide-sub:first-of-type{margin-top:0;padding-top:0;border-top:0}
 .guide-sub::before{content:"✦"}
 .guide-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:12px}
 .guide-list li{position:relative;padding-inline-start:30px;color:var(--text);font-size:14.5px;line-height:1.7}
