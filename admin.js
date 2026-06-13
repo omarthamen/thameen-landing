@@ -5,6 +5,26 @@ let TOKEN = null;
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// أيقونات SVG بريميوم (بدل الإيموجي)
+function ic(n) {
+  const p = {
+    calendar: '<rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/>',
+    chart: '<path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-6"/>',
+    bars: '<path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="14" width="3" height="3"/>',
+    chat: '<path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/>',
+    trophy: '<path d="M8 4h8v3a4 4 0 0 1-8 0z"/><path d="M8 5H5v1a3 3 0 0 0 3 3M16 5h3v1a3 3 0 0 1-3 3"/><path d="M12 11v4M9 19h6M10.5 19v-2h3v2"/>',
+    bag: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    device: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    play: '<path d="M6 4l14 8-14 8z" fill="currentColor" stroke="none"/>',
+    pause: '<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',
+    book: '<path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2zM20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/>',
+    film: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>',
+    folder: '<path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>',
+  };
+  return `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p[n] || ""}</svg>`;
+}
 const setMsg = (el, text, ok) => { el.textContent = text; el.className = "msg " + (ok ? "ok" : "err"); };
 
 // fetch بمهلة (ما يعلّق أبدًا)
@@ -119,25 +139,25 @@ async function loadSubscribers() {
       const susp = !!p.suspended;
       const devN = p.devices || 0, ipN = p.ips || 0;
       const sharing = devN > 2 || ipN > 3;   // اشتباه مشاركة حساب
-      const status = susp ? '<span class="sub-badge stop">⛔ موقوف</span>'
-        : (sharing ? '<span class="sub-badge warn">⚠ مشاركة محتملة</span>' : '<span class="sub-badge ok">● نشط</span>');
+      const status = susp ? '<span class="sub-badge stop">● موقوف</span>'
+        : (sharing ? '<span class="sub-badge warn">● مشاركة محتملة</span>' : '<span class="sub-badge ok">● نشط</span>');
       const pct = p.total ? Math.round((p.completed / p.total) * 100) : 0;
       return `<div class="crow sub-row ${susp ? "is-susp" : ""} ${sharing ? "is-sharing" : ""}">
         <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}
           <div class="sub-stats">
-            <span title="تاريخ الاشتراك">📅 ${fmtJoin(p.joined)}</span>
-            <span title="دروس مكتملة (٩٠٪+)">📈 ${p.completed || 0}/${p.total || 0} مكتمل</span>
-            <span title="دروس بدأها + أعلى نسبة وصلها">📊 بدأ ${p.started || 0} · أعلى ${p.top_percent || 0}%</span>
-            <span title="رسائل بالمجتمع">💬 ${p.messages || 0}</span>
-            <span title="إنجازات منشورة">🏆 ${p.achievements || 0}</span>
-            <span title="فرص عمل نشرها">💼 ${p.jobs || 0}</span>
-            <span title="عدد الأجهزة" class="${devN > 2 ? "stat-warn" : ""}">📱 ${devN} جهاز</span>
-            <span title="عدد عناوين IP" class="${ipN > 3 ? "stat-warn" : ""}">🌐 ${ipN} IP</span>
+            <span title="تاريخ الاشتراك">${ic("calendar")} ${fmtJoin(p.joined)}</span>
+            <span title="دروس مكتملة (٩٠٪+)">${ic("chart")} ${p.completed || 0}/${p.total || 0} مكتمل</span>
+            <span title="دروس بدأها + أعلى نسبة وصلها">${ic("bars")} بدأ ${p.started || 0} · أعلى ${p.top_percent || 0}%</span>
+            <span title="رسائل بالمجتمع">${ic("chat")} ${p.messages || 0}</span>
+            <span title="إنجازات منشورة">${ic("trophy")} ${p.achievements || 0}</span>
+            <span title="فرص عمل نشرها">${ic("bag")} ${p.jobs || 0}</span>
+            <span title="عدد الأجهزة" class="${devN > 2 ? "stat-warn" : ""}">${ic("device")} ${devN} جهاز</span>
+            <span title="عدد عناوين IP" class="${ipN > 3 ? "stat-warn" : ""}">${ic("globe")} ${ipN} IP</span>
             ${p.last_ip ? `<span title="آخر IP" style="direction:ltr">${esc(p.last_ip)}</span>` : ""}
           </div>
         </div>
         <div class="c-actions">
-          <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "▶ تفعيل" : "⏸ إيقاف"}</button>
+          <button class="btn btn-ghost btn-sm icon-btn susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? ic("play") + " تفعيل" : ic("pause") + " إيقاف"}</button>
           <button class="btn btn-danger btn-sm del-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">حذف</button>
         </div></div>`;
     }).join("");
@@ -463,20 +483,20 @@ async function loadCourses() {
       return `<div class="card sec-card" data-sid="${sec.id}">
         <div class="sec-head"><h3>${esc(sec.title)}</h3><button class="btn btn-danger btn-sm sec-del">حذف القسم</button></div>
         <div class="sec-cover-row">
-          ${sec.cover_url ? `<img src="${esc(sec.cover_url)}" class="sec-cover-img" alt="">` : `<div class="sec-cover-img empty-thumb">📚</div>`}
+          ${sec.cover_url ? `<img src="${esc(sec.cover_url)}" class="sec-cover-img" alt="">` : `<div class="sec-cover-img empty-thumb">${ic("book")}</div>`}
           <input type="file" class="fld sec-cover-file" accept="image/*" />
           <button class="btn btn-ghost btn-sm sec-cover-btn">حفظ غلاف الدورة</button>
           <span class="msg sec-cover-msg"></span>
         </div>
         <div class="lessons">${ls.map((l) => `<div class="lesson-row" data-lid="${l.id}">
-          ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">🎬</div>`}
-          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}${l.description ? " · وصف ✔" : ""}${l.folder ? ` · 📁 ${esc(l.folder)}` : ""}</small></div>
-          <button class="btn btn-ghost btn-sm lesson-edit">✏️ تعديل</button>
+          ${l.thumb_url ? `<img src="${esc(l.thumb_url)}" class="lesson-thumb" alt="">` : `<div class="lesson-thumb empty-thumb">${ic("film")}</div>`}
+          <div class="lesson-info"><b>${esc(l.title)}</b><small>${(l.chapters || []).length} فصل · ${l.embed_url ? "فيديو ✔" : "بلا فيديو"}${l.description ? " · وصف ✔" : ""}${l.folder ? ` · مجلّد: ${esc(l.folder)}` : ""}</small></div>
+          <button class="btn btn-ghost btn-sm icon-btn lesson-edit">${ic("pencil")} تعديل</button>
           <button class="btn btn-danger btn-sm lesson-del">حذف</button>
           <div class="lesson-editor" hidden>
             <label class="lbl">عنوان الفيديو</label>
             <input type="text" class="fld le-title" value="${esc(l.title)}" />
-            <label class="lbl">📁 المجلد / الموضوع (اختياري) — اكتب نفس الاسم لعدة دروس ليتجمّعون تحت مجلّد واحد</label>
+            <label class="lbl">المجلد / الموضوع (اختياري) — اكتب نفس الاسم لعدة دروس ليتجمّعون تحت مجلّد واحد</label>
             <input type="text" class="fld le-folder" value="${esc(l.folder || "")}" placeholder="مثلاً: أساسيات التلوين" />
             <label class="lbl">رابط Bunny (iframe) — اتركه فاضي إذا ما تبي تغيّره</label>
             <input type="text" class="fld le-embed" value="${esc(l.embed_url || "")}" placeholder="https://iframe.mediadelivery.net/embed/..." />
@@ -485,11 +505,11 @@ async function loadCourses() {
             <button class="btn btn-primary btn-sm le-save">حفظ التعديلات</button>
             <span class="msg le-msg"></span>
           </div></div>`).join("") || '<p class="hint">لا دروس بعد.</p>'}</div>
-        <p class="hint folder-hint">📁 <b>تبي تجمع فيديوهات بمجلّد؟</b> اضغط ✏️ تعديل على الدروس واكتب لهم <b>نفس اسم المجلّد</b> في خانة «المجلد/الموضوع» — وراح يتجمّعون تلقائيًا تحت مجلّد واحد عند المشترك.</p>
+        <p class="hint folder-hint"><b>تبي تجمع فيديوهات بمجلّد؟</b> اضغط «تعديل» على الدروس واكتب لهم <b>نفس اسم المجلّد</b> في خانة «المجلد/الموضوع» — وراح يتجمّعون تلقائيًا تحت مجلّد واحد عند المشترك.</p>
         <details class="add-lesson">
           <summary>＋ إضافة درس</summary>
           <input type="text" class="fld l-title" placeholder="عنوان الدرس" />
-          <input type="text" class="fld l-folder" placeholder="📁 المجلد/الموضوع (اختياري) — نفس الاسم يجمع عدة دروس" />
+          <input type="text" class="fld l-folder" placeholder="المجلد/الموضوع (اختياري) — نفس الاسم يجمع عدة دروس" />
           <input type="text" class="fld l-embed" placeholder="رابط Bunny (iframe embed) أو الصق كود iframe" />
           <label class="lbl">صورة مصغّرة (ثَمنيل)</label>
           <input type="file" class="fld l-thumb" accept="image/*" />
