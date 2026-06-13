@@ -425,6 +425,9 @@ function plItemHtml(l, i) {
 // سلسلة الذكاء الاصطناعي — ٣ حلقات تُعرض كمجلّد فعلي داخل «دورة المحترفين» (بدل بوكس «قريبًا»)
 const AI_SERIES_FOLDER = "سلسلة الذكاء الاصطناعي";
 const AI_SERIES = [
+  { id: "ai-figma-ae", title: "Claude + فيقما + الأفتر إفكتس",
+    embed_url: "https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb",
+    description: "تصميم وحركة بالذكاء الاصطناعي." },
   { id: "ai-mcp-setup", title: "تحميل التطبيقات وربطها بالـ MCP",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/5b04f5da-9b96-480a-81c1-11d1776faea1",
     description: [
@@ -440,9 +443,6 @@ const AI_SERIES = [
       "على ويندوز:", "```", "./install-cep.bat", "```",
       "ربط بريمير برو على ماك:", "```", "cd ~/Downloads/Adobe_Premiere_Pro_MCP", "npm run setup:mac", "```",
     ].join("\n") },
-  { id: "ai-figma-ae", title: "Claude + فيقما + الأفتر إفكتس",
-    embed_url: "https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb",
-    description: "تصميم وحركة بالذكاء الاصطناعي." },
   { id: "ai-premiere", title: "Claude AI + بريمير برو",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/e4a8f102-c0c8-4e0c-a89e-ccab446d7b8a",
     description: "مونتاج وتحكم كامل في التايملاين." },
