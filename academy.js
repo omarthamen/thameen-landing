@@ -279,6 +279,14 @@ const CHAL_POOL = [
   "الإتقان يجي من التفاصيل الصغيرة. ركّز على درس اليوم بكل تركيزك.",
   "ما في يوم ضائع طول ما تتعلّم فيه شي جديد. خلّ اليوم نقلة.",
   "نفس النَفَس اللي بدأت فيه — احتفظ فيه للنهاية. أنت قادر.",
+  "لو فاتك يوم أو يومين، عادي جدًا — المهم ترجع. التحدّي مو سباق، هو رحلة.",
+  "تذكّر: كل درس تخلّصه يقربك خطوة من أول فيديو احترافي ينبهر فيه الكل.",
+  "الناس اللي وصلت، ما كانت أذكى منك — بس كانت أصبر. اصبر يوم بيوم.",
+  "اليوم فرصة جديدة، حتى لو أمس ما كان مثالي. ابدأ من جديد بكل طاقتك 💪",
+  "تخيّل نفسك بعد ما تخلّص التحدّي: مونتير محترف يشتغل بشغفه. هذا اللي تبنيه الحين.",
+  "ما يحتاج وقت طويل — ٣٠ دقيقة تركيز اليوم تفرق. ابدأ بدرس واحد بس.",
+  "إنجازك الصغير اليوم هو أساس إنجازك الكبير بكرة. لا تستهين بأي خطوة.",
+  "إذا حسّيت بإحباط، هذا دليل إنك تتطوّر فعلاً — استمر، الجزء الصعب يعني إنك تكبر.",
 ];
 const CHAL_COMM = [
   "شارك تطبيقك اليوم في قسم المجتمع — التغذية الراجعة تسرّع تطوّرك أضعاف.",
@@ -299,10 +307,10 @@ function renderChallenge() {
   const banner = $("challengeBanner"); if (!banner) return;
   const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
   if (!raw) { banner.hidden = true; return; }
-  const start = new Date(raw), now = new Date();
-  const elapsed = (now - start) / 86400000;
-  const dayNum = Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
-  const done = elapsed >= 90;
+  const start = new Date(raw);
+  const diff = Math.round((dayOf(new Date()) - dayOf(start)) / 86400000);
+  const done = diff >= 90;
+  const dayNum = currentChalDay();
   const left = Math.max(0, 90 - dayNum);
   const pct = Math.round((dayNum / 90) * 100);
   $("chalDay").textContent = done ? "٩٠" : toAr(dayNum);
@@ -310,7 +318,7 @@ function renderChallenge() {
   $("chalBar").style.width = pct + "%";
   const ring = $("chalRing");
   if (ring) ring.style.background = `conic-gradient(#5BB8E8 ${pct * 3.6}deg, rgba(255,255,255,.1) 0deg)`;
-  $("chalMsg").textContent = done ? CHAL_MILE[90] : challengeMsg(dayNum);
+  $("chalMsg").textContent = (done ? CHAL_MILE[90] : challengeMsg(dayNum)) + " " + progressLine();
   let dis = null; try { dis = localStorage.getItem("thameen_chal_dismiss"); } catch (_) {}
   banner.hidden = (dis === String(dayNum));
   const x = $("chalX");
@@ -322,13 +330,13 @@ function renderInbox() {
   const box = $("inboxList"); if (!box) return;
   const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
   if (!raw) { box.innerHTML = '<p class="hint">رسائلك التحفيزية بتبدأ توصلك من أول يوم اشتراك.</p>'; return; }
-  const start = new Date(raw), now = new Date();
-  const elapsed = (now - start) / 86400000;
-  const today = Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
+  const base = dayOf(new Date(raw));
+  const today = currentChalDay();
   let html = "";
   for (let d = today; d >= 1; d--) {
-    const date = new Date(start.getTime() + (d - 1) * 86400000);
-    const msg = d >= 90 ? CHAL_MILE[90] : challengeMsg(d);
+    const date = new Date(base.getTime() + (d - 1) * 86400000);
+    let msg = d >= 90 ? CHAL_MILE[90] : challengeMsg(d);
+    if (d === today) msg += " " + progressLine();   // رسالة اليوم: تذكير شخصي بالإنجاز
     const mile = !!CHAL_MILE[d];
     html += `<div class="inbox-msg ${mile ? "mile" : ""} ${d === today ? "new" : ""}">
       <div class="inbox-meta"><span class="inbox-day">اليوم ${toAr(d)}</span><span class="inbox-date">${fmtDate(date)}</span>${d === today ? '<span class="inbox-new">جديد</span>' : ""}</div>
@@ -339,11 +347,20 @@ function renderInbox() {
 }
 
 // تتبّع الرسائل الجديدة + نقطة التنبيه على البروفايل
+function dayOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }   // منتصف الليل المحلي
 function currentChalDay() {
   const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
   if (!raw) return 0;
-  const elapsed = (new Date() - new Date(raw)) / 86400000;
-  return Math.min(90, Math.max(1, Math.floor(elapsed) + 1));
+  // فرق الأيام التقويمية (الرسالة تتغيّر مع كل يوم جديد، مو حسب ساعة التسجيل)
+  const diff = Math.round((dayOf(new Date()) - dayOf(new Date(raw))) / 86400000);
+  return Math.min(90, Math.max(1, diff + 1));
+}
+// سطر شخصي يذكّره بإنجازه ويطمئنه — يُضاف لرسالة اليوم فقط
+function progressLine() {
+  const doneN = DONE.size, total = LESSONS.length || 0, left = Math.max(0, 90 - currentChalDay());
+  if (total && doneN >= total) return `وأنجزت كل الدروس (${toAr(doneN)}) 👑 — فخورين فيك، كمّل تطبيق وإبداع!`;
+  if (doneN === 0) return `ما عليك لو اليوم كان مشغول — باقي لك ${toAr(left)} يوم، وكل يوم فرصة جديدة. افتح درس واحد بس اليوم وبتلقى نفسك بلشت 🚀`;
+  return `لين الحين أنجزت ${toAr(doneN)}${total ? " من " + toAr(total) : ""} درس 👏 وباقي لك ${toAr(left)} يوم — تقدر تنجز أكثر، خطوة كل يوم تكفي. ولو فاتك يوم لا تشيل هم، رجّاع وكمّل.`;
 }
 function inboxSeen() { try { return parseInt(localStorage.getItem("thameen_inbox_seen") || "0", 10) || 0; } catch (_) { return 0; } }
 function hasNewInbox() { return currentChalDay() > inboxSeen(); }
