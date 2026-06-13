@@ -348,8 +348,13 @@
 @media(max-width:1200px){
   .acad-grid{grid-template-columns:300px minmax(0,1fr);gap:20px}
   .lessons-col{grid-column:1 / -1;position:static}
-  .lessons-col #plList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
-  .lessons-col .pl-item{border:1px solid rgba(255,255,255,.06);border-radius:12px}
+  .lessons-col #plList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:10px;background:transparent;border:0;overflow:visible}
+  .lessons-col #plList > .pl-item{border:1px solid rgba(255,255,255,.06);border-radius:12px}
+  /* المجلّد يمتد بعرض كامل، وفيديوهاته بشبكة مرتبة */
+  .lessons-col .pl-folder{grid-column:1 / -1;border:1px solid rgba(91,184,232,.2);border-radius:14px;overflow:hidden;background:rgba(91,184,232,.04)}
+  .lessons-col .pl-folder.open .pl-fold-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:9px;margin-inline-start:0;border-inline-start:0;padding:12px}
+  .lessons-col .pl-fold-body .pl-item{border:1px solid rgba(255,255,255,.07);border-radius:11px;padding-inline-start:12px;background:rgba(255,255,255,.02)}
+  .lessons-col .pl-fold-end{grid-column:1 / -1;padding:2px 4px 6px}
 }
 /* ===== بانر تحدّي ٩٠ يوم ===== */
 .chal-banner{position:relative;display:flex;align-items:center;gap:20px;max-width:1640px;margin:18px auto 0;padding:20px 24px;background:linear-gradient(120deg,rgba(44,141,208,.16),rgba(91,184,232,.06),rgba(8,8,12,.2));border:1px solid rgba(91,184,232,.28);border-radius:20px}
