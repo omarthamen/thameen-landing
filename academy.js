@@ -206,6 +206,7 @@ async function loadAcademy() {
       return;
     }
     SECTIONS = sections || []; LESSONS = lessons || [];
+    injectAISeries();
     PCT = {}; DONE = new Set();
     (progress || []).forEach((p) => { PCT[p.lesson_id] = p.percent != null ? p.percent : (p.completed ? 100 : 0); if (p.completed) DONE.add(p.lesson_id); });
     MEMBER = (members && members[0]) || null;
@@ -405,42 +406,32 @@ function plItemHtml(l, i) {
       ${dur}
     </button>`;
 }
-// بوكس «قريبًا» — يحمّس لحلقات الذكاء الاصطناعي والأدوات
-const FIGMA_SVG = '<svg viewBox="0 0 38 57"><path fill="#1abcfe" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/><path fill="#0acf83" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/><path fill="#ff7262" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/><path fill="#f24e1e" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/><path fill="#a259ff" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/></svg>';
-const CLAUDE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.2 5.2l13.6 13.6M18.8 5.2L5.2 18.8"/></svg>';
-const SOON_TOOLS = [
-  { n: "After Effects", sub: "الموشن جرافيك والمؤثرات", c: "st-ae", ic: "<b>Ae</b>" },
-  { n: "Premiere Pro", sub: "المونتاج الاحترافي", c: "st-pr", ic: "<b>Pr</b>" },
-  { n: "Figma", sub: "التصميم والتعاون", c: "st-figma", ic: FIGMA_SVG },
-  { n: "Claude", sub: "الذكاء الاصطناعي", c: "st-claude", ic: CLAUDE_SVG },
+// سلسلة الذكاء الاصطناعي — ٣ حلقات تُعرض كمجلّد فعلي داخل «دورة المحترفين» (بدل بوكس «قريبًا»)
+const AI_SERIES_FOLDER = "سلسلة الذكاء الاصطناعي";
+const AI_SERIES = [
+  { id: "ai-mcp-setup", title: "تحميل التطبيقات وربطها بالـ MCP",
+    embed_url: "https://iframe.mediadelivery.net/embed/281396/5b04f5da-9b96-480a-81c1-11d1776faea1",
+    description: "التأسيس — تحميل التطبيقات وربطها بالـ MCP مرة واحدة." },
+  { id: "ai-figma-ae", title: "Claude + فيقما + الأفتر إفكتس",
+    embed_url: "https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb",
+    description: "تصميم وحركة بالذكاء الاصطناعي." },
+  { id: "ai-premiere", title: "Claude AI + بريمير برو",
+    embed_url: "https://iframe.mediadelivery.net/embed/281396/e4a8f102-c0c8-4e0c-a89e-ccab446d7b8a",
+    description: "مونتاج وتحكم كامل في التايملاين." },
 ];
-// مجلّد «قريبًا» مضغوط داخل قائمة الدروس — ينفتح ويبيّن الأدوات والتفاصيل
-function comingSoonFolder() {
-  const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
-  const spark = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6z"/></svg>';
-  const tools = SOON_TOOLS.map((t) => `<div class="soonf-tool"><span class="st-ic ${t.c}">${t.ic}</span><div class="soonf-meta"><b>${esc(t.n)}</b><small>${esc(t.sub)}</small></div></div>`).join("");
-  return `<div class="pl-folder pl-soonf">
-    <button class="pl-fold-head" type="button">
-      <span class="pl-fold-ic soonf-ic">${spark}</span>
-      <span class="pl-fold-name">سلسلة الذكاء الاصطناعي</span>
-      <span class="soonf-tag">قريبًا</span>
-      <span class="pl-fold-arrow">${chevron}</span>
-    </button>
-    <div class="pl-fold-body">
-      <p class="soonf-intro">حلقات تربط أقوى الأدوات مع الذكاء الاصطناعي وترفع شغلك لمستوى ثاني:</p>
-      <div class="soonf-tools">${tools}</div>
-      <p class="soonf-cta">⚡ الربط بينهم + أتمتة المونتاج بالذكاء الاصطناعي — استعدّوا!</p>
-    </div>
-  </div>`;
-}
-function isProSection(secId) {
-  const s = SECTIONS.find((x) => x.id === secId);
-  return s && /محترف|احتراف|تطوير|pro/i.test(s.title || "");
+// تُحقن في قائمة الدروس كمجلّد داخل القسم الاحترافي — تظهر وتشتغل فورًا بدون قاعدة بيانات
+function injectAISeries() {
+  const pro = SECTIONS.find((s) => /محترف|احتراف|تطوير|pro/i.test(s.title || ""));
+  if (!pro || LESSONS.some((l) => l.id === AI_SERIES[0].id)) return;
+  AI_SERIES.forEach((v, i) => LESSONS.push({
+    id: v.id, section_id: pro.id, title: v.title, embed_url: v.embed_url,
+    description: v.description, folder: AI_SERIES_FOLDER, sort: 900 + i, duration: 0,
+  }));
 }
 function renderPlaylist(ls) {
   const wrap = $("plList");
   if (!wrap) return;
-  if (!ls.length) { wrap.innerHTML = (isProSection(CURSEC) ? comingSoonFolder() : '<p class="hint" style="padding:14px">لا دروس بعد.</p>'); bindPlaylist(wrap); return; }
+  if (!ls.length) { wrap.innerHTML = '<p class="hint" style="padding:14px">لا دروس بعد.</p>'; bindPlaylist(wrap); return; }
   const folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>';
   const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10l4 4 4-4"/></svg>';
   const seen = new Set(); let html = "";
@@ -462,7 +453,6 @@ function renderPlaylist(ls) {
       <div class="pl-fold-body">${group.map((g) => plItemHtml(g, ls.indexOf(g))).join("")}<div class="pl-fold-end">نهاية المجلّد</div></div>
     </div>`;
   });
-  if (isProSection(CURSEC)) html += comingSoonFolder();
   wrap.innerHTML = html;
   bindPlaylist(wrap);
 }
