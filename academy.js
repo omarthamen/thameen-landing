@@ -186,6 +186,7 @@ async function loadAcademy() {
   ]);
   if (!(await guardP)) return;           // موقوف من الأدمن
   showOnboarding();
+  checkCommUnread();                      // شارة رسائل المجتمع الجديدة
   setNavProfile();
   renderSocials();
   const wrap = $("coursesCol");
@@ -1050,7 +1051,26 @@ function restoreView() {
   }
   if (v && v !== "courses") switchView(v);
 }
+// ===== شارة رسائل المجتمع الجديدة =====
+let CURVIEW = "courses";
+function setCommBadge(n) {
+  const b = $("commTabBadge"); if (!b) return;
+  if (n > 0) { b.textContent = n > 50 ? "٥٠+" : toAr(n); b.hidden = false; }
+  else b.hidden = true;
+}
+function markCommSeen() { try { localStorage.setItem("thameen_comm_seen", new Date().toISOString()); } catch (_) {} setCommBadge(0); }
+async function checkCommUnread() {
+  let seen = null; try { seen = localStorage.getItem("thameen_comm_seen"); } catch (_) {}
+  if (!seen) { markCommSeen(); return; }
+  try {
+    const rows = await dbGet(`community_messages?select=user_id&created_at=gt.${encodeURIComponent(seen)}&limit=80`);
+    const n = (rows || []).filter((r) => r.user_id !== (USER && USER.id)).length;   // لا تحسب رسائلي
+    setCommBadge(n);
+  } catch (_) {}
+}
+
 function switchView(view) {
+  const prev = CURVIEW; CURVIEW = view;
   try { localStorage.setItem("thameen_view", view); } catch (_) {}
   document.querySelectorAll(".nav-tab").forEach((t) => t.classList.toggle("on", t.dataset.view === view));
   const vc = $("viewCourses"), vm = $("viewCommunity"), va = $("viewAccount"), vcl = $("viewCalls");
@@ -1058,11 +1078,14 @@ function switchView(view) {
   if (vm) vm.hidden = view !== "community";
   if (va) va.hidden = view !== "account";
   if (vcl) vcl.hidden = view !== "calls";
-  if (view === "community") { registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
+  if (view === "community") { markCommSeen(); registerProfile(); loadMembers(); loadMessages(true); startCommPoll(); } else stopCommPoll();
+  if (prev === "community" && view !== "community") markCommSeen();   // علّم مقروء عند الخروج
   if (view === "account") loadAccount();
   if (view === "calls") loadCalls(); else stopCalls();   // أوقف عدّاد المكالمة لو طلع من الصفحة
 }
 document.querySelectorAll(".nav-tab").forEach((t) => t.addEventListener("click", () => switchView(t.dataset.view)));
+// فحص دوري للرسائل الجديدة (لما المستخدم مو داخل المجتمع)
+setInterval(() => { if (USER && appView && !appView.hidden && CURVIEW !== "community") checkCommUnread(); }, 25000);
 
 // القنوات
 document.querySelectorAll("#commChannels .chan").forEach((c) => c.addEventListener("click", () => {
