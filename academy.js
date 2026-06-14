@@ -499,7 +499,15 @@ const AI_SERIES_FOLDER = "سلسلة الذكاء الاصطناعي";
 const AI_SERIES = [
   { id: "ai-figma-ae", title: "Claude + فيقما + الأفتر إفكتس",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/8c2fc5f2-f543-46fe-aa5f-4757afd163fb",
-    description: "تصميم وحركة بالذكاء الاصطناعي." },
+    description: [
+      "تصميم وحركة موشن جرافيكس بالكامل عبر الذكاء الاصطناعي.",
+      "ملفات المهارة (Skill) — حمّلها ثم حطّها داخل مجلد ‎~/.claude/skills/‎ وأعد تشغيل كلود:",
+      "تحميل ملفات المهارة (Google Drive)",
+      "https://drive.google.com/drive/folders/1BnLz4YtHOw42LOw7e34_n7pyeBxxFEcK",
+      "خطوة التثبيت — أنشئ مجلّد المهارات (انسخ والصق في التيرمنال):",
+      "```", "mkdir -p ~/.claude/skills", "```",
+      "بعدها فك ضغط مجلّد ai-motion-graphics داخل ‎~/.claude/skills/‎ ثم أعد فتح كلود — وتطلب منه: «سوّي لي موشن جرافيكس».",
+    ].join("\n") },
   { id: "ai-mcp-setup", title: "تحميل التطبيقات وربطها بالـ MCP",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/5b04f5da-9b96-480a-81c1-11d1776faea1",
     description: [
