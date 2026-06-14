@@ -1054,17 +1054,26 @@ function maybeShowChannels() {
   if (!joined) openM($("channelsModal"));
 }
 
-// ====== نافذة التعليمات الترحيبية ======
-let onboarding = false;
+// ====== نافذة الترحيب والإرشادات (تظهر مرة + بالقائمة) ======
+let welcomeOnb = false;
+(function () {
+  const modal = $("welcomeModal"); if (!modal) return;
+  const after = () => { const wasOnb = welcomeOnb; welcomeOnb = false; if (wasOnb) maybeShowChannels(); };
+  const dismiss = () => { try { localStorage.setItem("thameen_welcome_hidden", "1"); } catch (_) {} closeM(modal, after); };
+  const x = $("welcomeX"); if (x) x.addEventListener("click", dismiss);
+  const ok = $("welcomeOk"); if (ok) ok.addEventListener("click", dismiss);
+  const sk = $("welcomeSkip"); if (sk) sk.addEventListener("click", dismiss);
+  const wb = $("welcomeBtn"); if (wb) wb.addEventListener("click", () => { welcomeOnb = false; openM(modal); });
+  modal.addEventListener("click", (e) => { if (e.target === modal) dismiss(); });
+})();
+
+// ====== نافذة رسائلي (التقدّم + الرسائل التحفيزية) ======
 (function () {
   const modal = $("guideModal"); if (!modal) return;
-  const done = () => { const wasOnb = onboarding; onboarding = false; markInboxSeen(); if (wasOnb) maybeShowChannels(); };  // بعد الترحيب → القنوات + علّم الرسائل مقروءة
-  const close = () => closeM(modal, done);
-  const hideForever = () => { try { localStorage.setItem("thameen_guide_hidden", "1"); } catch (_) {} close(); };
+  const close = () => closeM(modal, markInboxSeen);   // علّم الرسائل مقروءة عند الإغلاق
   const x = $("guideX"); if (x) x.addEventListener("click", close);
   const ok = $("guideOk"); if (ok) ok.addEventListener("click", close);
-  const hide = $("guideHide"); if (hide) hide.addEventListener("click", hideForever);
-  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { onboarding = false; renderInbox(); openM(modal); });
+  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { renderInbox(); openM(modal); });
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
@@ -1100,11 +1109,11 @@ function channelsHtml() {
 })();
 // أول دخول: الترحيب أولاً، وبعد إغلاقه تظهر القنوات تلقائيًا
 function showOnboarding() {
-  let guideHidden = null, chJoined = null;
-  try { guideHidden = localStorage.getItem("thameen_guide_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
+  let welcomeHidden = null, chJoined = null;
+  try { welcomeHidden = localStorage.getItem("thameen_welcome_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
   updateInboxBadge();   // نقطة «جديد» على البروفايل لو فيه رسالة ما انقرت
-  if (hasNewInbox()) { onboarding = !guideHidden; renderInbox(); openM($("guideModal")); }   // رسالة جديدة → تنفتح تلقائيًا أول دخول
-  else if (!guideHidden) { onboarding = true; renderInbox(); openM($("guideModal")); }
+  if (!welcomeHidden) { welcomeOnb = true; openM($("welcomeModal")); }   // أول دخول: الترحيب والإرشادات (مرة)
+  else if (hasNewInbox()) { renderInbox(); openM($("guideModal")); }     // رسالة تحفيزية جديدة → افتح رسائلي
   else if (!chJoined) { openM($("channelsModal")); }
 }
 

@@ -18,7 +18,7 @@
   <link rel="dns-prefetch" href="https://cdn.embed.ly" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css?v=12" />
-  <link rel="stylesheet" href="academy.css?v=46" />
+  <link rel="stylesheet" href="academy.css?v=47" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -76,6 +76,10 @@
           <button class="nav-menu-item" id="channelsBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a3 3 0 0 1 0 6"/></svg>
             القنوات والتحديثات
+          </button>
+          <button class="nav-menu-item" id="welcomeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.8L18.7 9.7l-4.8 1.9L12 16.4 10.1 11.6 5.3 9.7l4.8-1.9z"/></svg>
+            البداية والإرشادات
           </button>
           <button class="nav-menu-item" id="guideBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg>
@@ -283,13 +287,13 @@
       <p class="foot-copy"><span class="brand-diamond"></span> أكاديمية ثَمين — جميع الحقوق محفوظة</p>
     </footer>
 
-    <!-- ===== نافذة التعليمات الترحيبية ===== -->
-    <div id="guideModal" class="guide-overlay" hidden>
+    <!-- ===== نافذة الترحيب والإرشادات (تظهر مرة) ===== -->
+    <div id="welcomeModal" class="guide-overlay" hidden>
       <div class="guide-card">
-        <button class="guide-x" id="guideX" type="button" aria-label="إغلاق">✕</button>
-        <div class="guide-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg></div>
-        <h2 class="guide-title">رسائلي</h2>
-        <p class="guide-lead">أهلاً فيك 🤍 هنا خطوات البداية، ورسالة تجيك كل يوم تثبّتك على طريقك.</p>
+        <button class="guide-x" id="welcomeX" type="button" aria-label="إغلاق">✕</button>
+        <div class="guide-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.8L18.7 9.7l-4.8 1.9L12 16.4 10.1 11.6 5.3 9.7l4.8-1.9z"/><path d="M5 4v3M3.5 5.5h3M19 16v3M17.5 17.5h3"/></svg></div>
+        <h2 class="guide-title">أهلاً فيك في أكاديمية ثَمين</h2>
+        <p class="guide-lead">هذي خطوات البداية، وأهم شي تعرفه قبل ما تبدأ رحلتك 🤍</p>
 
         <h3 class="guide-sub">ابدأ من هنا</h3>
         <ul class="guide-list">
@@ -315,14 +319,23 @@
           </ul>
         </div>
 
-        <h3 class="guide-sub">رسائل ثَمين</h3>
-        <p class="hint" style="margin:-4px 0 14px">رسالة تجيك كل يوم من بداية رحلتك — الأحدث فوق.</p>
-        <div id="inboxList" class="inbox-list"></div>
-        <div id="guideChannels"></div>
-
         <div class="guide-actions">
-          <button class="btn btn-primary" id="guideOk" type="button">فهمت، نبدأ</button>
-          <button class="btn btn-ghost" id="guideHide" type="button">عدم الإظهار تلقائيًا</button>
+          <button class="btn btn-primary" id="welcomeOk" type="button">فهمت، نبدأ</button>
+          <button class="btn btn-ghost" id="welcomeSkip" type="button">تخطّي</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== نافذة رسائلي (التقدّم + الرسائل التحفيزية) ===== -->
+    <div id="guideModal" class="guide-overlay" hidden>
+      <div class="guide-card">
+        <button class="guide-x" id="guideX" type="button" aria-label="إغلاق">✕</button>
+        <div class="guide-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg></div>
+        <h2 class="guide-title">رسائلي</h2>
+        <p class="guide-lead">تقدّمك ورسالة تجيك كل يوم تثبّتك على طريقك — الأحدث فوق.</p>
+        <div id="inboxList" class="inbox-list"></div>
+        <div class="guide-actions">
+          <button class="btn btn-primary" id="guideOk" type="button">تمام</button>
         </div>
       </div>
     </div>
@@ -345,6 +358,6 @@
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
   <script defer src="https://meet.jit.si/external_api.js"></script>
-  <script defer src="academy.js?v=46"></script>
+  <script defer src="academy.js?v=47"></script>
 </body>
 </html>
