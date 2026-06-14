@@ -526,6 +526,17 @@ const AI_SERIES = [
   { id: "ai-premiere", title: "Claude AI + بريمير برو",
     embed_url: "https://iframe.mediadelivery.net/embed/281396/e4a8f102-c0c8-4e0c-a89e-ccab446d7b8a",
     description: "مونتاج وتحكم كامل في التايملاين." },
+  { id: "ai-motion-no-app", title: "سويت موشن جرافكس بدون أي برنامج… بس بالكلام! 🤯",
+    embed_url: "https://iframe.mediadelivery.net/embed/281396/d21a8f32-d6bb-42ed-b6a3-452744020b1e",
+    description: [
+      "موشن جرافيكس احترافي بالكامل عبر الذكاء الاصطناعي — بدون أي برنامج (لا أفتر ولا بريمير)، فقط بالكلام عبر Claude.",
+      "ملفات المهارة (Skill) — حمّلها ثم حطّها داخل مجلد ‎~/.claude/skills/‎ وأعد تشغيل كلود:",
+      "تحميل ملفات المهارة (Google Drive)",
+      "https://drive.google.com/drive/folders/1BnLz4YtHOw42LOw7e34_n7pyeBxxFEcK",
+      "خطوة التثبيت — أنشئ مجلّد المهارات (انسخ والصق في التيرمنال):",
+      "```", "mkdir -p ~/.claude/skills", "```",
+      "بعدها فك ضغط مجلّد ai-motion-graphics داخل ‎~/.claude/skills/‎ ثم أعد فتح كلود — وتطلب منه: «سوّي لي موشن جرافيكس».",
+    ].join("\n") },
 ];
 // تُحقن في قائمة الدروس كمجلّد داخل القسم الاحترافي — تظهر وتشتغل فورًا بدون قاعدة بيانات
 function injectAISeries() {
