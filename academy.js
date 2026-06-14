@@ -711,7 +711,7 @@ function jumpToTime(seconds) {
 
 // ====== المجتمع ======
 let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
-let renderedIds = new Set(), rLastDay = null, rLastUid = null, rLastTime = 0, rChan = null;
+let renderedIds = new Set(), rLastDay = null, rLastUid = null, rLastTime = 0, rChan = null, lastDynSig = "";
 const CHAN_INFO = {
   general: { t: "العام", d: "شارك، اسأل، وتفاعل مع باقي المتدربين" },
   achievements: { t: "الإنجازات", d: "اعرض شغلك وإنجازاتك وارفع فيديوهاتك 🚀" },
@@ -816,6 +816,7 @@ function renderMessages(forceScroll) {
   }
   box.innerHTML = html;
   wireDeletes(box);
+  lastDynSig = dynSig();
   if (forceScroll) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
 }
 // إضافة الرسائل الجديدة فقط — بدون إعادة رسم (يمنع الوميض وقفز التمرير)
@@ -833,20 +834,115 @@ function appendNew(newMsgs) {
   }
   box.insertAdjacentHTML("beforeend", html);
   wireDeletes(box);
+  lastDynSig = dynSig();
   if (atBottom) { box.scrollTop = box.scrollHeight; updateScrollBtn(); }
 }
 function mediaHtml(m) {
   if (!m.media_url) return "";
   return m.media_type === "video" ? `<video src="${esc(m.media_url)}" controls preload="metadata"></video>` : `<img src="${esc(m.media_url)}" alt="" loading="lazy">`;
 }
+
+// ====== تفاعلات + ردود ======
+const REACT_EMOJIS = ["🔥", "👍", "❤️", "😂", "👏", "🙏"];
+let replyTo = null;
+async function rpc(fn, body) {
+  try { await fetchT(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify(body) }, 12000); } catch (_) {}
+}
+function reactionsInner(m) {
+  const r = m.reactions || {}; const myId = USER && USER.id;
+  return Object.keys(r).filter((k) => (r[k] || []).length).map((k) => {
+    const arr = r[k] || [];
+    return `<button class="react-chip ${arr.indexOf(myId) >= 0 ? "mine" : ""}" type="button" data-emoji="${esc(k)}">${k} ${arr.length}</button>`;
+  }).join("");
+}
+function reactionsHtml(m) { const i = reactionsInner(m); return i ? `<div class="cmsg-reacts">${i}</div>` : ""; }
+function replyQuoteHtml(m) {
+  if (!m.reply_to) return "";
+  const o = MSGS.find((x) => x.id === m.reply_to);
+  const nm = o ? (o.name || "متدرب") : "رسالة";
+  const txt = o ? (o.text || "📎 مرفق") : "رسالة محذوفة";
+  return `<div class="cmsg-reply"><b>${esc(nm)}</b><span>${esc(String(txt).slice(0, 90))}</span></div>`;
+}
+async function reactTo(msgId, emoji) {
+  const m = MSGS.find((x) => x.id === msgId);
+  if (m && USER) {
+    m.reactions = m.reactions || {};
+    const arr = m.reactions[emoji] || [];
+    const i = arr.indexOf(USER.id);
+    if (i >= 0) arr.splice(i, 1); else arr.push(USER.id);
+    if (arr.length) m.reactions[emoji] = arr; else delete m.reactions[emoji];
+    const box = $("commMessages"), st = box ? box.scrollTop : 0;
+    renderMessages(false); if (box) box.scrollTop = st;
+  }
+  await rpc("toggle_reaction", { p_msg: msgId, p_emoji: emoji });
+  loadMessages(false);
+}
+async function toggleJobTaken(msgId, taken) {
+  const m = MSGS.find((x) => x.id === msgId);
+  if (m) { m.meta = m.meta || {}; m.meta.taken = taken; const box = $("commMessages"), st = box ? box.scrollTop : 0; renderMessages(false); if (box) box.scrollTop = st; }
+  await rpc("set_job_taken", { p_msg: msgId, p_taken: taken });
+  loadMessages(false);
+}
+// شريط التفاعل عند الضغط المزدوج
+let reactBarEl = null;
+function closeReactBar() { if (reactBarEl) { reactBarEl.remove(); reactBarEl = null; document.removeEventListener("click", reactBarOutside, true); } }
+function reactBarOutside(e) { if (reactBarEl && !reactBarEl.contains(e.target)) closeReactBar(); }
+function openReactBar(anchor, msgId) {
+  closeReactBar();
+  const bar = document.createElement("div");
+  bar.className = "react-bar";
+  bar.innerHTML = REACT_EMOJIS.map((em) => `<button type="button" data-em="${em}">${em}</button>`).join("") + `<button type="button" class="react-reply" data-reply="1">↩ رد</button>`;
+  document.body.appendChild(bar);
+  const r = anchor.getBoundingClientRect();
+  let left = Math.max(10, Math.min(r.left + r.width / 2 - bar.offsetWidth / 2, window.innerWidth - bar.offsetWidth - 10));
+  let top = r.top - bar.offsetHeight - 8; if (top < 8) top = r.bottom + 8;
+  bar.style.left = left + "px"; bar.style.top = top + "px";
+  bar.querySelectorAll("button").forEach((b) => b.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    if (b.dataset.reply) startReply(msgId); else reactTo(msgId, b.dataset.em);
+    closeReactBar();
+  }));
+  reactBarEl = bar;
+  setTimeout(() => document.addEventListener("click", reactBarOutside, true), 0);
+}
+function startReply(msgId) {
+  const o = MSGS.find((x) => x.id === msgId); if (!o) return;
+  replyTo = msgId;
+  const bar = $("replyBar");
+  if (bar) {
+    bar.hidden = false;
+    bar.innerHTML = `<div class="reply-bar-in"><b>ترد على ${esc(o.name || "متدرب")}</b><span>${esc(String(o.text || "📎 مرفق").slice(0, 80))}</span></div><button type="button" id="replyCancel" aria-label="إلغاء">✕</button>`;
+    const c = bar.querySelector("#replyCancel"); if (c) c.addEventListener("click", cancelReply);
+  }
+  const inp = $("commInput"); if (inp) inp.focus();
+}
+function cancelReply() { replyTo = null; const bar = $("replyBar"); if (bar) { bar.hidden = true; bar.innerHTML = ""; } }
+function dynSig() { return MSGS.map((m) => m.id + ":" + JSON.stringify(m.reactions || 0) + ":" + ((m.meta && m.meta.taken) ? 1 : 0)).join("|"); }
+// أحداث: ضغط مزدوج للتفاعل/الرد، نقر على تفاعل، استلام العمل
+(function () {
+  const box = $("commMessages"); if (!box) return;
+  box.addEventListener("dblclick", (e) => {
+    if (CURCHAN === "jobs") return;
+    const el = e.target.closest(".cmsg[data-id], .ach-card[data-id]"); if (!el) return;
+    openReactBar(el, el.dataset.id);
+  });
+  box.addEventListener("click", (e) => {
+    const chip = e.target.closest(".react-chip");
+    if (chip) { const el = chip.closest("[data-id]"); if (el) reactTo(el.dataset.id, chip.dataset.emoji); return; }
+    const take = e.target.closest(".job-take");
+    if (take) { const el = take.closest("[data-id]"); if (el) toggleJobTaken(el.dataset.id, take.dataset.take === "1"); return; }
+  });
+})();
 function bubbleHtml(m, isAdmin, grouped) {
   const me = m.user_id === (USER && USER.id), nm = m.name || "متدرب";
-  const inner = `${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}`;
+  const inner = `${replyQuoteHtml(m)}${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}`;
+  const reacts = reactionsHtml(m);
   if (grouped) {
     return `<div class="cmsg grouped ${me ? "me" : ""}" data-id="${m.id}">
       <div class="cmsg-av-sp"></div>
       <div class="cmsg-body">
         <div class="cmsg-bubble">${inner}<span class="cmsg-t">${fmtTime(m.created_at)}</span></div>
+        ${reacts}
         ${(isAdmin || me) ? '<button class="del-msg mini" type="button" title="حذف">×</button>' : ""}
       </div></div>`;
   }
@@ -855,14 +951,16 @@ function bubbleHtml(m, isAdmin, grouped) {
     <div class="cmsg-body">
       <div class="cmsg-meta"><span class="cmsg-name">${me ? "أنت" : esc(nm)}</span><span class="cmsg-time">${fmtTime(m.created_at)}</span>${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}</div>
       <div class="cmsg-bubble">${inner}</div>
+      ${reacts}
     </div></div>`;
 }
 function achCard(m, isAdmin) {
   const nm = m.name || "متدرب", me = m.user_id === (USER && USER.id);
   return `<div class="ach-card" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
     <div class="ach-head"><div class="ach-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
-    ${mediaHtml(m)}${embedFor(m.text)}
-    ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}</div>`;
+    ${replyQuoteHtml(m)}${mediaHtml(m)}${embedFor(m.text)}
+    ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}
+    ${reactionsHtml(m)}</div>`;
 }
 // تحويل الأرقام العربية/الفارسية (٠١٢٣ / ۰۱۲۳) إلى إنجليزية (0123)
 function toLatinDigits(s) {
@@ -884,12 +982,18 @@ function normLink(s) {
 }
 function jobCard(m, isAdmin) {
   const nm = m.name || "متدرب", meta = m.meta || {}, me = m.user_id === (USER && USER.id);
-  const ch = normLink(meta.channel), ct = normLink(meta.contact);
-  return `<div class="job-card" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
-    <div class="job-top"><div class="job-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div></div>
+  const ch = normLink(meta.channel), ct = normLink(meta.contact), taken = !!meta.taken, canManage = isAdmin || me;
+  return `<div class="job-card ${taken ? "taken" : ""}" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
+    <div class="job-top"><div class="job-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>✦ فرصة عمل · ${fmtTime(m.created_at)}</small></div>${taken ? '<span class="job-taken-badge">✓ تم الاستلام</span>' : ""}</div>
     <div class="job-desc">${linkify(m.text || "")}</div>
     ${meta.price ? `<span class="job-price">💰 ${esc(meta.price)}</span>` : ""}
-    <div class="job-actions">${ch ? `<a class="job-btn" href="${esc(ch)}" target="_blank" rel="noopener">معرض الأعمال</a>` : ""}${ct ? `<a class="job-btn primary" href="${esc(ct)}" target="_blank" rel="noopener">📞 تواصل مباشر</a>` : ""}</div></div>`;
+    <div class="job-actions">
+      ${ch ? `<a class="job-btn" href="${esc(ch)}" target="_blank" rel="noopener">معرض الأعمال</a>` : ""}
+      ${taken
+        ? '<span class="job-btn done" aria-disabled="true">✓ تم استلام العمل</span>'
+        : (ct ? `<a class="job-btn primary" href="${esc(ct)}" target="_blank" rel="noopener">📞 تواصل مباشر</a>` : "")}
+      ${canManage ? `<button class="job-take" type="button" data-take="${taken ? 0 : 1}">${taken ? "إلغاء الاستلام" : "تحديد: تم الاستلام"}</button>` : ""}
+    </div></div>`;
 }
 function applyChannelUI() {
   const isJobs = CURCHAN === "jobs";
@@ -910,7 +1014,9 @@ async function loadMessages(forceScroll) {
   const curIds = new Set(MSGS.map((m) => m.id));
   for (const id of renderedIds) { if (!curIds.has(id)) { renderMessages(false); return; } }  // حُذفت رسالة → رسم كامل
   const newMsgs = MSGS.filter((m) => !renderedIds.has(m.id));
-  if (newMsgs.length) appendNew(newMsgs);                  // رسائل جديدة فقط → إضافة سلسة
+  if (newMsgs.length) { appendNew(newMsgs); return; }      // رسائل جديدة فقط → إضافة سلسة
+  // لا جديد ولا حذف → افحص التفاعلات/الاستلام (تحديث حيّ بدون قفز التمرير)
+  if (dynSig() !== lastDynSig) { const st = box.scrollTop; renderMessages(false); box.scrollTop = st; }
 }
 function updateScrollBtn() {
   const box = $("commMessages"), btn = $("commScrollBtn"); if (!box || !btn) return;
@@ -1038,8 +1144,8 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
         media_url = await uploadCommFile(pendingFile);
         media_type = pendingFile.type.startsWith("video") ? "video" : "image";
       }
-      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t || null, channel: CURCHAN, media_url, media_type }, "return=minimal");
-      inp.value = ""; clearPending();
+      await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t || null, channel: CURCHAN, media_url, media_type, reply_to: replyTo || null }, "return=minimal");
+      inp.value = ""; clearPending(); cancelReply();
       await loadMessages(true);
     } catch (err) { alert("خطأ: " + err.message); }
     btn.disabled = false; btn.textContent = "إرسال"; inp.focus();
