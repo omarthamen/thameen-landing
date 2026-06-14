@@ -1480,6 +1480,12 @@ async function loadCalls() {
   loadQuestions();
 }
 function stopCalls() { if (callTimer) { clearInterval(callTimer); callTimer = null; } }
+// تسجيل حضور مكالمة تلقائيًا (مرة وحدة باليوم، وبس إذا متاح)
+async function attendCall() {
+  try {
+    await fetchT(`${SUPABASE_URL}/rest/v1/rpc/attend_call`, { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: "{}" }, 12000);
+  } catch (_) {}
+}
 // تفتح بنافذة جديدة (بدون حد ٥ دقائق، مجاني تمامًا)
 function startCall(room) {
   const url = "https://meet.jit.si/" + room + "#userInfo.displayName=" + encodeURIComponent('"' + myName() + '"') + "&config.prejoinPageEnabled=false";
@@ -1615,7 +1621,7 @@ async function addQuestion() {
   try { await dbSend("POST", "call_questions", { user_id: USER.id, text: t }, "return=minimal"); loadQuestions(); } catch (e) { alert("تعذّر الحفظ"); }
 }
 (function () {
-  const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => startCall(GROUP_ROOM));
+  const gp = $("joinGroupCall"); if (gp) gp.addEventListener("click", () => { attendCall(); startCall(GROUP_ROOM); });
   const qa = $("qAddBtn"); if (qa) qa.addEventListener("click", addQuestion);
   const qi = $("qInput"); if (qi) qi.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addQuestion(); } });
 })();
