@@ -124,13 +124,26 @@ document.querySelectorAll(".tab").forEach((t) => {
 
 function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); loadNotifsAdmin(); }
 
-// ====== تبويب المكالمات (تقسيم + إشعارات مخصّصة) ======
+// ====== تبويب المكالمات (تجميع تلقائي حسب نافذة الجاهزية + إشعارات) ======
+function daysSinceJoin(iso) { try { return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); } catch (_) { return 0; } }
+function readyThreshold(used) { return used * 30 + 15; }   // نافذة الجاهزية: ١٥ يوم داخل شهر المكالمة
 const CALL_STAGES = [
-  { used: 0, title: "المكالمة الأولى", hint: "مشتركون ما سوّوا أي مكالمة بعد", suggest: "حان وقت مكالمتك الأولى مع ثَمين — تواصل معنا للتنسيق 📞" },
-  { used: 1, title: "المكالمة الثانية", hint: "سوّوا مكالمة وحدة", suggest: "جاهز لمكالمتك الثانية؟ تواصل معنا لحجز الموعد 📞" },
-  { used: 2, title: "المكالمة الثالثة", hint: "سوّوا مكالمتين", suggest: "مكالمتك الثالثة والأخيرة بانتظارك — نسّق معنا 📞" },
-  { used: 3, title: "اكتملت مكالماتهم", hint: "خلّصوا الـ٣ مكالمات", done: true },
+  { used: 0, ready: true, title: "🟢 جاهزون للمكالمة الأولى", hint: "مرّ ١٥ يوم أو أكثر على اشتراكهم", suggest: "حان وقت مكالمتك الأولى مع ثَمين 📞" },
+  { used: 1, ready: true, title: "🟢 جاهزون للمكالمة الثانية", hint: "دخلوا شهرهم الثاني (٤٥ يوم+)", suggest: "جاهز لمكالمتك الثانية؟ 📞" },
+  { used: 2, ready: true, title: "🟢 جاهزون للمكالمة الثالثة", hint: "دخلوا شهرهم الثالث (٧٥ يوم+)", suggest: "مكالمتك الثالثة والأخيرة بانتظارك 📞" },
+  { soon: true, title: "⏳ لم يحن وقتهم بعد", hint: "ما وصلوا نافذة المكالمة (أقل من ١٥ يوم في شهرهم)" },
+  { done: true, title: "✓ اكتملت مكالماتهم", hint: "خلّصوا الـ٣ مكالمات" },
 ];
+function stageMembers(st) {
+  return CALLS_DATA.filter((m) => {
+    if (!callsJoinPass(m.joined)) return false;
+    const D = daysSinceJoin(m.joined), u = m.calls_used;
+    if (st.done) return u >= 3;
+    if (st.ready) return u === st.used && D >= readyThreshold(u);
+    if (st.soon) return u < 3 && D < readyThreshold(u);
+    return false;
+  });
+}
 let CALLS_DATA = [];
 async function loadCallsTab() {
   const wrap = $("callsStages"); if (!wrap) return;
@@ -158,14 +171,15 @@ function renderCallsTab() {
       const days = Math.round((new Date(m.call_at).getTime() - now) / 86400000);
       const tag = days < 0 ? "فاتت" : days === 0 ? "اليوم" : days === 1 ? "بكرة" : `بعد ${days} يوم`;
       const cls = days < 0 ? "past" : days <= 1 ? "soon" : "";
-      return `<div class="sched-row ${cls}"><div class="sched-id"><b>${esc(m.name || "—")}</b><small>${fmtCallDT(m.call_at)} · المكالمة ${m.calls_used + 1}</small></div><span class="sched-tag">${tag}</span></div>`;
+      const doneBtn = days < 0 ? `<button class="btn btn-primary btn-sm sched-done" data-uid="${esc(m.user_id)}">✓ تم إنجازها</button>` : `<span class="sched-tag">${tag}</span>`;
+      return `<div class="sched-row ${cls}"><div class="sched-id"><b>${esc(m.name || "—")}</b><small>${fmtCallDT(m.call_at)} · المكالمة ${m.calls_used + 1}</small></div>${doneBtn}</div>`;
     }).join("") + `</div>` : '<p class="hint">ما في مواعيد مجدولة بعد. حدّد موعدًا لمجموعة من تحت 👇</p>') + `</div>`;
   wrap.innerHTML = schedHtml + CALL_STAGES.map((st) => {
-    const members = CALLS_DATA.filter((m) => (st.done ? (m.calls_used >= 3) : (m.calls_used === st.used)) && callsJoinPass(m.joined));
+    const members = stageMembers(st);
     const memHtml = members.length
-      ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${m.calls_used}/${m.calls_total}${m.call_at ? ' · 📅 ' + fmtCallDT(m.call_at) : ""}</small></div>`).join("")
+      ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${daysSinceJoin(m.joined)} يوم · ${m.calls_used}/${m.calls_total}${m.call_at ? ' · 📅 ' + fmtCallDT(m.call_at) : ""}</small></div>`).join("")
       : '<p class="hint">لا أحد بهذه المجموعة.</p>';
-    const sendBox = (members.length && !st.done) ? `<div class="stage-send">
+    const sendBox = (members.length && st.ready) ? `<div class="stage-send">
       <label class="lbl">موعد المكالمة لهذه المجموعة (تاريخ وساعة)</label>
       <input type="datetime-local" class="fld st-at" />
       <input type="text" class="fld st-title" value="موعد مكالمتك مع ثَمين 📞" />
@@ -173,7 +187,7 @@ function renderCallsTab() {
       <button class="btn btn-primary btn-sm st-schedule" data-ids="${members.map((m) => m.user_id).join(",")}">📅 جدولة + إشعار (${members.length})</button>
       <span class="msg st-msg"></span>
     </div>` : "";
-    return `<div class="card call-stage ${st.done ? "done" : ""}">
+    return `<div class="card call-stage ${(st.done || st.soon) ? "done" : ""}">
       <h3>${st.title} <span class="stage-count">${members.length}</span></h3>
       <p class="hint">${st.hint}</p>
       <div class="stage-members">${memHtml}</div>
@@ -181,6 +195,12 @@ function renderCallsTab() {
     </div>`;
   }).join("");
   wrap.querySelectorAll(".st-schedule").forEach((b) => b.addEventListener("click", () => scheduleStage(b)));
+  wrap.querySelectorAll(".sched-done").forEach((b) => b.addEventListener("click", () => completeCall(b.dataset.uid)));
+}
+async function completeCall(uid) {
+  if (!confirm("تأكيد: تمّت هذه المكالمة؟\nراح تنحسب وينتقل المشترك لمكالمته التالية.")) return;
+  try { await rpc("admin_complete_call", { p_user: uid }); loadCallsTab(); }
+  catch (e) { alert("خطأ: " + e.message + "\n(تأكّد إنك شغّلت SQL الدالة)"); }
 }
 async function scheduleStage(btn) {
   const card = btn.closest(".call-stage"), msg = card.querySelector(".st-msg");
