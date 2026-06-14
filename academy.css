@@ -184,6 +184,18 @@
   #memList{flex-direction:row;flex-wrap:wrap}
 }
 @media(max-width:760px){.comm-card{height:calc(100vh - 220px)}.cmsg{max-width:92%}.nav-tabs{order:3;width:100%;justify-content:center}.comm-head{flex-wrap:wrap}.comm-search{width:100%;max-width:100%}}
+/* ===== الجوال فقط: ترتيب المجتمع (لا يؤثر على الكمبيوتر) ===== */
+@media(max-width:680px){
+  .community-wrap{padding:12px}
+  .comm-card{height:auto;min-height:auto;max-height:72vh}
+  .comm-side{flex-direction:column;gap:10px}
+  .comm-channels{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px}
+  .comm-channels::-webkit-scrollbar{display:none}
+  .comm-channels .chan{flex:1 0 auto;justify-content:center;padding:9px 12px;font-size:13px;white-space:nowrap}
+  .comm-members{width:100%;flex:none}
+  #memList{flex-direction:row;flex-wrap:wrap;gap:8px;max-height:none;overflow:visible}
+  .mem{flex:0 0 calc(50% - 4px);min-width:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);padding:8px 10px}
+}
 .nav-stat{font-size:13px;color:var(--text-subtle)}
 .nav-stat b{color:var(--primary-soft);font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
 .nav-name{font-size:13px;color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
