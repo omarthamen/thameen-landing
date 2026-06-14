@@ -717,6 +717,7 @@ function jumpToTime(seconds) {
 
 // ====== المجتمع ======
 let commTimer = null, CURCHAN = "general", commSearch = "", pendingFile = null, MSGS = [];
+let MEMBERS = [], pendingMentions = [];
 let renderedIds = new Set(), rLastDay = null, rLastUid = null, rLastTime = 0, rChan = null, lastDynSig = "";
 const CHAN_INFO = {
   general: { t: "العام", d: "شارك، اسأل، وتفاعل مع باقي المتدربين" },
@@ -763,6 +764,7 @@ async function loadMembers() {
   let ps; try { ps = await dbGet("profiles?select=user_id,name,avatar_url&order=created_at.asc&limit=300"); }
   catch (_) { try { ps = await dbGet("profiles?select=user_id,name&order=created_at.asc&limit=300"); } catch (_) { return; } }
   ps.forEach((p) => { if (p.avatar_url) AVATARS[p.user_id] = p.avatar_url; });
+  MEMBERS = ps.filter((p) => p.name && p.user_id !== (USER && USER.id)).map((p) => ({ id: p.user_id, name: p.name }));
   const c = $("memCount"); if (c) c.textContent = `(${ps.length})`;
   el.innerHTML = ps.map((p) => `<div class="mem"><div class="mem-av" style="${avStyle(p.user_id, p.name)}">${avInner(p.user_id, p.name)}</div><span class="mem-name">${esc(p.name || "متدرب")}</span></div>`).join("");
 }
@@ -939,9 +941,19 @@ function dynSig() { return MSGS.map((m) => m.id + ":" + JSON.stringify(m.reactio
     if (take) { const el = take.closest("[data-id]"); if (el) toggleJobTaken(el.dataset.id, take.dataset.take === "1"); return; }
   });
 })();
+// تمييز المنشن @اسم داخل النص (بعد linkify)
+function highlightMentions(html) {
+  if (!html || html.indexOf("@") < 0 || !MEMBERS.length) return html;
+  let out = html;
+  for (const mem of MEMBERS) {
+    const at = "@" + esc(mem.name);
+    if (out.indexOf(at) >= 0) out = out.split(at).join(`<span class="mention">${at}</span>`);
+  }
+  return out;
+}
 function bubbleHtml(m, isAdmin, grouped) {
   const me = m.user_id === (USER && USER.id), nm = m.name || "متدرب";
-  const inner = `${replyQuoteHtml(m)}${m.text ? linkify(m.text) : ""}${mediaHtml(m)}${embedFor(m.text)}`;
+  const inner = `${replyQuoteHtml(m)}${m.text ? highlightMentions(linkify(m.text)) : ""}${mediaHtml(m)}${embedFor(m.text)}`;
   const reacts = reactionsHtml(m);
   if (grouped) {
     return `<div class="cmsg grouped ${me ? "me" : ""}" data-id="${m.id}">
@@ -965,7 +977,7 @@ function achCard(m, isAdmin) {
   return `<div class="ach-card" data-id="${m.id}">${(isAdmin || me) ? '<button class="del-msg" type="button">حذف</button>' : ""}
     <div class="ach-head"><div class="ach-av" style="${avStyle(m.user_id, nm)}">${avInner(m.user_id, nm)}</div><div><b>${esc(nm)}</b><small>🏆 إنجاز · ${fmtTime(m.created_at)}</small></div></div>
     ${replyQuoteHtml(m)}${mediaHtml(m)}${embedFor(m.text)}
-    ${m.text ? `<div class="ach-text">${linkify(m.text)}</div>` : ""}
+    ${m.text ? `<div class="ach-text">${highlightMentions(linkify(m.text))}</div>` : ""}
     ${reactionsHtml(m)}</div>`;
 }
 // تحويل الأرقام العربية/الفارسية (٠١٢٣ / ۰۱۲۳) إلى إنجليزية (0123)
@@ -1173,6 +1185,9 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
         media_type = pendingFile.type.startsWith("video") ? "video" : "image";
       }
       await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t || null, channel: CURCHAN, media_url, media_type, reply_to: replyTo || null }, "return=minimal");
+      const targets = [...new Set(pendingMentions.filter((p) => t.includes("@" + p.name)).map((p) => p.id))];
+      if (targets.length) rpc("notify_mention", { p_targets: targets, p_text: t });   // إشعار للمذكورين
+      pendingMentions = [];
       inp.value = ""; clearPending(); cancelReply();
       await loadMessages(true);
     } catch (err) { alert("خطأ: " + err.message); }
@@ -1480,7 +1495,11 @@ function timeAgo(ts) {
   return `قبل ${toAr(Math.floor(h / 24))} يوم`;
 }
 async function loadNotifs() {
-  try { NOTIFS = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=30"); } catch (_) { NOTIFS = []; }
+  let all = [];
+  try { all = await dbGet("notifications?select=id,title,body,kind,created_at,target_user&order=created_at.desc&limit=40"); }
+  catch (_) { try { all = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=30"); } catch (_) { all = []; } }
+  const me = USER && USER.id;
+  NOTIFS = (all || []).filter((n) => !n.target_user || n.target_user === me).slice(0, 30);   // عام أو موجّه لي
   renderNotifs();
 }
 const NOTIF_ICONS = {
@@ -1488,11 +1507,38 @@ const NOTIF_ICONS = {
   video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.2l5 2.8-5 2.8z"/></svg>',
   general: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
 };
+NOTIF_ICONS.mention = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a2.5 2.5 0 0 0 5 0v-1a9 9 0 1 0-3.5 7.1"/></svg>';
 function notifIcon(kind) {
   if (kind === "call") return { cls: "ni-call", svg: NOTIF_ICONS.call };
   if (kind === "video") return { cls: "ni-video", svg: NOTIF_ICONS.video };
+  if (kind === "mention") return { cls: "ni-gen", svg: NOTIF_ICONS.mention };
   return { cls: "ni-gen", svg: NOTIF_ICONS.general };
 }
+// إكمال المنشن @ في صندوق الكتابة
+(function () {
+  const inp = $("commInput"), list = $("mentionList"); if (!inp || !list) return;
+  const close = () => { list.hidden = true; list.innerHTML = ""; };
+  inp.addEventListener("input", () => {
+    const pos = inp.selectionStart || inp.value.length;
+    const before = inp.value.slice(0, pos);
+    const at = before.match(/@([^\s@]{0,20})$/);
+    if (!at || !MEMBERS.length) { close(); return; }
+    const q = at[1].toLowerCase();
+    const matches = MEMBERS.filter((mem) => mem.name.toLowerCase().includes(q)).slice(0, 6);
+    if (!matches.length) { close(); return; }
+    list.innerHTML = matches.map((mem) => `<button type="button" data-id="${esc(mem.id)}" data-name="${esc(mem.name)}"><span class="mention-av" style="${avStyle(mem.id, mem.name)}">${avInner(mem.id, mem.name)}</span>${esc(mem.name)}</button>`).join("");
+    list.hidden = false;
+    list.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      const name = b.dataset.name, id = b.dataset.id;
+      const start = before.length - at[0].length;
+      inp.value = inp.value.slice(0, start) + "@" + name + " " + inp.value.slice(pos);
+      if (!pendingMentions.some((p) => p.id === id)) pendingMentions.push({ id, name });
+      close(); inp.focus();
+      const np = start + name.length + 2; try { inp.setSelectionRange(np, np); } catch (_) {}
+    }));
+  });
+  inp.addEventListener("blur", () => setTimeout(close, 160));
+})();
 function renderNotifs() {
   const list = $("notifList"), badge = $("bellBadge"); if (!list) return;
   const seen = notifSeenTs(); let unread = 0;
