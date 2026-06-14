@@ -342,22 +342,14 @@ function renderInbox(onlyNew) {
     items.push({ d, date, msg, mile: !!CHAL_MILE[d], isToday: d === today });
   }
   if (!items.length) { box.innerHTML = '<p class="hint">لا رسائل جديدة — كل رسائلك مقروءة 🤍</p>'; return; }
-  let idx = onlyNew ? 0 : items.length - 1;   // الجديد: من الأقدم للأحدث · الأرشيف: يبدأ بالأحدث
-  const slide = (it) => `<div class="inbox-msg ${it.mile ? "mile" : ""} ${it.isToday ? "new" : ""}">
-      <div class="inbox-meta"><span class="inbox-day">اليوم ${toAr(it.d)}</span><span class="inbox-date">${fmtDate(it.date)}</span>${it.isToday ? '<span class="inbox-new">جديد</span>' : ""}</div>
-      <p>${esc(it.msg)}</p></div>`;
-  const nav = items.length > 1 ? `<div class="inbox-nav">
-      <button class="inbox-prev" type="button" aria-label="الأقدم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-      <span class="inbox-count"><b>${toAr(idx + 1)}</b> / ${toAr(items.length)}</span>
-      <button class="inbox-next" type="button" aria-label="الأحدث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-    </div>` : "";
-  box.innerHTML = `<div class="inbox-carousel">${items.map((it, i) => `<div class="inbox-slide ${i === idx ? "active" : ""}">${slide(it)}</div>`).join("")}</div>${nav}`;
-  if (items.length > 1) {
-    const slides = box.querySelectorAll(".inbox-slide"), cb = box.querySelector(".inbox-count b");
-    const show = (n) => { idx = Math.max(0, Math.min(items.length - 1, n)); slides.forEach((s, i) => s.classList.toggle("active", i === idx)); if (cb) cb.textContent = toAr(idx + 1); };
-    box.querySelector(".inbox-prev").addEventListener("click", () => show(idx - 1));
-    box.querySelector(".inbox-next").addEventListener("click", () => show(idx + 1));
-  }
+  // الأحدث فوق + قابلة للطيّ: المفتوح = الجديد كله (تلقائي) أو الأحدث فقط (تصفّح)
+  items.reverse();   // الأحدث أولاً
+  box.innerHTML = items.map((it, i) => {
+    const open = (onlyNew || i === 0) ? " open" : "";
+    return `<details class="inbox-item ${it.mile ? "mile" : ""}"${open}>
+      <summary><span class="inbox-day">اليوم ${toAr(it.d)}</span><span class="inbox-date">${fmtDate(it.date)}</span>${it.isToday ? '<span class="inbox-new">جديد</span>' : ""}<span class="inbox-chev">▸</span></summary>
+      <p>${esc(it.msg)}</p></details>`;
+  }).join("");
 }
 
 // تتبّع الرسائل الجديدة + نقطة التنبيه على البروفايل
