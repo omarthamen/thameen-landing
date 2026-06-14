@@ -1542,7 +1542,9 @@ function playBeep() {
     o.start(now + t); o.stop(now + t + 0.22);
   });
 }
-document.addEventListener("pointerdown", () => audioCtx(), { once: true });   // فك قفل الصوت بأول لمسة
+// فك قفل الصوت — يُستأنف مع كل تفاعل (iOS يعلّق سياق الصوت عند الخلفية، فلا يكفي مرة وحدة)
+["pointerdown", "touchstart", "keydown"].forEach((ev) =>
+  document.addEventListener(ev, () => audioCtx(), { passive: true }));
 async function loadNotifs() {
   let all = [];
   try { all = await dbGet("notifications?select=id,title,body,kind,created_at,target_user&order=created_at.desc&limit=40"); }
@@ -1557,7 +1559,11 @@ async function loadNotifs() {
   notifNewest = Math.max(notifNewest, newest);
   renderNotifs();
 }
-function startNotifPoll() { if (notifTimer) return; notifTimer = setInterval(() => { loadNotifs(); checkCallReminders(); }, 15000); }
+function startNotifPoll() { if (notifTimer) return; notifTimer = setInterval(() => { loadNotifs(); checkCallReminders(); }, 10000); }
+// رجوع المستخدم للصفحة/التبويب → حدّث الإشعارات فورًا (المؤقّت يتوقف بالخلفية) + استأنف الصوت
+function refreshNotifsOnReturn() { if (USER && appView && !appView.hidden) { audioCtx(); loadNotifs(); checkCallReminders(); } }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshNotifsOnReturn(); });
+window.addEventListener("focus", refreshNotifsOnReturn);
 // تذكير المكالمة التلقائي حسب موعدها (call_at): ٣ أيام / يوم / اليوم / ساعات — كل مرحلة مرة وحدة
 function fmtCallDateTime(iso) { try { return new Date(iso).toLocaleString("ar", { dateStyle: "full", timeStyle: "short" }); } catch (_) { return ""; } }
 async function checkCallReminders() {
