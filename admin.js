@@ -22,6 +22,7 @@ function ic(n) {
     book: '<path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2zM20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/>',
     film: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>',
     folder: '<path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>',
+    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
   };
   return `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p[n] || ""}</svg>`;
 }
@@ -117,10 +118,74 @@ document.querySelectorAll(".tab").forEach((t) => {
     document.querySelectorAll(".panel").forEach((p) => { p.classList.remove("on"); p.hidden = true; });
     t.classList.add("on");
     const p = $("tab-" + t.dataset.tab); p.classList.add("on"); p.hidden = false;
+    if (t.dataset.tab === "calls") loadCallsTab();
   });
 });
 
 function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); loadNotifsAdmin(); }
+
+// ====== تبويب المكالمات (تقسيم + إشعارات مخصّصة) ======
+const CALL_STAGES = [
+  { used: 0, title: "المكالمة الأولى", hint: "مشتركون ما سوّوا أي مكالمة بعد", suggest: "حان وقت مكالمتك الأولى مع ثَمين — تواصل معنا للتنسيق 📞" },
+  { used: 1, title: "المكالمة الثانية", hint: "سوّوا مكالمة وحدة", suggest: "جاهز لمكالمتك الثانية؟ تواصل معنا لحجز الموعد 📞" },
+  { used: 2, title: "المكالمة الثالثة", hint: "سوّوا مكالمتين", suggest: "مكالمتك الثالثة والأخيرة بانتظارك — نسّق معنا 📞" },
+  { used: 3, title: "اكتملت مكالماتهم", hint: "خلّصوا الـ٣ مكالمات", done: true },
+];
+let CALLS_DATA = [];
+async function loadCallsTab() {
+  const wrap = $("callsStages"); if (!wrap) return;
+  wrap.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  try { CALLS_DATA = await rpc("admin_calls_overview"); }
+  catch (e) { wrap.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}<br>(تأكّد إنك شغّلت SQL الدوال)</p>`; return; }
+  renderCallsTab();
+}
+function callsJoinPass(iso) {
+  const sel = $("callsJoinFilter"); const f = sel ? sel.value : "all";
+  if (f === "all") return true;
+  const d = new Date(iso), now = new Date();
+  if (f === "thismonth") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  if (f === "lastmonth") { const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.getMonth() === lm.getMonth() && d.getFullYear() === lm.getFullYear(); }
+  return true;
+}
+function renderCallsTab() {
+  const wrap = $("callsStages"); if (!wrap) return;
+  $("callsTabCount").textContent = (CALLS_DATA.length || 0) + " مشترك";
+  wrap.innerHTML = CALL_STAGES.map((st) => {
+    const members = CALLS_DATA.filter((m) => (st.done ? (m.calls_used >= 3) : (m.calls_used === st.used)) && callsJoinPass(m.joined));
+    const memHtml = members.length
+      ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${m.calls_used}/${m.calls_total}</small></div>`).join("")
+      : '<p class="hint">لا أحد بهذه المجموعة.</p>';
+    const sendBox = (members.length && !st.done) ? `<div class="stage-send">
+      <input type="text" class="fld st-title" placeholder="عنوان الإشعار" />
+      <textarea class="fld st-body" rows="2" placeholder="${esc(st.suggest)}"></textarea>
+      <button class="btn btn-primary btn-sm st-send" data-ids="${members.map((m) => m.user_id).join(",")}">إرسال لهذه المجموعة (${members.length})</button>
+      <span class="msg st-msg"></span>
+    </div>` : "";
+    return `<div class="card call-stage ${st.done ? "done" : ""}">
+      <h3>${st.title} <span class="stage-count">${members.length}</span></h3>
+      <p class="hint">${st.hint}</p>
+      <div class="stage-members">${memHtml}</div>
+      ${sendBox}
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".st-send").forEach((b) => b.addEventListener("click", () => sendStageNotif(b)));
+}
+async function sendStageNotif(btn) {
+  const card = btn.closest(".call-stage"), msg = card.querySelector(".st-msg");
+  const title = card.querySelector(".st-title").value.trim();
+  const body = card.querySelector(".st-body").value.trim();
+  const ids = (btn.dataset.ids || "").split(",").filter(Boolean);
+  if (!title) { setMsg(msg, "اكتب عنوان الإشعار.", false); return; }
+  if (!ids.length) { setMsg(msg, "لا مستلمين.", false); return; }
+  btn.disabled = true; setMsg(msg, "جارٍ الإرسال…", true);
+  try {
+    const n = await rpc("admin_notify_users", { p_users: ids, p_title: title, p_body: body || null });
+    setMsg(msg, `تم الإرسال لـ ${n} مشترك ✅`, true);
+    card.querySelector(".st-title").value = ""; card.querySelector(".st-body").value = "";
+  } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
+  btn.disabled = false;
+}
+document.addEventListener("change", (e) => { if (e.target && e.target.id === "callsJoinFilter") renderCallsTab(); });
 
 // ====== المشتركون ======
 async function loadSubscribers() {

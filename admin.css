@@ -134,6 +134,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .sub-calls .call-inc{background:rgba(80,200,120,.18);color:#74d99a}
 .sub-calls .call-dec{background:rgba(255,255,255,.08);color:var(--text-muted)}
 .sub-calls button:hover{filter:brightness(1.25)}
+/* تبويب المكالمات */
+.calls-filter-card .fld{max-width:300px;margin-bottom:0;color-scheme:dark}
+.call-stage .stage-count{font-size:13px;font-weight:800;color:#04121d;background:var(--grad-cta);padding:1px 11px;border-radius:99px;margin-inline-start:8px}
+.call-stage.done{opacity:.7}
+.stage-members{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin:12px 0}
+.stage-mem{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px}
+.stage-mem b{display:block;font-size:14px}
+.stage-mem small{color:var(--text-subtle);font-size:11.5px}
+.stage-send{border-top:1px dashed rgba(255,255,255,.12);margin-top:10px;padding-top:14px}
+.stage-send .fld{margin-bottom:8px}
+.stage-send textarea{font-family:inherit}
 .sub-stats{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;font-size:12.5px;color:var(--text-muted)}
 .sub-stats span{white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
 .sub-stats .ic{color:#5BB8E8;opacity:.8}
