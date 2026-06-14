@@ -27,7 +27,7 @@ function fetchT(url, opts = {}, ms = 15000) {
 }
 const authHeaders = (extra) => Object.assign({ apikey: SUPABASE_KEY, Authorization: "Bearer " + (TOKEN || SUPABASE_KEY) }, extra || {});
 async function dbGet(path) {
-  const r = await fetchT(`${SUPABASE_URL}/rest/v1/${path}`, { headers: authHeaders() });
+  const r = await fetchT(`${SUPABASE_URL}/rest/v1/${path}`, { headers: authHeaders(), cache: "no-store" });
   if (!r.ok) { if (r.status === 401) logout(); throw new Error(await r.text()); }
   return r.json();
 }
