@@ -1316,22 +1316,17 @@ async function loadAccount() {
       <span class="acc-cpct">${d}/${ls.length}</span></div>`;
   }).join("") || '<p class="hint">لا دورات بعد.</p>';
 
-  // المكالمات الشهرية (٣ أشهر من تاريخ الاشتراك)
+  // المكالمات الشهرية — الموعد يُنسّق مع الإدارة (مو تلقائي)
   const callsTotal = (MEMBER && MEMBER.calls_total) || 3;
   const callsUsed = (MEMBER && MEMBER.calls_used) || 0;
-  const now = new Date();
   const ord = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة"];
   let calls = "";
   for (let i = 0; i < callsTotal; i++) {
-    const date = sub ? addMonths(sub, i + 1) : null;
-    let state, cls;
-    if (i < callsUsed) { state = "تمّت ✓"; cls = "used"; }
-    else if (date && date <= now) { state = "متاحة الآن"; cls = "ready"; }
-    else { state = "قادمة"; cls = "soon"; }
-    calls += `<div class="acc-call ${cls}">
-      <div class="acc-call-n">${i + 1}</div>
-      <div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${date ? fmtDate(date) : "—"}</small></div>
-      <span class="acc-call-tag">${state}</span></div>`;
+    const done = i < callsUsed;
+    calls += `<div class="acc-call ${done ? "used" : "ready"}">
+      <div class="acc-call-n">${toAr(i + 1)}</div>
+      <div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${done ? "تمّت بنجاح" : "يُنسّق موعدها معك"}</small></div>
+      <span class="acc-call-tag">${done ? "تمّت ✓" : "متبقّية"}</span></div>`;
   }
   $("accCalls").innerHTML = calls;
 
@@ -1522,7 +1517,10 @@ async function loadNotifs() {
   try { all = await dbGet("notifications?select=id,title,body,kind,created_at,target_user&order=created_at.desc&limit=40"); }
   catch (_) { try { all = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=30"); } catch (_) { all = []; } }
   const me = USER && USER.id;
-  NOTIFS = (all || []).filter((n) => !n.target_user || n.target_user === me).slice(0, 30);   // عام أو موجّه لي
+  const joined = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
+  const joinTs = joined ? new Date(joined).getTime() - 60000 : 0;   // قبل الاشتراك بدقيقة (هامش)
+  // عام أو موجّه لي + بعد تاريخ اشتراكي فقط (الحساب الجديد يبدأ فريش بلا إشعارات قديمة)
+  NOTIFS = (all || []).filter((n) => (!n.target_user || n.target_user === me) && new Date(n.created_at).getTime() >= joinTs).slice(0, 30);
   const newest = NOTIFS.length ? Math.max.apply(null, NOTIFS.map((n) => new Date(n.created_at).getTime())) : 0;
   if (notifNewest && newest > notifNewest && newest > notifSeenTs()) playBeep();   // إشعار جديد فعلاً → صوت
   notifNewest = Math.max(notifNewest, newest);
