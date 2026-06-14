@@ -156,9 +156,11 @@ function renderCallsTab() {
       ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${m.calls_used}/${m.calls_total}</small></div>`).join("")
       : '<p class="hint">لا أحد بهذه المجموعة.</p>';
     const sendBox = (members.length && !st.done) ? `<div class="stage-send">
-      <input type="text" class="fld st-title" placeholder="عنوان الإشعار" />
-      <textarea class="fld st-body" rows="2" placeholder="${esc(st.suggest)}"></textarea>
-      <button class="btn btn-primary btn-sm st-send" data-ids="${members.map((m) => m.user_id).join(",")}">إرسال لهذه المجموعة (${members.length})</button>
+      <label class="lbl">موعد المكالمة لهذه المجموعة (تاريخ وساعة)</label>
+      <input type="datetime-local" class="fld st-at" />
+      <input type="text" class="fld st-title" value="موعد مكالمتك مع ثَمين 📞" />
+      <textarea class="fld st-body" rows="2" placeholder="${esc(st.suggest)} (يُكتب الموعد تلقائيًا لو تركته فاضي)"></textarea>
+      <button class="btn btn-primary btn-sm st-schedule" data-ids="${members.map((m) => m.user_id).join(",")}">📅 جدولة + إشعار (${members.length})</button>
       <span class="msg st-msg"></span>
     </div>` : "";
     return `<div class="card call-stage ${st.done ? "done" : ""}">
@@ -168,20 +170,24 @@ function renderCallsTab() {
       ${sendBox}
     </div>`;
   }).join("");
-  wrap.querySelectorAll(".st-send").forEach((b) => b.addEventListener("click", () => sendStageNotif(b)));
+  wrap.querySelectorAll(".st-schedule").forEach((b) => b.addEventListener("click", () => scheduleStage(b)));
 }
-async function sendStageNotif(btn) {
+async function scheduleStage(btn) {
   const card = btn.closest(".call-stage"), msg = card.querySelector(".st-msg");
+  const atRaw = card.querySelector(".st-at").value;
   const title = card.querySelector(".st-title").value.trim();
-  const body = card.querySelector(".st-body").value.trim();
+  let body = card.querySelector(".st-body").value.trim();
   const ids = (btn.dataset.ids || "").split(",").filter(Boolean);
+  if (!atRaw) { setMsg(msg, "حدّد تاريخ وساعة المكالمة.", false); return; }
   if (!title) { setMsg(msg, "اكتب عنوان الإشعار.", false); return; }
   if (!ids.length) { setMsg(msg, "لا مستلمين.", false); return; }
-  btn.disabled = true; setMsg(msg, "جارٍ الإرسال…", true);
+  const iso = new Date(atRaw).toISOString();
+  let human = atRaw; try { human = new Date(atRaw).toLocaleString("ar", { dateStyle: "full", timeStyle: "short" }); } catch (_) {}
+  if (!body) body = "تم تحديد موعد مكالمتك: " + human + " — راح نذكّرك تلقائيًا قبلها.";
+  btn.disabled = true; setMsg(msg, "جارٍ الجدولة…", true);
   try {
-    const n = await rpc("admin_notify_users", { p_users: ids, p_title: title, p_body: body || null });
-    setMsg(msg, `تم الإرسال لـ ${n} مشترك ✅`, true);
-    card.querySelector(".st-title").value = ""; card.querySelector(".st-body").value = "";
+    const n = await rpc("admin_schedule_calls", { p_users: ids, p_at: iso, p_title: title, p_body: body });
+    setMsg(msg, `تم جدولة وإشعار ${n} مشترك ✅ — النظام راح يذكّرهم تلقائيًا.`, true);
   } catch (e) { setMsg(msg, "خطأ: " + e.message, false); }
   btn.disabled = false;
 }

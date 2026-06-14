@@ -219,6 +219,7 @@ async function loadAcademy() {
     loadAvatars();                       // مؤجّل — بعد عرض الدورات (يقلل التزاحم)
     recordLogin();                       // تسجيل الدخول للمراقبة — مؤجّل وغير حاجب
     loadNotifs(); startNotifPoll();      // مركز الإشعارات (الجرس) + تحديث حيّ كل ١٥ث
+    checkCallReminders();                // تذكير المكالمة التلقائي حسب موعدها
     if (SECTIONS.length) {
       let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
       const savedLesson = savedLid && LESSONS.find((l) => l.id === savedLid);
@@ -1328,7 +1329,12 @@ async function loadAccount() {
       <div class="acc-call-body"><b>المكالمة ${ord[i] || i + 1}</b><small>${done ? "تمّت بنجاح" : "يُنسّق موعدها معك"}</small></div>
       <span class="acc-call-tag">${done ? "تمّت ✓" : "متبقّية"}</span></div>`;
   }
-  $("accCalls").innerHTML = calls;
+  const nextAt = MEMBER && MEMBER.call_at;
+  let nextHtml = "";
+  if (nextAt && new Date(nextAt).getTime() > Date.now() - 3 * 3600000) {
+    nextHtml = `<div class="acc-next-call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg> موعد مكالمتك القادمة: <b>${fmtCallDateTime(nextAt)}</b></div>`;
+  }
+  $("accCalls").innerHTML = nextHtml + calls;
 
   // شارات الإنجاز
   const fullCourses = SECTIONS.filter((s) => { const ls = LESSONS.filter((l) => l.section_id === s.id); return ls.length && ls.every((l) => DONE.has(l.id)); }).length;
@@ -1532,7 +1538,26 @@ async function loadNotifs() {
   notifNewest = Math.max(notifNewest, newest);
   renderNotifs();
 }
-function startNotifPoll() { if (notifTimer) return; notifTimer = setInterval(loadNotifs, 15000); }
+function startNotifPoll() { if (notifTimer) return; notifTimer = setInterval(() => { loadNotifs(); checkCallReminders(); }, 15000); }
+// تذكير المكالمة التلقائي حسب موعدها (call_at): ٣ أيام / يوم / اليوم / ساعات — كل مرحلة مرة وحدة
+function fmtCallDateTime(iso) { try { return new Date(iso).toLocaleString("ar", { dateStyle: "full", timeStyle: "short" }); } catch (_) { return ""; } }
+async function checkCallReminders() {
+  const at = MEMBER && MEMBER.call_at; if (!at) return;
+  const t = new Date(at).getTime(), now = Date.now(); const hrs = (t - now) / 3600000;
+  if (hrs < -3) return;                       // فاتت المكالمة
+  const key = "thameen_callrem_" + at; let done = {};
+  try { done = JSON.parse(localStorage.getItem(key) || "{}"); } catch (_) {}
+  const when = fmtCallDateTime(at);
+  let ms = null, title = null, body = null;
+  if (hrs <= 3 && !done.h) { ms = "h"; title = "مكالمتك بعد ساعات قليلة ⏰"; body = "موعدك " + when + " — جهّز أسئلتك وكن جاهزًا."; }
+  else if (hrs <= 24 && hrs > 3 && !done.d0) { ms = "d0"; title = "مكالمتك اليوم 📞"; body = "موعد مكالمتك اليوم: " + when + "."; }
+  else if (hrs <= 48 && hrs > 24 && !done.d1) { ms = "d1"; title = "بكرة موعد مكالمتك 📞"; body = "تذكير: مكالمتك " + when + "."; }
+  else if (hrs <= 72 && hrs > 48 && !done.d3) { ms = "d3"; title = "بعد ٣ أيام: مكالمتك القادمة"; body = "موعد مكالمتك " + when + " — لا تنساها."; }
+  if (!ms) return;
+  done[ms] = 1; try { localStorage.setItem(key, JSON.stringify(done)); } catch (_) {}
+  try { await rpc("add_self_notif", { p_title: title, p_body: body }); } catch (_) {}
+  playBeep(); loadNotifs();
+}
 const NOTIF_ICONS = {
   call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
   video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.2l5 2.8-5 2.8z"/></svg>',

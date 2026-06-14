@@ -562,6 +562,9 @@
 .acc-cpct{font-size:12px;color:var(--text-subtle);flex:none;min-width:36px;text-align:left}
 /* المكالمات */
 .acc-calls{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.acc-next-call{display:flex;align-items:center;gap:8px;background:rgba(91,184,232,.12);border:1px solid rgba(91,184,232,.35);border-radius:12px;padding:11px 13px;font-size:13.5px;color:var(--text);margin-bottom:4px}
+.acc-next-call svg{width:18px;height:18px;color:#5BB8E8;flex:none}
+.acc-next-call b{color:#5BB8E8}
 .acc-call{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .acc-call-n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:rgba(255,255,255,.08);color:#fff;flex:none}
 .acc-call-body{flex:1}
