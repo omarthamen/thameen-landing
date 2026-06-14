@@ -326,25 +326,38 @@ function renderChallenge() {
   if (x && !x._wired) { x._wired = true; x.addEventListener("click", () => { try { localStorage.setItem("thameen_chal_dismiss", String(dayNum)); } catch (_) {} banner.hidden = true; }); }
 }
 
-// صندوق «رسائلي»: كل الرسائل التحفيزية المستلمة حسب تاريخ الانضمام (الأحدث فوق)
-function renderInbox() {
+// صندوق «رسائلي» — سلايدر: شريحة وحدة بالمرّة. onlyNew=الجديد فقط (يظهر مرة عند الدخول)
+function renderInbox(onlyNew) {
   const box = $("inboxList"); if (!box) return;
   const raw = (MEMBER && MEMBER.created_at) || (USER && USER.created_at);
   if (!raw) { box.innerHTML = '<p class="hint">رسائلك التحفيزية بتبدأ توصلك من أول يوم اشتراك.</p>'; return; }
   const base = dayOf(new Date(raw));
   const today = currentChalDay();
-  let html = "";
-  for (let d = today; d >= 1; d--) {
+  const from = onlyNew ? Math.min(today, inboxSeen() + 1) : 1;
+  const items = [];
+  for (let d = from; d <= today; d++) {
     const date = new Date(base.getTime() + (d - 1) * 86400000);
     let msg = d >= 90 ? CHAL_MILE[90] : challengeMsg(d);
-    if (d === today) msg += " " + progressLine();   // رسالة اليوم: تذكير شخصي بالإنجاز
-    const mile = !!CHAL_MILE[d];
-    html += `<div class="inbox-msg ${mile ? "mile" : ""} ${d === today ? "new" : ""}">
-      <div class="inbox-meta"><span class="inbox-day">اليوم ${toAr(d)}</span><span class="inbox-date">${fmtDate(date)}</span>${d === today ? '<span class="inbox-new">جديد</span>' : ""}</div>
-      <p>${esc(msg)}</p>
-    </div>`;
+    if (d === today) msg += " " + progressLine();
+    items.push({ d, date, msg, mile: !!CHAL_MILE[d], isToday: d === today });
   }
-  box.innerHTML = html;
+  if (!items.length) { box.innerHTML = '<p class="hint">لا رسائل جديدة — كل رسائلك مقروءة 🤍</p>'; return; }
+  let idx = onlyNew ? 0 : items.length - 1;   // الجديد: من الأقدم للأحدث · الأرشيف: يبدأ بالأحدث
+  const slide = (it) => `<div class="inbox-msg ${it.mile ? "mile" : ""} ${it.isToday ? "new" : ""}">
+      <div class="inbox-meta"><span class="inbox-day">اليوم ${toAr(it.d)}</span><span class="inbox-date">${fmtDate(it.date)}</span>${it.isToday ? '<span class="inbox-new">جديد</span>' : ""}</div>
+      <p>${esc(it.msg)}</p></div>`;
+  const nav = items.length > 1 ? `<div class="inbox-nav">
+      <button class="inbox-prev" type="button" aria-label="الأقدم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <span class="inbox-count"><b>${toAr(idx + 1)}</b> / ${toAr(items.length)}</span>
+      <button class="inbox-next" type="button" aria-label="الأحدث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    </div>` : "";
+  box.innerHTML = `<div class="inbox-carousel">${items.map((it, i) => `<div class="inbox-slide ${i === idx ? "active" : ""}">${slide(it)}</div>`).join("")}</div>${nav}`;
+  if (items.length > 1) {
+    const slides = box.querySelectorAll(".inbox-slide"), cb = box.querySelector(".inbox-count b");
+    const show = (n) => { idx = Math.max(0, Math.min(items.length - 1, n)); slides.forEach((s, i) => s.classList.toggle("active", i === idx)); if (cb) cb.textContent = toAr(idx + 1); };
+    box.querySelector(".inbox-prev").addEventListener("click", () => show(idx - 1));
+    box.querySelector(".inbox-next").addEventListener("click", () => show(idx + 1));
+  }
 }
 
 // تتبّع الرسائل الجديدة + نقطة التنبيه على البروفايل
@@ -1202,7 +1215,7 @@ let welcomeOnb = false;
   const close = () => closeM(modal, markInboxSeen);   // علّم الرسائل مقروءة عند الإغلاق
   const x = $("guideX"); if (x) x.addEventListener("click", close);
   const ok = $("guideOk"); if (ok) ok.addEventListener("click", close);
-  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { renderInbox(); openM(modal); });
+  const gb = $("guideBtn"); if (gb) gb.addEventListener("click", () => { renderInbox(false); openM(modal); });   // كل الرسائل للتصفّح
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 })();
 
@@ -1242,7 +1255,7 @@ function showOnboarding() {
   try { welcomeHidden = localStorage.getItem("thameen_welcome_hidden"); chJoined = localStorage.getItem("thameen_channels_joined"); } catch (_) {}
   updateInboxBadge();   // نقطة «جديد» على البروفايل لو فيه رسالة ما انقرت
   if (!welcomeHidden) { welcomeOnb = true; openM($("welcomeModal")); }   // أول دخول: الترحيب والإرشادات (مرة)
-  else if (hasNewInbox()) { renderInbox(); openM($("guideModal")); }     // رسالة تحفيزية جديدة → افتح رسائلي
+  else if (hasNewInbox()) { renderInbox(true); openM($("guideModal")); }   // رسالة جديدة → الجديد فقط (مرة وحدة)
   else if (!chJoined) { openM($("channelsModal")); }
 }
 
