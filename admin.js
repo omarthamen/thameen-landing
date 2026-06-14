@@ -150,10 +150,20 @@ function callsJoinPass(iso) {
 function renderCallsTab() {
   const wrap = $("callsStages"); if (!wrap) return;
   $("callsTabCount").textContent = (CALLS_DATA.length || 0) + " مشترك";
-  wrap.innerHTML = CALL_STAGES.map((st) => {
+  // نظرة شاملة: كل المواعيد المجدولة مرتّبة بالتاريخ
+  const now = Date.now();
+  const sched = CALLS_DATA.filter((m) => m.call_at && callsJoinPass(m.joined)).sort((a, b) => new Date(a.call_at) - new Date(b.call_at));
+  const schedHtml = `<div class="card"><h3>📅 المواعيد المجدولة <span class="stage-count">${sched.length}</span></h3>` +
+    (sched.length ? `<div class="sched-list">` + sched.map((m) => {
+      const days = Math.round((new Date(m.call_at).getTime() - now) / 86400000);
+      const tag = days < 0 ? "فاتت" : days === 0 ? "اليوم" : days === 1 ? "بكرة" : `بعد ${days} يوم`;
+      const cls = days < 0 ? "past" : days <= 1 ? "soon" : "";
+      return `<div class="sched-row ${cls}"><div class="sched-id"><b>${esc(m.name || "—")}</b><small>${fmtCallDT(m.call_at)} · المكالمة ${m.calls_used + 1}</small></div><span class="sched-tag">${tag}</span></div>`;
+    }).join("") + `</div>` : '<p class="hint">ما في مواعيد مجدولة بعد. حدّد موعدًا لمجموعة من تحت 👇</p>') + `</div>`;
+  wrap.innerHTML = schedHtml + CALL_STAGES.map((st) => {
     const members = CALLS_DATA.filter((m) => (st.done ? (m.calls_used >= 3) : (m.calls_used === st.used)) && callsJoinPass(m.joined));
     const memHtml = members.length
-      ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${m.calls_used}/${m.calls_total}</small></div>`).join("")
+      ? members.map((m) => `<div class="stage-mem"><b>${esc(m.name || "—")}</b><small>اشترك ${fmtJoin(m.joined)} · ${m.calls_used}/${m.calls_total}${m.call_at ? ' · 📅 ' + fmtCallDT(m.call_at) : ""}</small></div>`).join("")
       : '<p class="hint">لا أحد بهذه المجموعة.</p>';
     const sendBox = (members.length && !st.done) ? `<div class="stage-send">
       <label class="lbl">موعد المكالمة لهذه المجموعة (تاريخ وساعة)</label>
@@ -252,6 +262,7 @@ async function markCall(uid, delta) {
   catch (e) { alert("خطأ: " + e.message + "\n(تأكّد إنك شغّلت SQL الدوال)"); }
 }
 function fmtJoin(iso) { try { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; } catch (_) { return "—"; } }
+function fmtCallDT(iso) { try { return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" }); } catch (_) { return "—"; } }
 function toLocalInput(iso) { if (!iso) return ""; try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; } catch (_) { return ""; } }
 function fmtCallDate(iso) { try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} · ${h}:${p(d.getMinutes())} ${ap}`; } catch (_) { return "—"; } }
 async function loadGroupCall() {
