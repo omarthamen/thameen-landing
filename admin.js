@@ -135,7 +135,10 @@ async function loadSubscribers() {
     }
     $("subsCount").textContent = (ps?.length || 0) + " مشترك";
     if (!ps || !ps.length) { list.innerHTML = '<p class="empty">لا مشتركين بعد.</p>'; return; }
+    let callsMap = {};
+    try { (await rpc("admin_member_calls") || []).forEach((r) => { callsMap[r.user_id] = r; }); } catch (_) {}
     list.innerHTML = ps.map((p) => {
+      const cm = callsMap[p.user_id] || {}; const cu = cm.calls_used || 0, ct = cm.calls_total || 3;
       const susp = !!p.suspended;
       const devN = p.devices || 0, ipN = p.ips || 0;
       const sharing = devN > 2 || ipN > 3;   // اشتباه مشاركة حساب
@@ -157,15 +160,26 @@ async function loadSubscribers() {
           </div>
         </div>
         <div class="c-actions">
+          <div class="sub-calls" title="مكالمات تمّت / الإجمالي">
+            <button class="call-dec" data-uid="${esc(p.user_id)}" title="تراجع">−</button>
+            <span class="call-n">📞 ${cu}/${ct}</span>
+            <button class="call-inc" data-uid="${esc(p.user_id)}" title="سجّل مكالمة تمّت">✓</button>
+          </div>
           <button class="btn btn-ghost btn-sm icon-btn susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? ic("play") + " تفعيل" : ic("pause") + " إيقاف"}</button>
           <button class="btn btn-danger btn-sm del-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">حذف</button>
         </div></div>`;
     }).join("");
     list.querySelectorAll(".susp-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "set_suspended")));
     list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
+    list.querySelectorAll(".call-inc").forEach((b) => b.addEventListener("click", () => markCall(b.dataset.uid, 1)));
+    list.querySelectorAll(".call-dec").forEach((b) => b.addEventListener("click", () => markCall(b.dataset.uid, -1)));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }
 
+async function markCall(uid, delta) {
+  try { await rpc("admin_mark_call", { p_user: uid, p_delta: delta }); loadSubscribers(); }
+  catch (e) { alert("خطأ: " + e.message + "\n(تأكّد إنك شغّلت SQL الدوال)"); }
+}
 function fmtJoin(iso) { try { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; } catch (_) { return "—"; } }
 function toLocalInput(iso) { if (!iso) return ""; try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; } catch (_) { return ""; } }
 function fmtCallDate(iso) { try { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); let h = d.getHours(); const ap = h < 12 ? "ص" : "م"; h = h % 12 || 12; return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} · ${h}:${p(d.getMinutes())} ${ap}`; } catch (_) { return "—"; } }

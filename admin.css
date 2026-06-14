@@ -127,7 +127,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .sub-badge.lock{color:#7cc6ee;background:rgba(91,184,232,.14)}
 .sub-badge.stop{color:#ff8f8f;background:rgba(255,90,90,.16)}
 .sub-row.is-susp{opacity:.7}
-.sub-row .c-actions{flex-direction:row;flex-wrap:wrap}
+.sub-row .c-actions{flex-direction:row;flex-wrap:wrap;align-items:center}
+.sub-calls{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:3px 6px}
+.sub-calls .call-n{font-size:12px;font-weight:700;color:var(--text-muted);min-width:48px;text-align:center}
+.sub-calls button{width:24px;height:24px;border-radius:50%;border:0;cursor:pointer;font-size:14px;font-weight:800;display:grid;place-items:center;font-family:inherit}
+.sub-calls .call-inc{background:rgba(80,200,120,.18);color:#74d99a}
+.sub-calls .call-dec{background:rgba(255,255,255,.08);color:var(--text-muted)}
+.sub-calls button:hover{filter:brightness(1.25)}
 .sub-stats{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;font-size:12.5px;color:var(--text-muted)}
 .sub-stats span{white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
 .sub-stats .ic{color:#5BB8E8;opacity:.8}
