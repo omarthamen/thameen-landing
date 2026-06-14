@@ -218,12 +218,17 @@ async function loadAcademy() {
     renderCourses();
     loadAvatars();                       // مؤجّل — بعد عرض الدورات (يقلل التزاحم)
     recordLogin();                       // تسجيل الدخول للمراقبة — مؤجّل وغير حاجب
-    loadNotifs();                        // مركز الإشعارات (الجرس)
+    loadNotifs(); startNotifPoll();      // مركز الإشعارات (الجرس) + تحديث حيّ كل ١٥ث
     if (SECTIONS.length) {
       let savedLid = null; try { savedLid = localStorage.getItem("thameen_lesson"); } catch (_) {}
       const savedLesson = savedLid && LESSONS.find((l) => l.id === savedLid);
       if (savedLesson) { CURSEC = savedLesson.section_id; renderCourses(); playLesson(savedLesson.id); }
-      else { const firstSec = SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0]; openCourse(firstSec.id); }
+      else {
+        // المشترك الجديد يبدأ من دورة المبتدئين، المقطع الأول
+        const beginner = SECTIONS.find((s) => /مبتدئ|الصفر|الأولى/.test(s.title || "") && LESSONS.some((l) => l.section_id === s.id));
+        const firstSec = beginner || SECTIONS.find((s) => LESSONS.some((l) => l.section_id === s.id)) || SECTIONS[0];
+        openCourse(firstSec.id);
+      }
       restoreView();
     } else {
       wrap.innerHTML = '<p class="hint" style="padding:14px">لا توجد دورات بعد.</p>';
@@ -943,8 +948,8 @@ function dynSig() { return MSGS.map((m) => m.id + ":" + JSON.stringify(m.reactio
 })();
 // تمييز المنشن @اسم داخل النص (بعد linkify)
 function highlightMentions(html) {
-  if (!html || html.indexOf("@") < 0 || !MEMBERS.length) return html;
-  let out = html;
+  if (!html || html.indexOf("@") < 0) return html;
+  let out = html.split("@الكل").join('<span class="mention">@الكل</span>');
   for (const mem of MEMBERS) {
     const at = "@" + esc(mem.name);
     if (out.indexOf(at) >= 0) out = out.split(at).join(`<span class="mention">${at}</span>`);
@@ -1185,8 +1190,10 @@ function clearPending() { pendingFile = null; const pv = $("filePreview"); if (p
         media_type = pendingFile.type.startsWith("video") ? "video" : "image";
       }
       await dbSend("POST", "community_messages", { user_id: USER.id, name: myName(), text: t || null, channel: CURCHAN, media_url, media_type, reply_to: replyTo || null }, "return=minimal");
-      const targets = [...new Set(pendingMentions.filter((p) => t.includes("@" + p.name)).map((p) => p.id))];
-      if (targets.length) rpc("notify_mention", { p_targets: targets, p_text: t });   // إشعار للمذكورين
+      const hasAll = pendingMentions.some((p) => p.id === "all") && t.includes("@الكل");
+      const targets = [...new Set(pendingMentions.filter((p) => p.id !== "all" && t.includes("@" + p.name)).map((p) => p.id))];
+      if (hasAll) rpc("notify_all", { p_text: t });                          // إشعار للجميع
+      else if (targets.length) rpc("notify_mention", { p_targets: targets, p_text: t });   // إشعار للمذكورين
       pendingMentions = [];
       inp.value = ""; clearPending(); cancelReply();
       await loadMessages(true);
@@ -1494,14 +1501,34 @@ function timeAgo(ts) {
   const h = Math.floor(m / 60); if (h < 24) return `قبل ${toAr(h)} ساعة`;
   return `قبل ${toAr(Math.floor(h / 24))} يوم`;
 }
+// صوت إشعار لطيف (Web Audio — بدون ملف)
+let _actx = null, notifNewest = 0, notifTimer = null;
+function audioCtx() { try { if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)(); if (_actx.state === "suspended") _actx.resume(); return _actx; } catch (_) { return null; } }
+function playBeep() {
+  const ctx = audioCtx(); if (!ctx) return;
+  const now = ctx.currentTime;
+  [[880, 0], [1320, 0.13]].forEach(([f, t]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, now + t);
+    g.gain.exponentialRampToValueAtTime(0.16, now + t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.2);
+    o.start(now + t); o.stop(now + t + 0.22);
+  });
+}
+document.addEventListener("pointerdown", () => audioCtx(), { once: true });   // فك قفل الصوت بأول لمسة
 async function loadNotifs() {
   let all = [];
   try { all = await dbGet("notifications?select=id,title,body,kind,created_at,target_user&order=created_at.desc&limit=40"); }
   catch (_) { try { all = await dbGet("notifications?select=id,title,body,kind,created_at&order=created_at.desc&limit=30"); } catch (_) { all = []; } }
   const me = USER && USER.id;
   NOTIFS = (all || []).filter((n) => !n.target_user || n.target_user === me).slice(0, 30);   // عام أو موجّه لي
+  const newest = NOTIFS.length ? Math.max.apply(null, NOTIFS.map((n) => new Date(n.created_at).getTime())) : 0;
+  if (notifNewest && newest > notifNewest && newest > notifSeenTs()) playBeep();   // إشعار جديد فعلاً → صوت
+  notifNewest = Math.max(notifNewest, newest);
   renderNotifs();
 }
+function startNotifPoll() { if (notifTimer) return; notifTimer = setInterval(loadNotifs, 15000); }
 const NOTIF_ICONS = {
   call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
   video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 9.2l5 2.8-5 2.8z"/></svg>',
@@ -1524,9 +1551,12 @@ function notifIcon(kind) {
     const at = before.match(/@([^\s@]{0,20})$/);
     if (!at || !MEMBERS.length) { close(); return; }
     const q = at[1].toLowerCase();
-    const matches = MEMBERS.filter((mem) => mem.name.toLowerCase().includes(q)).slice(0, 6);
+    const allOpt = ("الكل".includes(at[1]) || at[1] === "") ? [{ id: "all", name: "الكل", all: true }] : [];
+    const matches = allOpt.concat(MEMBERS.filter((mem) => mem.name.toLowerCase().includes(q))).slice(0, 6);
     if (!matches.length) { close(); return; }
-    list.innerHTML = matches.map((mem) => `<button type="button" data-id="${esc(mem.id)}" data-name="${esc(mem.name)}"><span class="mention-av" style="${avStyle(mem.id, mem.name)}">${avInner(mem.id, mem.name)}</span>${esc(mem.name)}</button>`).join("");
+    list.innerHTML = matches.map((mem) => mem.all
+      ? `<button type="button" data-id="all" data-name="الكل"><span class="mention-av all">📣</span>الكل — إشعار للجميع</button>`
+      : `<button type="button" data-id="${esc(mem.id)}" data-name="${esc(mem.name)}"><span class="mention-av" style="${avStyle(mem.id, mem.name)}">${avInner(mem.id, mem.name)}</span>${esc(mem.name)}</button>`).join("");
     list.hidden = false;
     list.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
       const name = b.dataset.name, id = b.dataset.id;

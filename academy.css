@@ -458,6 +458,7 @@
 .mention-list button:hover{background:rgba(91,184,232,.14)}
 .mention-av{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;overflow:hidden}
 .mention-av .av-img{width:100%;height:100%;object-fit:cover}
+.mention-av.all{background:rgba(91,184,232,.18);font-size:14px}
 
 /* ===== تفاعلات + ردود + استلام العمل ===== */
 .react-bar{position:fixed;z-index:9999;display:flex;align-items:center;gap:4px;background:#14161f;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 7px;box-shadow:0 14px 40px rgba(0,0,0,.6)}
