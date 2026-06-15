@@ -265,6 +265,7 @@ async function loadSubscribers() {
           ${cu > 0 ? `<span class="sub-act-item">📞 ${cu}/${ct} مكالمة</span>` : ""}
         </div>
         <div class="sub-actions">
+          <button class="btn btn-primary btn-sm details-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">تفاصيل</button>
           <div class="sub-calls">
             <button class="call-btn call-dec" data-uid="${esc(p.user_id)}">−</button>
             <span>📞 ${cu}/${ct}</span>
@@ -279,12 +280,63 @@ async function loadSubscribers() {
     list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
     list.querySelectorAll(".call-inc").forEach((b) => b.addEventListener("click", () => markCall(b.dataset.uid, 1)));
     list.querySelectorAll(".call-dec").forEach((b) => b.addEventListener("click", () => markCall(b.dataset.uid, -1)));
+    list.querySelectorAll(".details-sub").forEach((b) => b.addEventListener("click", () => showSubDetails(b.dataset.uid, b.dataset.name)));
   } catch (x) { list.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
 }
 
 async function markCall(uid, delta) {
   try { await rpc("admin_mark_call", { p_user: uid, p_delta: delta }); loadSubscribers(); }
   catch (e) { alert("خطأ: " + e.message + "\n(تأكّد إنك شغّلت SQL الدوال)"); }
+}
+
+async function showSubDetails(uid, name) {
+  let modal = $("detailsModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "detailsModal";
+    modal.className = "modal-overlay";
+    modal.innerHTML = `<div class="modal-box">
+      <div class="modal-header"><h3 id="detailsTitle">تفاصيل</h3><button class="modal-close" onclick="$('detailsModal').hidden=true">✕</button></div>
+      <div class="modal-body" id="detailsBody"></div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
+  }
+  $("detailsTitle").textContent = `تفاصيل مشاهدات ${name}`;
+  $("detailsBody").innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  modal.hidden = false;
+  try {
+    const [progressData, lessonsData, sectionsData] = await Promise.all([
+      dbGet(`progress?select=lesson_id,percent,completed,updated_at&user_id=eq.${uid}&order=updated_at.desc`),
+      dbGet("lessons?select=id,title,section_id&order=sort.asc"),
+      dbGet("sections?select=id,title&order=sort.asc")
+    ]);
+    const lessonMap = {}; (lessonsData || []).forEach((l) => { lessonMap[l.id] = l; });
+    const sectionMap = {}; (sectionsData || []).forEach((s) => { sectionMap[s.id] = s; });
+    if (!progressData || !progressData.length) {
+      $("detailsBody").innerHTML = '<p class="empty">ما بدأ أي درس بعد.</p>';
+      return;
+    }
+    const rows = progressData.map((pr) => {
+      const lesson = lessonMap[pr.lesson_id] || {};
+      const section = sectionMap[lesson.section_id] || {};
+      const pct = pr.percent || (pr.completed ? 100 : 0);
+      const done = pr.completed || pct >= 90;
+      return `<div class="detail-row ${done ? "done" : ""}">
+        <div class="detail-info">
+          <div class="detail-lesson">${esc(lesson.title || "درس محذوف")}</div>
+          <div class="detail-section">${esc(section.title || "")}</div>
+        </div>
+        <div class="detail-pct">
+          <div class="detail-bar"><div class="detail-fill" style="width:${pct}%"></div></div>
+          <span>${pct}%</span>
+        </div>
+      </div>`;
+    });
+    $("detailsBody").innerHTML = `<div class="detail-summary">${progressData.length} درس بدأه · ${progressData.filter((p) => p.completed || (p.percent || 0) >= 90).length} مكتمل</div>` + rows.join("");
+  } catch (e) {
+    $("detailsBody").innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`;
+  }
 }
 function fmtJoin(iso) { try { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; } catch (_) { return "—"; } }
 function fmtCallDT(iso) { try { return new Date(iso).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" }); } catch (_) { return "—"; } }
