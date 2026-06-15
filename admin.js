@@ -242,33 +242,38 @@ async function loadSubscribers() {
       const cm = callsMap[p.user_id] || {}; const cu = cm.calls_used || 0, ct = cm.calls_total || 3;
       const susp = !!p.suspended;
       const devN = p.devices || 0, ipN = p.ips || 0;
-      const sharing = devN > 2 || ipN > 3;   // اشتباه مشاركة حساب
-      const status = susp ? '<span class="sub-badge stop">● موقوف</span>'
-        : (sharing ? '<span class="sub-badge warn">● مشاركة محتملة</span>' : '<span class="sub-badge ok">● نشط</span>');
+      const sharing = devN > 2 || ipN > 3;
       const pct = p.total ? Math.round((p.completed / p.total) * 100) : 0;
-      return `<div class="crow sub-row ${susp ? "is-susp" : ""} ${sharing ? "is-sharing" : ""}">
-        <div class="c-main"><b class="c-name">${esc(p.name || "—")}</b> ${status}
-          <div class="sub-stats">
-            <span title="تاريخ الاشتراك">${ic("calendar")} ${fmtJoin(p.joined)}</span>
-            <span title="دروس مكتملة (٩٠٪+)">${ic("chart")} ${p.completed || 0}/${p.total || 0} مكتمل</span>
-            <span title="دروس بدأها + أعلى نسبة وصلها">${ic("bars")} بدأ ${p.started || 0} · أعلى ${p.top_percent || 0}%</span>
-            <span title="رسائل بالمجتمع">${ic("chat")} ${p.messages || 0}</span>
-            <span title="إنجازات منشورة">${ic("trophy")} ${p.achievements || 0}</span>
-            <span title="فرص عمل نشرها">${ic("bag")} ${p.jobs || 0}</span>
-            <span title="عدد الأجهزة" class="${devN > 2 ? "stat-warn" : ""}">${ic("device")} ${devN} جهاز</span>
-            <span title="عدد عناوين IP" class="${ipN > 3 ? "stat-warn" : ""}">${ic("globe")} ${ipN} IP</span>
-            ${p.last_ip ? `<span title="آخر IP" style="direction:ltr">${esc(p.last_ip)}</span>` : ""}
-          </div>
+      const statusClass = susp ? "stop" : (sharing ? "warn" : "ok");
+      const statusText = susp ? "موقوف" : (sharing ? "مشاركة؟" : "نشط");
+      return `<div class="sub-card ${susp ? "is-susp" : ""} ${sharing ? "is-sharing" : ""}">
+        <div class="sub-header">
+          <div class="sub-name">${esc(p.name || "—")}</div>
+          <span class="sub-status ${statusClass}">${statusText}</span>
         </div>
-        <div class="c-actions">
-          <div class="sub-calls" title="مكالمات تمّت / الإجمالي">
-            <button class="call-dec" data-uid="${esc(p.user_id)}" title="تراجع">−</button>
-            <span class="call-n">📞 ${cu}/${ct}</span>
-            <button class="call-inc" data-uid="${esc(p.user_id)}" title="سجّل مكالمة تمّت">✓</button>
+        <div class="sub-date">اشترك ${fmtJoin(p.joined)}</div>
+        <div class="sub-progress-section">
+          <div class="sub-progress-header">
+            <span>التقدّم في الدورة</span>
+            <span class="sub-progress-num">${p.completed || 0} من ${p.total || 0} درس</span>
           </div>
-          <button class="btn btn-ghost btn-sm icon-btn susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? ic("play") + " تفعيل" : ic("pause") + " إيقاف"}</button>
+          <div class="sub-progress-bar"><div class="sub-progress-fill" style="width:${pct}%"></div></div>
+          ${p.started > 0 ? `<div class="sub-watching">يشاهد الآن: وصل ${p.top_percent || 0}% من الدرس الحالي</div>` : ""}
+        </div>
+        <div class="sub-activity">
+          ${p.messages > 0 ? `<span class="sub-act-item">${ic("chat")} ${p.messages} رسالة</span>` : ""}
+          ${cu > 0 ? `<span class="sub-act-item">📞 ${cu}/${ct} مكالمة</span>` : ""}
+        </div>
+        <div class="sub-actions">
+          <div class="sub-calls">
+            <button class="call-btn call-dec" data-uid="${esc(p.user_id)}">−</button>
+            <span>📞 ${cu}/${ct}</span>
+            <button class="call-btn call-inc" data-uid="${esc(p.user_id)}">+</button>
+          </div>
+          <button class="btn btn-ghost btn-sm susp-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}" data-susp="${susp ? 1 : 0}">${susp ? "تفعيل" : "إيقاف"}</button>
           <button class="btn btn-danger btn-sm del-sub" data-uid="${esc(p.user_id)}" data-name="${esc(p.name || "")}">حذف</button>
-        </div></div>`;
+        </div>
+      </div>`;
     }).join("");
     list.querySelectorAll(".susp-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "set_suspended")));
     list.querySelectorAll(".del-sub").forEach((b) => b.addEventListener("click", () => subAction(b, "delete_subscriber")));
