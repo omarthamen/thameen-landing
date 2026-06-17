@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=22" />
+  <link rel="stylesheet" href="styles.css?v=30" />
 </head>
 <body>
 
@@ -56,7 +56,7 @@
 
   <!-- الفيديو الرئيسي -->
   <section id="video" class="section">
-    <div class="video-frame" id="videoFrame">
+    <div class="video-frame reveal-scale" id="videoFrame">
       <video
         id="mainVideo"
         preload="metadata"
@@ -92,16 +92,30 @@
     </div>
   </section>
 
+  <div class="section-divider-wide"></div>
+
+  <!-- المدرّب -->
+  <section id="instructor" class="section">
+    <div class="instructor-v2">
+      <img src="assets/images/omar-profile.png" alt="عمر ثمين" class="instructor-v2-img reveal-scale" />
+      <h2 class="reveal reveal-d1">أنا عمر ثمين</h2>
+      <p class="instructor-v2-role reveal reveal-d2">مونتير محترف</p>
+      <p class="instructor-v2-bio reveal reveal-d3">اشتغلت مع عشرات صنّاع المحتوى والشركات، ودرّبت مئات الطلاب على المونتاج الاحترافي.<br>صمّمت هذا البرنامج عشان أختصر عليك سنوات من التجربة والخطأ.</p>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
   <!-- مراحل البرنامج الثلاث -->
   <section id="stages" class="section">
-    <h2 class="section-title">خلال ٩٠ يوم… راح تبني مهارتك على <span>٣ مراحل</span> واضحة</h2>
-    <p class="stages-lead">
+    <h2 class="section-title reveal">خلال ٩٠ يوم… راح تبني مهارتك على <span>٣ مراحل</span> واضحة</h2>
+    <p class="stages-lead reveal reveal-d1">
       هذا مو كورس يعلّمك تضغط أزرار وبس. هذا برنامج تدريبي مصمَّم ينقلك من التشتّت بين
       دروس يوتيوب إلى مستوى واضح وقوي في المونتاج، بخطة مرتّبة، تطبيق عملي، وتصحيح مباشر.
     </p>
 
     <div class="stages">
-      <article class="stage glow">
+      <article class="stage glow reveal reveal-d1">
         <span class="stage-num">١</span>
         <h3>التأسيس التقني</h3>
         <p>
@@ -113,7 +127,7 @@
         <p class="stage-result"><b>النتيجة:</b> قاعدة قوية تخلّيك تبدأ أي فيديو بثقة.</p>
       </article>
 
-      <article class="stage glow">
+      <article class="stage glow reveal reveal-d2">
         <span class="stage-num">٢</span>
         <h3>الاحتراف البصري</h3>
         <p>
@@ -125,7 +139,7 @@
         <p class="stage-result"><b>النتيجة:</b> مونتاجك يصير أقوى بصريًا وأوضح وأقرب لمستوى صنّاع المحتوى واليوتيوبرز.</p>
       </article>
 
-      <article class="stage stage--featured glow">
+      <article class="stage stage--featured glow reveal reveal-d3">
         <span class="stage-num">٣</span>
         <h3>الـ 3D والذكاء الاصطناعي</h3>
         <p>
@@ -139,17 +153,19 @@
     </div>
   </section>
 
+  <div class="section-divider-wide"></div>
+
   <!-- المشكلة <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> التحوّل -->
   <section id="why" class="section">
-    <h2 class="section-title">ليش لين الحين مونتاجك ما تطوّر؟</h2>
-    <p class="why-lead">
+    <h2 class="section-title reveal">ليش لين الحين مونتاجك ما تطوّر؟</h2>
+    <p class="why-lead reveal reveal-d1">
       تفتح يوتيوب… درس، وبعده درس، وبعده درس. تجمّع معلومات مبعثرة من كل مكان،
       وبعد أشهر تكتشف إنك لسا بنفس النقطة، مونتاج يطلع عادي، وما عندك أساس واضح تبني عليه.
       <b>المشكلة مو فيك، المشكلة إنك تتعلّم بدون مسار، ولا خطة، ولا أحد يصحّح لك.</b>
     </p>
 
     <div class="ba-grid">
-      <div class="ba-col ba-before">
+      <div class="ba-col ba-before reveal-left reveal-d1">
         <h3>قبل ثَمين</h3>
         <ul>
           <li>دروس مبعثرة بلا ترتيب</li>
@@ -160,7 +176,7 @@
         </ul>
       </div>
       <div class="ba-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></div>
-      <div class="ba-col ba-after">
+      <div class="ba-col ba-after reveal-right reveal-d2">
         <h3>بعد ٩٠ يوم</h3>
         <ul>
           <li>مسار واضح من الصفر للاحتراف</li>
@@ -178,9 +194,11 @@
     </p>
   </section>
 
+  <div class="section-divider-wide"></div>
+
   <!-- إثبات الخبرة -->
   <section id="proof" class="section">
-    <div class="proof-card glow">
+    <div class="proof-card glow reveal-scale">
       <span class="proof-badge">خبرة حقيقية مو كلام نظري</span>
       <h2 class="proof-title">٨ سنوات خبرة وراء <span>كل درس</span></h2>
 
@@ -216,11 +234,13 @@
     </div>
   </section>
 
+  <div class="section-divider-wide"></div>
+
   <!-- جدار الشهادات -->
   <!-- ملاحظة: هذي نماذج مؤقتة، استبدلها بشهادات طلابك الحقيقية -->
   <section id="reviews" class="section">
-    <h2 class="section-title">وش يقولون المتدربين</h2>
-    <p class="section-sub">تجارب ناس بدأوا من الصفر مثلك بالضبط.</p>
+    <h2 class="section-title reveal">وش يقولون المتدربين</h2>
+    <p class="section-sub reveal reveal-d1">تجارب ناس بدأوا من الصفر مثلك بالضبط.</p>
 
     <!-- تقييم مجمّع، ضع رقمك الحقيقي قبل النشر -->
     <div class="rating-bar">
@@ -238,9 +258,11 @@
     </div>
   </section>
 
+  <div class="section-divider-wide"></div>
+
   <!-- الباقة الكاملة -->
   <section id="offer" class="section">
-    <div class="offer">
+    <div class="offer reveal-scale">
       <span class="offer-badge">باقة ثَمين الكاملة</span>
       <h2 class="offer-title">كل شي تحتاجه لتصير محترف</h2>
 
@@ -362,11 +384,13 @@
     </div>
   </section>
 
+  <div class="section-divider-wide"></div>
+
   <!-- الأسئلة الشائعة -->
   <section id="faq" class="section">
-    <h2 class="section-title">أسئلة شائعة</h2>
+    <h2 class="section-title reveal">أسئلة شائعة</h2>
     <!-- ٤ أسئلة ظاهرة دائمًا -->
-    <div class="faq">
+    <div class="faq reveal reveal-d1">
       <details>
         <summary>هدفي أزيد دخلي وأحترف المونتاج، هل التدريب يساعدني؟</summary>
         <p>نعم. التدريب ما يعلّمك بس شلون تضغط أزرار داخل Premiere وAfter Effects، هذا موجود باليوتيوب. داخل البرنامج تتعلّم مهارة مطلوبة بالسوق، ونوريك شلون تتعامل مع العملاء وتقفل الصفقات: شنو الأخطاء اللي تخلّي العميل يرفضك حتى لو مونتاجك جيد، وشلون تعرض قيمة شغلك بطريقة تقرّبك من قفل الصفقة.</p>
@@ -503,6 +527,6 @@
 
   <script src="gallery.js?v=2"></script>
   <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=21"></script>
+  <script src="main.js?v=22"></script>
 </body>
 </html>
