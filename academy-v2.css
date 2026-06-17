@@ -645,4 +645,43 @@
 .call-notif-card #callNotifWhen{font-size:17px;font-weight:800;color:#c4b3ff;margin:0 0 10px}
 .call-notif-sub{font-size:13.5px;color:var(--text-muted);line-height:1.7;margin:0 0 18px}
 .call-notif-card .btn{width:100%}
-/* v58 */
+/* ===== Scroll Reveal Animations ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-scale{opacity:0;transform:scale(0.92);transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+.reveal-d1{transition-delay:0.1s}
+.reveal-d2{transition-delay:0.2s}
+.reveal-d3{transition-delay:0.3s}
+.reveal-d4{transition-delay:0.4s}
+
+/* ===== تأثيرات تفاعلية ===== */
+.login-card{animation:cardIn 0.5s cubic-bezier(0.16,1,0.3,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-card .fld{transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s}
+.login-card .fld:focus{transform:scale(1.01);box-shadow:0 0 0 3px rgba(91,184,232,0.15)}
+.login-card .btn{transition:transform 0.2s,box-shadow 0.2s}
+.login-card .btn:hover{transform:translateY(-2px)}
+.login-card .btn:active{transform:scale(0.97)}
+
+/* أنميشن للكروت */
+.course-fold{transition:transform 0.2s,box-shadow 0.2s}
+.course-fold:hover{transform:translateX(4px)}
+.lesson-item{transition:background 0.2s,transform 0.2s}
+.lesson-item:hover{transform:translateX(4px)}
+
+/* أنميشن للتابات */
+.nav-tab{transition:all 0.25s cubic-bezier(0.16,1,0.3,1)}
+.nav-tab:hover{transform:translateY(-2px)}
+.nav-tab:active{transform:scale(0.96)}
+
+/* أنميشن الجرس */
+.nav-bell{transition:all 0.2s}
+.nav-bell:hover{transform:scale(1.08)}
+.nav-bell:active{transform:scale(0.95)}
+
+/* v59 */
