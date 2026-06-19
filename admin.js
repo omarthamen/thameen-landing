@@ -799,21 +799,50 @@ $("addSectionBtn").addEventListener("click", async () => {
 });
 
 // ========== صور ردود الفعل ==========
+// الصور المحلية كـ fallback
+const LOCAL_FEEDBACK = [
+  { id: 1, url: "assets/feedback/feedback-1.png", sort: 0 },
+  { id: 2, url: "assets/feedback/feedback-2.png", sort: 1 },
+  { id: 3, url: "assets/feedback/feedback-3.png", sort: 2 },
+];
+let feedbackUsingLocal = false;
+
 async function loadFeedback() {
   const grid = $("feedbackGrid");
   if (!grid) return;
   grid.innerHTML = '<p class="empty">جارٍ التحميل…</p>';
+
+  let items = [];
+  feedbackUsingLocal = false;
+
   try {
-    const items = await dbGet("feedback_images?select=*&order=sort.asc");
-    if (!items.length) { grid.innerHTML = '<p class="empty">لا توجد صور. أضف صورة أعلاه.</p>'; return; }
-    grid.innerHTML = items.map((it, i) => `
-      <div class="feedback-item" draggable="true" data-id="${it.id}" data-sort="${it.sort}">
-        <span class="fb-order">${i + 1}</span>
-        <img src="${esc(it.url)}" alt="ردود فعل" />
-        <button class="del" title="حذف">✕</button>
-      </div>
-    `).join("");
-    initFeedbackDrag();
+    items = await dbGet("feedback_images?select=*&order=sort.asc");
+  } catch (x) {
+    // الجدول مو موجود - استخدم الصور المحلية
+    if (x.message.includes("feedback_images") || x.message.includes("PGRST")) {
+      feedbackUsingLocal = true;
+      items = LOCAL_FEEDBACK;
+      const msg = $("feedbackMsg");
+      if (msg) setMsg(msg, "⚠️ الجدول مو موجود في Supabase. شغّل feedback-setup.sql أولًا.", false);
+    } else {
+      grid.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`;
+      return;
+    }
+  }
+
+  if (!items.length) { grid.innerHTML = '<p class="empty">لا توجد صور. أضف صورة أعلاه.</p>'; return; }
+
+  grid.innerHTML = items.map((it, i) => `
+    <div class="feedback-item" draggable="true" data-id="${it.id}" data-sort="${it.sort}" data-url="${esc(it.url)}">
+      <span class="fb-order">${i + 1}</span>
+      <img src="${esc(it.url)}" alt="ردود فعل" />
+      ${feedbackUsingLocal ? '' : '<button class="del" title="حذف">✕</button>'}
+    </div>
+  `).join("");
+
+  initFeedbackDrag();
+
+  if (!feedbackUsingLocal) {
     grid.querySelectorAll(".del").forEach(btn => {
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -822,7 +851,7 @@ async function loadFeedback() {
         try { await dbSend("DELETE", `feedback_images?id=eq.${id}`); loadFeedback(); } catch (x) { alert("خطأ: " + x.message); }
       });
     });
-  } catch (x) { grid.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
+  }
 }
 
 function initFeedbackDrag() {
@@ -850,6 +879,15 @@ function initFeedbackDrag() {
 async function saveFeedbackOrder() {
   const grid = $("feedbackGrid");
   const items = grid.querySelectorAll(".feedback-item");
+
+  // لو الصور محلية، حدّث الأرقام بس بدون حفظ
+  if (feedbackUsingLocal) {
+    items.forEach((el, i) => {
+      el.querySelector(".fb-order").textContent = i + 1;
+    });
+    return;
+  }
+
   const updates = [...items].map((el, i) => ({ id: parseInt(el.dataset.id), sort: i }));
   for (const u of updates) {
     try { await dbSend("PATCH", `feedback_images?id=eq.${u.id}`, { sort: u.sort }); } catch (x) { console.error(x); }
@@ -859,6 +897,13 @@ async function saveFeedbackOrder() {
 
 $("addFeedbackBtn")?.addEventListener("click", async () => {
   const msg = $("feedbackMsg");
+
+  // لو الجدول مو موجود، ما نقدر نضيف
+  if (feedbackUsingLocal) {
+    setMsg(msg, "⚠️ شغّل feedback-setup.sql في Supabase أولًا عشان تقدر تضيف صور.", false);
+    return;
+  }
+
   const file = $("feedbackFile").files[0];
   if (!file) { setMsg(msg, "اختر صورة.", false); return; }
   const btn = $("addFeedbackBtn"); btn.disabled = true; setMsg(msg, "جارٍ الرفع…", true);
