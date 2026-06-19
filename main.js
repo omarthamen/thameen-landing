@@ -483,9 +483,9 @@
 // ===== Scroll Reveal Animations =====
 (function() {
   const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-  
+
   if (!reveals.length) return;
-  
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -496,6 +496,59 @@
     threshold: 0.15,
     rootMargin: '0px 0px -50px 0px'
   });
-  
+
   reveals.forEach(el => observer.observe(el));
+})();
+
+// ===== تأثير الإضاءة للكروت =====
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const cards = document.querySelectorAll('.stage');
+
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--glow-x', x + 'px');
+      card.style.setProperty('--glow-y', y + 'px');
+    });
+  });
+})();
+
+// ===== الماوس التفاعلي =====
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const cursor = document.getElementById('customCursor');
+  const dot = document.getElementById('cursorDot');
+  if (!cursor || !dot) return;
+
+  let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.12;
+    cursorY += (mouseY - cursorY) * 0.12;
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  const hoverElements = document.querySelectorAll('a, button, .btn, .stage, .course-card, .review, details summary, .video-play, input, textarea');
+  hoverElements.forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  document.addEventListener('mousedown', () => cursor.classList.add('click'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('click'));
 })();

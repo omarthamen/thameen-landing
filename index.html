@@ -25,9 +25,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=30" />
+  <link rel="stylesheet" href="styles.css?v=42" />
 </head>
 <body>
+
+  <!-- الماوس التفاعلي -->
+  <div class="custom-cursor" id="customCursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
 
   <!-- خلفية متوهجة -->
   <div class="bg-glow" aria-hidden="true"></div>
@@ -101,6 +105,52 @@
       <h2 class="reveal reveal-d1">أنا عمر ثمين</h2>
       <p class="instructor-v2-role reveal reveal-d2">مونتير محترف</p>
       <p class="instructor-v2-bio reveal reveal-d3">اشتغلت مع عشرات صنّاع المحتوى والشركات، ودرّبت مئات الطلاب على المونتاج الاحترافي.<br>صمّمت هذا البرنامج عشان أختصر عليك سنوات من التجربة والخطأ.</p>
+
+      <!-- Social Proof -->
+      <div class="social-proof reveal reveal-d4">
+        <div class="sp-avatars">
+          <div class="sp-avatar">
+            <img src="assets/clients/banderitax.jpg" alt="BanderitaX" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">BanderitaX <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">20.8M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/ocmz.jpg" alt="oCMz" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">oCMz <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">9.78M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/suhaib.jpg" alt="Suhaib" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Suhaib <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">8.11M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/ahmedshow.jpg" alt="Ahmed Show" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Ahmed Show <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">5.91M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/peaksbase.jpg" alt="Peaks" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Peaks <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">1.14M subscribers</span>
+            </div>
+          </div>
+          <span class="sp-more">+50</span>
+        </div>
+        <div class="sp-info">
+          <span class="sp-text">اشتغلت مع أكثر من <strong>٥٠ صانع محتوى</strong></span>
+          <span class="sp-stars">★★★★★</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -527,6 +577,6 @@
 
   <script src="gallery.js?v=2"></script>
   <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=22"></script>
+  <script src="main.js?v=25"></script>
 </body>
 </html>
