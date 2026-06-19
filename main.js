@@ -574,3 +574,82 @@
     });
   });
 })();
+
+// ===== Feedback Slider =====
+(function() {
+  const container = document.querySelector('.slider-container');
+  const prevBtn = document.getElementById('sliderPrev');
+  const nextBtn = document.getElementById('sliderNext');
+  const section = document.getElementById('feedback-showcase');
+
+  if (!container || !prevBtn || !nextBtn) return;
+
+  const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3enBqeHhmZHFzanltYmJqb2t2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg2OTg2MjYsImV4cCI6MjAzNDI3NDYyNn0.NkCwklwVe8xYxDrNaLMeeWuXIwM_lFUr0sM2_btyuLs";
+
+  let items = [];
+  let current = 0;
+
+  async function loadFeedbackImages() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_images?select=*&order=sort.asc`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!res.ok) throw new Error("Failed to load");
+      const data = await res.json();
+      if (data.length === 0) {
+        if (section) section.style.display = 'none';
+        return;
+      }
+      container.innerHTML = data.map((img, i) => `
+        <div class="slider-item" data-index="${i}">
+          <img src="${img.url}" alt="رد فعل عميل" />
+        </div>
+      `).join('');
+      items = Array.from(container.querySelectorAll('.slider-item'));
+      current = 0;
+      updateSlider();
+    } catch (e) {
+      console.log("Using local feedback images");
+      items = Array.from(container.querySelectorAll('.slider-item'));
+      if (items.length > 0) updateSlider();
+    }
+  }
+
+  function updateSlider() {
+    const total = items.length;
+    if (total === 0) return;
+
+    items.forEach((item, i) => {
+      item.classList.remove('pos-left', 'pos-center', 'pos-right', 'pos-hidden');
+
+      const diff = (i - current + total) % total;
+
+      if (diff === 0) {
+        item.classList.add('pos-center');
+      } else if (diff === 1 || (diff === total - 1 && total === 2)) {
+        item.classList.add('pos-right');
+      } else if (diff === total - 1) {
+        item.classList.add('pos-left');
+      } else {
+        item.classList.add('pos-hidden');
+      }
+    });
+  }
+
+  prevBtn.addEventListener('click', () => {
+    const total = items.length;
+    if (total === 0) return;
+    current = (current - 1 + total) % total;
+    updateSlider();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    const total = items.length;
+    if (total === 0) return;
+    current = (current + 1) % total;
+    updateSlider();
+  });
+
+  loadFeedbackImages();
+})();

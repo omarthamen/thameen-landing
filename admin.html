@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=17" />
+  <link rel="stylesheet" href="admin.css?v=18" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -130,6 +130,17 @@
           <p class="msg" id="workMsg" role="status"></p>
           <div class="media-grid" id="worksGrid"></div>
         </div>
+
+        <div class="card">
+          <h3>📱 صور ردود الفعل</h3>
+          <p class="hint">سكرينشوتات المحادثات. تظهر بقسم "ردود فعل من اشتغلت معهم". اسحب لتغيير الترتيب.</p>
+          <div class="add-media">
+            <input type="file" id="feedbackFile" accept="image/*" class="fld" />
+            <button class="btn btn-primary btn-sm" id="addFeedbackBtn">إضافة صورة</button>
+          </div>
+          <p class="msg" id="feedbackMsg" role="status"></p>
+          <div class="feedback-grid" id="feedbackGrid"></div>
+        </div>
       </section>
 
       <!-- الدورات -->
@@ -213,6 +224,6 @@
     </main>
   </section>
 
-  <script src="admin.js?v=33"></script>
+  <script src="admin.js?v=34"></script>
 </body>
 </html>

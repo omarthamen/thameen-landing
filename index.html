@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=44" />
+  <link rel="stylesheet" href="styles.css?v=60" />
 </head>
 <body>
 
@@ -246,41 +246,27 @@
 
   <div class="section-divider-wide"></div>
 
-  <!-- إثبات الخبرة -->
-  <section id="proof" class="section">
-    <div class="proof-card glow reveal-scale">
-      <span class="proof-badge">خبرة حقيقية مو كلام نظري</span>
-      <h2 class="proof-title">٨ سنوات خبرة وراء <span>كل درس</span></h2>
+  <!-- ردود فعل العملاء - Carousel -->
+  <section id="feedback-showcase" class="section">
+    <h2 class="section-title reveal">ردود فعل من <span>اشتغلت معهم</span></h2>
+    <p class="section-sub reveal reveal-d1">ثقة حقيقية من صنّاع محتوى وعملاء</p>
 
-      <div class="proof-stats">
-        <div class="pstat">
-          <span class="pstat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg></span>
-          <span class="pstat-num"><b class="countup" data-to="8">8</b><i>+</i></span>
-          <small>سنوات خبرة</small>
+    <div class="feedback-slider reveal">
+      <button class="slider-btn slider-prev" id="sliderPrev" aria-label="السابق">‹</button>
+
+      <div class="slider-container">
+        <div class="slider-item" data-index="0">
+          <img src="assets/feedback/feedback-1.png" alt="رد فعل عميل" />
         </div>
-        <div class="pstat featured">
-          <span class="pstat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5-5.5 3.5z" fill="currentColor" stroke="none"/></svg></span>
-          <span class="pstat-num"><b>ملايين</b></span>
-          <small>مشاهدات</small>
+        <div class="slider-item" data-index="1">
+          <img src="assets/feedback/feedback-2.png" alt="رد فعل عميل" />
         </div>
-        <div class="pstat">
-          <span class="pstat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5a3.2 3.2 0 0 1 0 6.2M16.5 13.2A5.5 5.5 0 0 1 20.5 19"/></svg></span>
-          <span class="pstat-num"><b class="countup" data-to="350">350</b><i>+</i></span>
-          <small>متدرّب</small>
+        <div class="slider-item" data-index="2">
+          <img src="assets/feedback/feedback-3.png" alt="رد فعل عميل" />
         </div>
       </div>
 
-      <!-- قنوات اشتغل معها، تُملأ من CHANNELS في main.js -->
-      <div class="proof-block" id="proofChannels" hidden>
-        <p class="proof-block-title">اشتغلت مع قنوات يتابعها الملايين</p>
-        <div class="channels-row" id="channelsRow"></div>
-      </div>
-
-      <!-- نماذج شغل، تُملأ من WORKS في main.js -->
-      <div class="proof-block" id="proofWorks" hidden>
-        <p class="proof-block-title">نماذج من شغلي</p>
-        <div class="works-grid" id="worksGrid"></div>
-      </div>
+      <button class="slider-btn slider-next" id="sliderNext" aria-label="التالي">›</button>
     </div>
   </section>
 
@@ -595,6 +581,6 @@
 
   <script src="gallery.js?v=2"></script>
   <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=26"></script>
+  <script src="main.js?v=34"></script>
 </body>
 </html>

@@ -797,3 +797,80 @@ $("addSectionBtn").addEventListener("click", async () => {
     $("newSectionTitle").value = ""; setMsg(msg, "تمت الإضافة ✅", true); loadCourses();
   } catch (x) { setMsg(msg, "خطأ: " + x.message, false); }
 });
+
+// ========== صور ردود الفعل ==========
+async function loadFeedback() {
+  const grid = $("feedbackGrid");
+  if (!grid) return;
+  grid.innerHTML = '<p class="empty">جارٍ التحميل…</p>';
+  try {
+    const items = await dbGet("feedback_images?select=*&order=sort.asc");
+    if (!items.length) { grid.innerHTML = '<p class="empty">لا توجد صور. أضف صورة أعلاه.</p>'; return; }
+    grid.innerHTML = items.map((it, i) => `
+      <div class="feedback-item" draggable="true" data-id="${it.id}" data-sort="${it.sort}">
+        <span class="fb-order">${i + 1}</span>
+        <img src="${esc(it.url)}" alt="ردود فعل" />
+        <button class="del" title="حذف">✕</button>
+      </div>
+    `).join("");
+    initFeedbackDrag();
+    grid.querySelectorAll(".del").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm("حذف الصورة؟")) return;
+        const id = btn.closest(".feedback-item").dataset.id;
+        try { await dbSend("DELETE", `feedback_images?id=eq.${id}`); loadFeedback(); } catch (x) { alert("خطأ: " + x.message); }
+      });
+    });
+  } catch (x) { grid.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`; }
+}
+
+function initFeedbackDrag() {
+  const grid = $("feedbackGrid");
+  const items = grid.querySelectorAll(".feedback-item");
+  let dragItem = null;
+
+  items.forEach(item => {
+    item.addEventListener("dragstart", () => { dragItem = item; item.classList.add("dragging"); });
+    item.addEventListener("dragend", () => { item.classList.remove("dragging"); saveFeedbackOrder(); });
+    item.addEventListener("dragover", (e) => { e.preventDefault(); });
+    item.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (dragItem && dragItem !== item) {
+        const allItems = [...grid.querySelectorAll(".feedback-item")];
+        const fromIdx = allItems.indexOf(dragItem);
+        const toIdx = allItems.indexOf(item);
+        if (fromIdx < toIdx) item.after(dragItem);
+        else item.before(dragItem);
+      }
+    });
+  });
+}
+
+async function saveFeedbackOrder() {
+  const grid = $("feedbackGrid");
+  const items = grid.querySelectorAll(".feedback-item");
+  const updates = [...items].map((el, i) => ({ id: parseInt(el.dataset.id), sort: i }));
+  for (const u of updates) {
+    try { await dbSend("PATCH", `feedback_images?id=eq.${u.id}`, { sort: u.sort }); } catch (x) { console.error(x); }
+  }
+  loadFeedback();
+}
+
+$("addFeedbackBtn")?.addEventListener("click", async () => {
+  const msg = $("feedbackMsg");
+  const file = $("feedbackFile").files[0];
+  if (!file) { setMsg(msg, "اختر صورة.", false); return; }
+  const btn = $("addFeedbackBtn"); btn.disabled = true; setMsg(msg, "جارٍ الرفع…", true);
+  try {
+    const url = await uploadFile(file);
+    const n = await dbGet("feedback_images?select=sort&order=sort.desc&limit=1");
+    const sort = n && n[0] ? (n[0].sort || 0) + 1 : 0;
+    await dbSend("POST", "feedback_images", { url, sort }, "return=minimal");
+    $("feedbackFile").value = ""; setMsg(msg, "تمت الإضافة ✅", true); loadFeedback();
+  } catch (x) { setMsg(msg, "خطأ: " + x.message, false); }
+  btn.disabled = false;
+});
+
+// تحميل الصور عند الدخول
+if ($("feedbackGrid")) loadFeedback();
