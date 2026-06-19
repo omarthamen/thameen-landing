@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ثَمين - رحلتك تبدأ هنا</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #030508;
+      --primary: #5BB8E8;
+      --primary-glow: rgba(91,184,232,0.4);
+      --gold: #f0c674;
+      --text: #ffffff;
+      --text-soft: rgba(255,255,255,0.85);
+      --text-muted: rgba(255,255,255,0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== الماوس المخصص ===== */
+    .cursor {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, background 0.2s ease, width 0.2s ease, height 0.2s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-dot {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+    .cursor.hover {
+      width: 50px;
+      height: 50px;
+      background: rgba(91,184,232,0.1);
+      border-color: var(--primary);
+    }
+    .cursor.click {
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(91,184,232,0.3);
+    }
+
+    /* ===== الخلفية السينمائية ===== */
+    .cinematic-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(91,184,232,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(91,184,232,0.06) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    /* الجزيئات */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleFloat 10s infinite;
+    }
+    @keyframes particleFloat {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.5; }
+      90% { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+    }
+
+    /* ===== الحاوية ===== */
+    .onboarding {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px 24px;
+    }
+
+    /* ===== الخطوات ===== */
+    .step {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 1000px;
+      width: 100%;
+      opacity: 0;
+    }
+    .step.active {
+      display: flex;
+      animation: stepReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes stepReveal {
+      0% { opacity: 0; transform: translateY(50px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ===== اللوجو ===== */
+    .logo-container {
+      position: relative;
+      margin-bottom: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo {
+      width: 160px;
+      height: auto;
+      position: relative;
+      z-index: 2;
+      animation: logoFloat 5s ease-in-out infinite;
+      filter: drop-shadow(0 0 50px var(--primary-glow));
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+    .logo:hover {
+      transform: scale(1.1) !important;
+      filter: drop-shadow(0 0 80px var(--primary-glow));
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .logo-glow {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      animation: glowPulse 3s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes glowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    /* ===== النصوص ===== */
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: rgba(91,184,232,0.08);
+      border: 1px solid rgba(91,184,232,0.25);
+      border-radius: 99px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 35px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    .step-badge:hover {
+      background: rgba(91,184,232,0.15);
+      transform: translateY(-2px);
+    }
+    .step-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: badgePulse 2s infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .step-title {
+      font-size: clamp(38px, 7vw, 68px);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 30px;
+      letter-spacing: -1px;
+    }
+    .step-title .highlight {
+      background: linear-gradient(135deg, var(--primary) 0%, #7dd3fc 50%, var(--primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    .step-subtitle {
+      font-size: clamp(20px, 3.5vw, 26px);
+      font-weight: 400;
+      color: var(--text-soft);
+      line-height: 1.8;
+      max-width: 750px;
+      margin-bottom: 20px;
+    }
+
+    .step-text {
+      font-size: clamp(16px, 2.5vw, 19px);
+      color: var(--text-muted);
+      line-height: 1.9;
+      max-width: 650px;
+      margin-bottom: 50px;
+    }
+
+    /* ===== الرقم الضخم ===== */
+    .mega-number {
+      position: relative;
+      margin-bottom: 30px;
+    }
+    .mega-number span {
+      font-size: clamp(140px, 35vw, 280px);
+      font-weight: 900;
+      background: linear-gradient(180deg, var(--primary) 0%, rgba(91,184,232,0.2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 0.8;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .mega-number:hover span {
+      transform: scale(1.02);
+    }
+    .mega-label {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 10px;
+    }
+
+    /* ===== صورة المدرب ===== */
+    .trainer-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    .trainer-image {
+      position: relative;
+      margin-bottom: 30px;
+    }
+    .trainer-image img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center 35%;
+      border: 4px solid var(--primary);
+      box-shadow:
+        0 0 0 12px rgba(91,184,232,0.1),
+        0 0 80px rgba(91,184,232,0.3),
+        0 40px 80px rgba(0,0,0,0.5);
+      transition: all 0.4s ease;
+    }
+    .trainer-image:hover img {
+      transform: scale(1.05);
+      box-shadow:
+        0 0 0 15px rgba(91,184,232,0.15),
+        0 0 100px rgba(91,184,232,0.4),
+        0 50px 100px rgba(0,0,0,0.5);
+    }
+    .trainer-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, var(--gold), #e6b95c);
+      color: #000;
+      padding: 10px 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 8px 25px rgba(240,198,116,0.4);
+    }
+
+    /* ===== الإحصائيات ===== */
+    .stats-row {
+      display: flex;
+      gap: 60px;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat {
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .stat:hover {
+      transform: translateY(-5px);
+    }
+    .stat-number {
+      font-size: clamp(42px, 10vw, 64px);
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    /* ===== البطاقات ===== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 950px;
+      margin-bottom: 60px;
+      width: 100%;
+    }
+    @media (max-width: 800px) {
+      .cards-grid { grid-template-columns: 1fr; max-width: 400px; }
+    }
+    .card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px 28px;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .card:hover {
+      transform: translateY(-12px);
+      border-color: rgba(91,184,232,0.4);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 40px rgba(91,184,232,0.1);
+      background: linear-gradient(160deg, rgba(91,184,232,0.1) 0%, rgba(255,255,255,0.02) 100%);
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(91,184,232,0.2) 0%, rgba(91,184,232,0.05) 100%);
+      border-radius: 20px;
+      transition: all 0.4s ease;
+    }
+    .card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+      background: linear-gradient(135deg, rgba(91,184,232,0.3) 0%, rgba(91,184,232,0.1) 100%);
+    }
+    .card-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: var(--primary);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .card-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ===== الأزرار ===== */
+    .actions {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      position: relative;
+      padding: 20px 50px;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 16px;
+      border: none;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, #3d9fd4 100%);
+      color: #000;
+      box-shadow:
+        0 15px 50px rgba(91,184,232,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.6s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 25px 60px rgba(91,184,232,0.45);
+    }
+    .btn-primary:hover::before { left: 100%; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* ===== اقتباس قوي ===== */
+    .power-quote {
+      position: relative;
+      padding: 35px 45px;
+      background: linear-gradient(135deg, rgba(91,184,232,0.08) 0%, rgba(91,184,232,0.02) 100%);
+      border: 1px solid rgba(91,184,232,0.2);
+      border-radius: 24px;
+      margin-bottom: 50px;
+      max-width: 750px;
+      transition: all 0.4s ease;
+    }
+    .power-quote:hover {
+      transform: translateY(-5px);
+      border-color: rgba(91,184,232,0.35);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+    .power-quote::before {
+      content: '"';
+      position: absolute;
+      top: -5px;
+      right: 35px;
+      font-size: 100px;
+      font-weight: 900;
+      color: var(--primary);
+      opacity: 0.2;
+      line-height: 1;
+    }
+    .power-quote p {
+      font-size: clamp(18px, 3vw, 22px);
+      font-weight: 500;
+      line-height: 1.9;
+      color: var(--text-soft);
+    }
+
+    /* ===== التنقل ===== */
+    .progress {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 100;
+      background: rgba(0,0,0,0.6);
+      padding: 14px 24px;
+      border-radius: 99px;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .progress-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .progress-dot.active {
+      background: var(--primary);
+      box-shadow: 0 0 25px var(--primary-glow);
+      transform: scale(1.2);
+    }
+    .progress-dot:hover:not(.active) {
+      background: rgba(255,255,255,0.35);
+      transform: scale(1.1);
+    }
+
+    .skip {
+      position: fixed;
+      top: 35px;
+      left: 35px;
+      z-index: 100;
+      padding: 14px 28px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 99px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .skip:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+      transform: translateX(-5px);
+    }
+
+    /* تفاعل عام */
+    a, button, .card, .stat, .trainer-image, .logo, .progress-dot, .skip {
+      cursor: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- الماوس المخصص -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <div class="cinematic-bg"></div>
+  <div class="particles" id="particles"></div>
+
+  <button class="skip" onclick="goToSite()">تخطّي المقدمة</button>
+
+  <div class="onboarding">
+
+    <!-- الخطوة 1 -->
+    <div class="step active" data-step="1">
+      <div class="logo-container">
+        <div class="logo-glow"></div>
+        <img src="logo.png" alt="ثمين" class="logo" />
+      </div>
+      <div class="step-badge">أهلاً بك في ثَمين</div>
+      <h1 class="step-title">هل سئمت من <span class="highlight">التشتت</span>؟</h1>
+      <p class="step-subtitle">دروس يوتيوب ما توصّلك لمكان. كورسات تبدأها وما تكمّلها. شغل يطلع "عادي" مهما حاولت.</p>
+      <p class="step-text">الحين راح تعرف كيف تتحوّل من مبتدئ حائر إلى ممنتج محترف — بخطة واضحة ونتيجة مضمونة.</p>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="nextStep()">اكتشف الحل</button>
+      </div>
+    </div>
+
+    <!-- الخطوة 2 -->
+    <div class="step" data-step="2">
+      <div class="mega-number"><span>٩٠</span></div>
+      <div class="mega-label">يوم فقط</div>
+      <h1 class="step-title">من <span class="highlight">صفر</span> إلى <span class="highlight">احتراف</span></h1>
+      <p class="step-subtitle">مو وعد فارغ — هذا برنامج مُجرَّب على مئات الطلاب.</p>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-number">+٣٥٠</div>
+          <div class="stat-label">طالب تخرّج</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">٤.٩</div>
+          <div class="stat-label">تقييم الطلاب</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">٨</div>
+          <div class="stat-label">سنوات خبرة</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="prevStep()">السابق</button>
+        <button class="btn btn-primary" onclick="nextStep()">التالي</button>
+      </div>
+    </div>
+
+    <!-- الخطوة 3 -->
+    <div class="step" data-step="3">
+      <div class="trainer-section">
+        <div class="trainer-image">
+          <img src="assets/images/omar-profile.png" alt="عمر ثمين" />
+          <span class="trainer-badge">مدرّبك</span>
+        </div>
+      </div>
+      <div class="step-badge">تعرّف عليّ</div>
+      <h1 class="step-title">أنا <span class="highlight">عمر ثمين</span></h1>
+      <div class="power-quote">
+        <p>اشتغلت مع قنوات يتابعها الملايين، وشفت بعيني الفرق بين الممنتج العادي والمحترف. صمّمت هذا البرنامج عشان أعطيك الاختصار اللي تمنيته.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="prevStep()">السابق</button>
+        <button class="btn btn-primary" onclick="nextStep()">التالي</button>
+      </div>
+    </div>
+
+    <!-- الخطوة 4 -->
+    <div class="step" data-step="4">
+      <div class="step-badge">المنظومة الكاملة</div>
+      <h1 class="step-title">٣ مهارات = <span class="highlight">ممنتج كامل</span></h1>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8l3 2-3 2"/><path d="M13 10h4"/></svg>
+          </div>
+          <div class="card-title">Premiere Pro</div>
+          <div class="card-desc">أساسيات القص، الإيقاع، التلوين، والتصدير الاحترافي</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+          <div class="card-title">After Effects</div>
+          <div class="card-desc">موشن جرافيك، مؤثرات بصرية، وأنميشن يرفع مستوى شغلك</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><path d="M7.5 13a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM16.5 13a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>
+          </div>
+          <div class="card-title">الذكاء الاصطناعي</div>
+          <div class="card-desc">أدوات AI تسرّع شغلك ٣ أضعاف وتخليك صعب الاستبدال</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="prevStep()">السابق</button>
+        <button class="btn btn-primary" onclick="nextStep()">الخطوة الأخيرة</button>
+      </div>
+    </div>
+
+    <!-- الخطوة 5 -->
+    <div class="step" data-step="5">
+      <div class="logo-container">
+        <div class="logo-glow"></div>
+        <img src="logo.png" alt="ثمين" class="logo" />
+      </div>
+      <div class="step-badge">الخطوة الأخيرة</div>
+      <h1 class="step-title">جاهز تبدأ <span class="highlight">رحلتك</span>؟</h1>
+      <p class="step-subtitle">الفرق بينك وبين المحترفين مو الموهبة — الفرق هو المسار الصحيح.</p>
+      <p class="step-text">انضم لمئات الطلاب اللي غيّروا حياتهم المهنية. مكانك جاهز.</p>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="goToSite()" style="padding: 22px 70px; font-size: 20px;">
+          ابدأ الآن — اكتشف البرنامج
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- مؤشر التقدم -->
+  <div class="progress">
+    <div class="progress-dot active" onclick="goToStep(1)"></div>
+    <div class="progress-dot" onclick="goToStep(2)"></div>
+    <div class="progress-dot" onclick="goToStep(3)"></div>
+    <div class="progress-dot" onclick="goToStep(4)"></div>
+    <div class="progress-dot" onclick="goToStep(5)"></div>
+  </div>
+
+  <script>
+    // الماوس المخصص
+    const cursor = document.getElementById('cursor');
+    const cursorDot = document.getElementById('cursorDot');
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    // حركة سلسة للماوس
+    function animateCursor() {
+      cursorX += (mouseX - cursorX) * 0.15;
+      cursorY += (mouseY - cursorY) * 0.15;
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top = cursorY + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // تفاعل الماوس مع العناصر
+    const hoverElements = document.querySelectorAll('button, .card, .stat, .trainer-image, .logo, .progress-dot, a');
+    hoverElements.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+
+    document.addEventListener('mousedown', () => cursor.classList.add('click'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('click'));
+
+    // الجزيئات
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 25; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 10 + 's';
+      particle.style.animationDuration = (8 + Math.random() * 6) + 's';
+      particlesContainer.appendChild(particle);
+    }
+
+    let currentStep = 1;
+    const totalSteps = 5;
+
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+      });
+      document.querySelectorAll('.progress-dot').forEach(d => d.classList.remove('active'));
+
+      const activeStep = document.querySelector(`[data-step="${step}"]`);
+      activeStep.style.display = 'flex';
+      setTimeout(() => activeStep.classList.add('active'), 50);
+
+      document.querySelectorAll('.progress-dot')[step - 1].classList.add('active');
+      currentStep = step;
+    }
+
+    function nextStep() { if (currentStep < totalSteps) showStep(currentStep + 1); }
+    function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+    function goToStep(step) { showStep(step); }
+
+    function goToSite() {
+      document.body.style.opacity = '0';
+      document.body.style.transform = 'scale(1.05)';
+      document.body.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+      setTimeout(() => window.location.href = 'index.html', 500);
+    }
+
+    // دعم الكيبورد
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextStep(); }
+      if (e.key === 'ArrowRight') prevStep();
+      if (e.key === 'Escape') goToSite();
+    });
+
+    // دعم السحب على الموبايل
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+    document.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) diff > 0 ? nextStep() : prevStep();
+    });
+  </script>
+</body>
+</html>

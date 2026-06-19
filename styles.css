@@ -1441,16 +1441,39 @@ body {
   transform: rotate(135deg);
   color: #fff;
 }
+.faq details .faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--ease-out);
+}
+.faq details[open] .faq-answer {
+  grid-template-rows: 1fr;
+}
+.faq details .faq-answer-inner {
+  overflow: hidden;
+}
 .faq details p {
   padding: 0 22px 20px;
   color: var(--text-muted);
   font-size: 15.5px;
   line-height: 1.8;
-  animation: faqSlide 0.3s var(--ease-out);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.3s ease 0.05s, transform 0.3s var(--ease-out) 0.05s;
 }
-@keyframes faqSlide {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.faq details[open] p {
+  opacity: 1;
+  transform: translateY(0);
+}
+.faq details.closing .faq-answer {
+  grid-template-rows: 0fr;
+}
+.faq details.closing p {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.faq details.closing summary::after {
+  transform: rotate(0deg);
 }
 .faq details { transition: border-color 0.3s ease, background 0.3s ease; }
 .faq summary { transition: color 0.2s ease, background 0.2s ease; }

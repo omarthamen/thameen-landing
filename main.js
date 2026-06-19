@@ -552,3 +552,25 @@
   document.addEventListener('mousedown', () => cursor.classList.add('click'));
   document.addEventListener('mouseup', () => cursor.classList.remove('click'));
 })();
+
+// ===== FAQ Smooth Close Animation =====
+(function() {
+  const allDetails = document.querySelectorAll('.faq details');
+
+  allDetails.forEach(details => {
+    const summary = details.querySelector('summary');
+    const answer = details.querySelector('.faq-answer');
+
+    summary.addEventListener('click', (e) => {
+      if (details.open) {
+        e.preventDefault();
+        details.classList.add('closing');
+
+        setTimeout(() => {
+          details.open = false;
+          details.classList.remove('closing');
+        }, 300);
+      }
+    });
+  });
+})();
