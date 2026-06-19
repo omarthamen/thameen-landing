@@ -21,20 +21,41 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
     .container { max-width: 1200px; margin: 0 auto; }
 
     /* Section */
     .feedback-section {
-      margin-bottom: 80px;
-    }
-    .section-header {
       text-align: center;
+    }
+
+    /* Dynamic Title */
+    .title-wrapper {
+      position: relative;
+      height: 120px;
       margin-bottom: 40px;
+      overflow: hidden;
+    }
+    .dynamic-title {
+      position: absolute;
+      width: 100%;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dynamic-title.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .dynamic-title.exit-up {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+    .dynamic-title.enter-down {
+      opacity: 0;
+      transform: translateY(40px);
     }
     .section-title {
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       font-weight: 700;
       margin-bottom: 12px;
     }
@@ -46,6 +67,32 @@
     }
     .section-sub {
       color: var(--text-muted);
+      font-size: 1.15rem;
+    }
+
+    /* Type Badge */
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 20px;
+      transition: all 0.5s ease;
+    }
+    .type-badge.creators {
+      background: rgba(201, 162, 39, 0.15);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      color: var(--primary);
+    }
+    .type-badge.subscribers {
+      background: rgba(39, 162, 201, 0.15);
+      border: 1px solid rgba(39, 162, 201, 0.3);
+      color: #27a2c9;
+    }
+    .type-badge .icon {
       font-size: 1.1rem;
     }
 
@@ -59,6 +106,9 @@
       padding: 20px 0;
     }
     .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
       width: 50px;
       height: 50px;
       border-radius: 50%;
@@ -68,16 +118,20 @@
       font-size: 24px;
       cursor: pointer;
       transition: all 0.3s ease;
-      flex-shrink: 0;
+      z-index: 10;
     }
     .slider-btn:hover {
       background: var(--primary);
       border-color: var(--primary);
+      transform: translateY(-50%) scale(1.1);
     }
+    .slider-btn.prev { right: calc(50% + 180px); }
+    .slider-btn.next { left: calc(50% + 180px); }
+
     .slider-container {
       position: relative;
       width: 320px;
-      height: 500px;
+      height: 520px;
     }
     .slider-item {
       position: absolute;
@@ -96,200 +150,159 @@
     }
 
     /* Positions */
-    .slider-item.pos-far-left {
-      transform: translateX(-220%) scale(0.6);
-      opacity: 0;
-      z-index: 0;
-    }
     .slider-item.pos-left {
-      transform: translateX(-160%) scale(0.75);
-      opacity: 0.4;
+      transform: translateX(-165%) scale(0.8);
+      opacity: 0.5;
       z-index: 1;
     }
     .slider-item.pos-center {
       transform: translateX(-50%) scale(1);
       opacity: 1;
       z-index: 3;
-      box-shadow: 0 20px 60px rgba(201,162,39,0.2);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
     }
     .slider-item.pos-right {
-      transform: translateX(60%) scale(0.75);
-      opacity: 0.4;
+      transform: translateX(65%) scale(0.8);
+      opacity: 0.5;
       z-index: 1;
     }
-    .slider-item.pos-far-right {
-      transform: translateX(120%) scale(0.6);
-      opacity: 0;
-      z-index: 0;
-    }
     .slider-item.pos-hidden {
-      transform: translateX(-50%) scale(0.5);
+      transform: translateX(-50%) scale(0.6);
       opacity: 0;
       z-index: 0;
       pointer-events: none;
     }
 
-    /* Dots */
-    .slider-dots {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
+    /* Counter */
+    .slider-counter {
       margin-top: 30px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
     }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--border);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .dot.active {
-      background: var(--primary);
-      transform: scale(1.2);
-    }
-
-    /* Divider */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin: 60px 0;
-    }
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-    }
-    .divider-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      font-size: 24px;
+    .slider-counter .current {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <section class="feedback-section">
 
-    <!-- صناع المحتوى -->
-    <section class="feedback-section" id="creators-section">
-      <div class="section-header">
-        <h2 class="section-title">ردود فعل من <span>صناع محتوى</span></h2>
-        <p class="section-sub">ثقة من يوتيوبرز ومؤثرين اشتغلت معهم</p>
+      <!-- Dynamic Titles -->
+      <div class="title-wrapper">
+        <div class="dynamic-title active" id="creatorsTitle">
+          <div class="type-badge creators">
+            <span class="icon">🎬</span>
+            <span>صناع المحتوى</span>
+          </div>
+          <h2 class="section-title">ردود فعل من <span>اشتغلت معهم</span></h2>
+          <p class="section-sub">ثقة حقيقية من يوتيوبرز ومؤثرين</p>
+        </div>
+
+        <div class="dynamic-title enter-down" id="subscribersTitle">
+          <div class="type-badge subscribers">
+            <span class="icon">🎓</span>
+            <span>مشتركين الدورة</span>
+          </div>
+          <h2 class="section-title">آراء <span>طلاب الأكاديمية</span></h2>
+          <p class="section-sub">تجارب حقيقية من مشتركين ثمين</p>
+        </div>
       </div>
+
+      <!-- Slider -->
       <div class="slider-wrapper">
-        <button class="slider-btn" onclick="slideCreators(-1)">‹</button>
-        <div class="slider-container" id="creatorsSlider"></div>
-        <button class="slider-btn" onclick="slideCreators(1)">›</button>
+        <button class="slider-btn prev" id="prevBtn">‹</button>
+        <div class="slider-container" id="feedbackSlider"></div>
+        <button class="slider-btn next" id="nextBtn">›</button>
       </div>
-      <div class="slider-dots" id="creatorsDots"></div>
+
+      <div class="slider-counter">
+        <span class="current" id="currentNum">1</span> / <span id="totalNum">10</span>
+      </div>
+
     </section>
-
-    <!-- فاصل -->
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-icon">⬇</div>
-      <div class="divider-line"></div>
-    </div>
-
-    <!-- مشتركين الدورة -->
-    <section class="feedback-section" id="subscribers-section">
-      <div class="section-header">
-        <h2 class="section-title">آراء <span>مشتركين الدورة</span></h2>
-        <p class="section-sub">تجارب حقيقية من طلاب أكاديمية ثمين</p>
-      </div>
-      <div class="slider-wrapper">
-        <button class="slider-btn" onclick="slideSubscribers(-1)">‹</button>
-        <div class="slider-container" id="subscribersSlider"></div>
-        <button class="slider-btn" onclick="slideSubscribers(1)">›</button>
-      </div>
-      <div class="slider-dots" id="subscribersDots"></div>
-    </section>
-
   </div>
 
   <script>
-    // صناع المحتوى
-    const creatorsImages = [
-      'assets/feedback/feedback-1.png',  // بندريتا
-      'assets/feedback/feedback-2.png',  // ريان أوسمز
+    // الصور مع النوع
+    const feedbackItems = [
+      // صناع المحتوى
+      { src: 'assets/feedback/feedback-1.png', type: 'creator' },  // بندريتا
+      { src: 'assets/feedback/feedback-2.png', type: 'creator' },  // ريان أوسمز
+
+      // مشتركين الدورة
+      { src: 'assets/feedback/01-Ehab.png', type: 'subscriber' },
+      { src: 'assets/feedback/02-abdulsalam.png', type: 'subscriber' },
+      { src: 'assets/feedback/03-mortada.png', type: 'subscriber' },
+      { src: 'assets/feedback/04-Anonymous.png', type: 'subscriber' },
+      { src: 'assets/feedback/05-Ali-Yas.png', type: 'subscriber' },
+      { src: 'assets/feedback/06-mohamed-kaito.png', type: 'subscriber' },
+      { src: 'assets/feedback/07-Ehab-2.png', type: 'subscriber' },
+      { src: 'assets/feedback/feedback-3.png', type: 'subscriber' },  // عبدالسلام
     ];
 
-    // مشتركين الدورة
-    const subscribersImages = [
-      'assets/feedback/01-Ehab.png',
-      'assets/feedback/02-abdulsalam.png',
-      'assets/feedback/03-mortada.png',
-      'assets/feedback/04-Anonymous.png',
-      'assets/feedback/05-Ali-Yas.png',
-      'assets/feedback/06-mohamed-kaito.png',
-      'assets/feedback/07-Ehab-2.png',
-      'assets/feedback/feedback-3.png',  // عبدالسلام الجديد
-    ];
+    let currentIndex = 0;
+    let currentType = 'creator';
+    const total = feedbackItems.length;
 
-    let creatorsIndex = 0;
-    let subscribersIndex = 0;
+    const slider = document.getElementById('feedbackSlider');
+    const creatorsTitle = document.getElementById('creatorsTitle');
+    const subscribersTitle = document.getElementById('subscribersTitle');
+    const currentNum = document.getElementById('currentNum');
+    const totalNum = document.getElementById('totalNum');
 
-    function initSlider(containerId, dotsId, images, currentIndex) {
-      const container = document.getElementById(containerId);
-      const dotsContainer = document.getElementById(dotsId);
+    totalNum.textContent = total;
 
-      container.innerHTML = images.map((src, i) =>
-        `<div class="slider-item" data-index="${i}"><img src="${src}" alt="feedback"></div>`
-      ).join('');
+    // Build slider
+    slider.innerHTML = feedbackItems.map((item, i) =>
+      `<div class="slider-item" data-index="${i}"><img src="${item.src}" alt="feedback"></div>`
+    ).join('');
 
-      dotsContainer.innerHTML = images.map((_, i) =>
-        `<div class="dot" data-index="${i}"></div>`
-      ).join('');
-
-      updateSlider(containerId, dotsId, images, currentIndex);
-    }
-
-    function updateSlider(containerId, dotsId, images, currentIndex) {
-      const container = document.getElementById(containerId);
-      const items = container.querySelectorAll('.slider-item');
-      const dots = document.getElementById(dotsId).querySelectorAll('.dot');
-      const total = images.length;
+    function updateSlider() {
+      const items = slider.querySelectorAll('.slider-item');
 
       items.forEach((item, i) => {
         item.className = 'slider-item';
-        const diff = i - currentIndex;
+        const diff = (i - currentIndex + total) % total;
 
         if (diff === 0) item.classList.add('pos-center');
-        else if (diff === -1 || (currentIndex === 0 && i === total - 1)) item.classList.add('pos-left');
-        else if (diff === 1 || (currentIndex === total - 1 && i === 0)) item.classList.add('pos-right');
-        else if (diff === -2 || diff === total - 2) item.classList.add('pos-far-left');
-        else if (diff === 2 || diff === -(total - 2)) item.classList.add('pos-far-right');
+        else if (diff === 1) item.classList.add('pos-right');
+        else if (diff === total - 1) item.classList.add('pos-left');
         else item.classList.add('pos-hidden');
       });
 
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentIndex);
-      });
+      // Update counter
+      currentNum.textContent = currentIndex + 1;
+
+      // Update title based on type
+      const newType = feedbackItems[currentIndex].type;
+      if (newType !== currentType) {
+        if (newType === 'subscriber') {
+          creatorsTitle.className = 'dynamic-title exit-up';
+          subscribersTitle.className = 'dynamic-title active';
+        } else {
+          subscribersTitle.className = 'dynamic-title exit-up';
+          creatorsTitle.className = 'dynamic-title active';
+        }
+        currentType = newType;
+      }
     }
 
-    function slideCreators(dir) {
-      creatorsIndex = (creatorsIndex + dir + creatorsImages.length) % creatorsImages.length;
-      updateSlider('creatorsSlider', 'creatorsDots', creatorsImages, creatorsIndex);
+    function slide(dir) {
+      currentIndex = (currentIndex + dir + total) % total;
+      updateSlider();
     }
 
-    function slideSubscribers(dir) {
-      subscribersIndex = (subscribersIndex + dir + subscribersImages.length) % subscribersImages.length;
-      updateSlider('subscribersSlider', 'subscribersDots', subscribersImages, subscribersIndex);
-    }
+    document.getElementById('prevBtn').addEventListener('click', () => slide(-1));
+    document.getElementById('nextBtn').addEventListener('click', () => slide(1));
 
     // Auto-slide
-    setInterval(() => slideCreators(1), 5000);
-    setInterval(() => slideSubscribers(1), 4000);
+    setInterval(() => slide(1), 4000);
 
     // Initialize
-    initSlider('creatorsSlider', 'creatorsDots', creatorsImages, 0);
-    initSlider('subscribersSlider', 'subscribersDots', subscribersImages, 0);
+    updateSlider();
   </script>
 </body>
 </html>
