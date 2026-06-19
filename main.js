@@ -588,9 +588,17 @@
   let items = [];
   let current = 0;
   let lastType = null;
+  let autoSlideTimer = null;
 
-  // استخدم الصور المحلية مباشرة
   items = Array.from(container.querySelectorAll('.slider-item'));
+
+  function slide(dir) {
+    const total = items.length;
+    if (total === 0) return;
+    current = (current + dir + total) % total;
+    updateSlider();
+    resetAutoSlide();
+  }
 
   function updateSlider() {
     const total = items.length;
@@ -598,21 +606,14 @@
 
     items.forEach((item, i) => {
       item.classList.remove('pos-left', 'pos-center', 'pos-right', 'pos-hidden');
-
       const diff = (i - current + total) % total;
 
-      if (diff === 0) {
-        item.classList.add('pos-center');
-      } else if (diff === 1 || (diff === total - 1 && total === 2)) {
-        item.classList.add('pos-right');
-      } else if (diff === total - 1) {
-        item.classList.add('pos-left');
-      } else {
-        item.classList.add('pos-hidden');
-      }
+      if (diff === 0) item.classList.add('pos-center');
+      else if (diff === 1 || (diff === total - 1 && total === 2)) item.classList.add('pos-right');
+      else if (diff === total - 1) item.classList.add('pos-left');
+      else item.classList.add('pos-hidden');
     });
 
-    // تحديث التايب
     const currentItem = items[current];
     const currentType = currentItem?.dataset?.type || 'creator';
 
@@ -626,19 +627,55 @@
     }
   }
 
-  prevBtn.addEventListener('click', () => {
-    const total = items.length;
-    if (total === 0) return;
-    current = (current - 1 + total) % total;
-    updateSlider();
+  // أزرار
+  prevBtn.addEventListener('click', () => slide(-1));
+  nextBtn.addEventListener('click', () => slide(1));
+
+  // سحب بالماوس والإصبع
+  let startX = 0;
+  let isDragging = false;
+
+  container.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  container.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (Math.abs(diff) > 50) slide(diff > 0 ? 1 : -1);
+    isDragging = false;
   });
 
-  nextBtn.addEventListener('click', () => {
-    const total = items.length;
-    if (total === 0) return;
-    current = (current + 1) % total;
-    updateSlider();
+  container.addEventListener('mousedown', (e) => {
+    startX = e.clientX;
+    isDragging = true;
+    container.style.cursor = 'grabbing';
   });
 
-  if (items.length > 0) updateSlider();
+  document.addEventListener('mouseup', (e) => {
+    if (!isDragging) return;
+    const diff = startX - e.clientX;
+    if (Math.abs(diff) > 50) slide(diff > 0 ? 1 : -1);
+    isDragging = false;
+    container.style.cursor = 'grab';
+  });
+
+  container.style.cursor = 'grab';
+
+  // أوتو سلايد كل 4 ثواني
+  function startAutoSlide() {
+    autoSlideTimer = setInterval(() => slide(1), 4000);
+  }
+
+  function resetAutoSlide() {
+    clearInterval(autoSlideTimer);
+    startAutoSlide();
+  }
+
+  if (items.length > 0) {
+    updateSlider();
+    startAutoSlide();
+  }
 })();
