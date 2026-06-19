@@ -122,7 +122,7 @@ document.querySelectorAll(".tab").forEach((t) => {
   });
 });
 
-function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); loadNotifsAdmin(); }
+function loadAll() { loadComments(); loadVideo(); loadMedia("channel"); loadMedia("work"); loadCourses(); loadSubscribers(); loadGroupCall(); loadNotifsAdmin(); loadFeedback(); }
 
 // ====== تبويب المكالمات (تجميع تلقائي حسب نافذة الجاهزية + إشعارات) ======
 function daysSinceJoin(iso) { try { return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); } catch (_) { return 0; } }
@@ -818,16 +818,12 @@ async function loadFeedback() {
   try {
     items = await dbGet("feedback_images?select=*&order=sort.asc");
   } catch (x) {
-    // الجدول مو موجود - استخدم الصور المحلية
-    if (x.message.includes("feedback_images") || x.message.includes("PGRST")) {
-      feedbackUsingLocal = true;
-      items = LOCAL_FEEDBACK;
-      const msg = $("feedbackMsg");
-      if (msg) setMsg(msg, "⚠️ الجدول مو موجود في Supabase. شغّل feedback-setup.sql أولًا.", false);
-    } else {
-      grid.innerHTML = `<p class="empty">خطأ: ${esc(x.message)}</p>`;
-      return;
-    }
+    // أي خطأ = استخدم الصور المحلية
+    console.log("Feedback DB error, using local:", x.message);
+    feedbackUsingLocal = true;
+    items = LOCAL_FEEDBACK;
+    const msg = $("feedbackMsg");
+    if (msg) setMsg(msg, "⚠️ الجدول مو موجود. شغّل feedback-setup.sql", false);
   }
 
   if (!items.length) { grid.innerHTML = '<p class="empty">لا توجد صور. أضف صورة أعلاه.</p>'; return; }
