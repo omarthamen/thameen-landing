@@ -581,40 +581,16 @@
   const prevBtn = document.getElementById('sliderPrev');
   const nextBtn = document.getElementById('sliderNext');
   const section = document.getElementById('feedback-showcase');
+  const typeLabel = document.getElementById('feedbackTypeLabel');
 
   if (!container || !prevBtn || !nextBtn) return;
 
-  const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3enBqeHhmZHFzanltYmJqb2t2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg2OTg2MjYsImV4cCI6MjAzNDI3NDYyNn0.NkCwklwVe8xYxDrNaLMeeWuXIwM_lFUr0sM2_btyuLs";
-
   let items = [];
   let current = 0;
+  let lastType = null;
 
-  async function loadFeedbackImages() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/feedback_images?select=*&order=sort.asc`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
-      if (!res.ok) throw new Error("Failed to load");
-      const data = await res.json();
-      if (data.length === 0) {
-        if (section) section.style.display = 'none';
-        return;
-      }
-      container.innerHTML = data.map((img, i) => `
-        <div class="slider-item" data-index="${i}">
-          <img src="${img.url}" alt="رد فعل عميل" />
-        </div>
-      `).join('');
-      items = Array.from(container.querySelectorAll('.slider-item'));
-      current = 0;
-      updateSlider();
-    } catch (e) {
-      console.log("Using local feedback images");
-      items = Array.from(container.querySelectorAll('.slider-item'));
-      if (items.length > 0) updateSlider();
-    }
-  }
+  // استخدم الصور المحلية مباشرة
+  items = Array.from(container.querySelectorAll('.slider-item'));
 
   function updateSlider() {
     const total = items.length;
@@ -635,6 +611,19 @@
         item.classList.add('pos-hidden');
       }
     });
+
+    // تحديث التايب
+    const currentItem = items[current];
+    const currentType = currentItem?.dataset?.type || 'creator';
+
+    if (typeLabel && currentType !== lastType) {
+      if (currentType === 'subscriber') {
+        typeLabel.innerHTML = '<span class="type-badge">🎓 مشتركين الدورة</span>';
+      } else {
+        typeLabel.innerHTML = '';
+      }
+      lastType = currentType;
+    }
   }
 
   prevBtn.addEventListener('click', () => {
@@ -651,5 +640,5 @@
     updateSlider();
   });
 
-  loadFeedbackImages();
+  if (items.length > 0) updateSlider();
 })();
