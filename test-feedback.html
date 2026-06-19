@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ردود الفعل — تجريبي</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: rgba(255,255,255,0.08);
+      --text: #fff;
+      --text-muted: rgba(255,255,255,0.6);
+      --primary: #c9a227;
+      --primary-glow: rgba(201,162,39,0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Section */
+    .feedback-section {
+      margin-bottom: 80px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .section-title span {
+      background: linear-gradient(135deg, var(--primary), #e8d48b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Slider */
+    .slider-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px 0;
+    }
+    .slider-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .slider-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .slider-container {
+      position: relative;
+      width: 320px;
+      height: 500px;
+    }
+    .slider-item {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 280px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .slider-item img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Positions */
+    .slider-item.pos-far-left {
+      transform: translateX(-220%) scale(0.6);
+      opacity: 0;
+      z-index: 0;
+    }
+    .slider-item.pos-left {
+      transform: translateX(-160%) scale(0.75);
+      opacity: 0.4;
+      z-index: 1;
+    }
+    .slider-item.pos-center {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+      z-index: 3;
+      box-shadow: 0 20px 60px rgba(201,162,39,0.2);
+    }
+    .slider-item.pos-right {
+      transform: translateX(60%) scale(0.75);
+      opacity: 0.4;
+      z-index: 1;
+    }
+    .slider-item.pos-far-right {
+      transform: translateX(120%) scale(0.6);
+      opacity: 0;
+      z-index: 0;
+    }
+    .slider-item.pos-hidden {
+      transform: translateX(-50%) scale(0.5);
+      opacity: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Dots */
+    .slider-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .dot.active {
+      background: var(--primary);
+      transform: scale(1.2);
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 60px 0;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .divider-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- صناع المحتوى -->
+    <section class="feedback-section" id="creators-section">
+      <div class="section-header">
+        <h2 class="section-title">ردود فعل من <span>صناع محتوى</span></h2>
+        <p class="section-sub">ثقة من يوتيوبرز ومؤثرين اشتغلت معهم</p>
+      </div>
+      <div class="slider-wrapper">
+        <button class="slider-btn" onclick="slideCreators(-1)">‹</button>
+        <div class="slider-container" id="creatorsSlider"></div>
+        <button class="slider-btn" onclick="slideCreators(1)">›</button>
+      </div>
+      <div class="slider-dots" id="creatorsDots"></div>
+    </section>
+
+    <!-- فاصل -->
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-icon">⬇</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- مشتركين الدورة -->
+    <section class="feedback-section" id="subscribers-section">
+      <div class="section-header">
+        <h2 class="section-title">آراء <span>مشتركين الدورة</span></h2>
+        <p class="section-sub">تجارب حقيقية من طلاب أكاديمية ثمين</p>
+      </div>
+      <div class="slider-wrapper">
+        <button class="slider-btn" onclick="slideSubscribers(-1)">‹</button>
+        <div class="slider-container" id="subscribersSlider"></div>
+        <button class="slider-btn" onclick="slideSubscribers(1)">›</button>
+      </div>
+      <div class="slider-dots" id="subscribersDots"></div>
+    </section>
+
+  </div>
+
+  <script>
+    // صناع المحتوى
+    const creatorsImages = [
+      'assets/feedback/feedback-1.png',  // بندريتا
+      'assets/feedback/feedback-2.png',  // ريان أوسمز
+    ];
+
+    // مشتركين الدورة
+    const subscribersImages = [
+      'assets/feedback/01-Ehab.png',
+      'assets/feedback/02-abdulsalam.png',
+      'assets/feedback/03-mortada.png',
+      'assets/feedback/04-Anonymous.png',
+      'assets/feedback/05-Ali-Yas.png',
+      'assets/feedback/06-mohamed-kaito.png',
+      'assets/feedback/07-Ehab-2.png',
+      'assets/feedback/feedback-3.png',  // عبدالسلام الجديد
+    ];
+
+    let creatorsIndex = 0;
+    let subscribersIndex = 0;
+
+    function initSlider(containerId, dotsId, images, currentIndex) {
+      const container = document.getElementById(containerId);
+      const dotsContainer = document.getElementById(dotsId);
+
+      container.innerHTML = images.map((src, i) =>
+        `<div class="slider-item" data-index="${i}"><img src="${src}" alt="feedback"></div>`
+      ).join('');
+
+      dotsContainer.innerHTML = images.map((_, i) =>
+        `<div class="dot" data-index="${i}"></div>`
+      ).join('');
+
+      updateSlider(containerId, dotsId, images, currentIndex);
+    }
+
+    function updateSlider(containerId, dotsId, images, currentIndex) {
+      const container = document.getElementById(containerId);
+      const items = container.querySelectorAll('.slider-item');
+      const dots = document.getElementById(dotsId).querySelectorAll('.dot');
+      const total = images.length;
+
+      items.forEach((item, i) => {
+        item.className = 'slider-item';
+        const diff = i - currentIndex;
+
+        if (diff === 0) item.classList.add('pos-center');
+        else if (diff === -1 || (currentIndex === 0 && i === total - 1)) item.classList.add('pos-left');
+        else if (diff === 1 || (currentIndex === total - 1 && i === 0)) item.classList.add('pos-right');
+        else if (diff === -2 || diff === total - 2) item.classList.add('pos-far-left');
+        else if (diff === 2 || diff === -(total - 2)) item.classList.add('pos-far-right');
+        else item.classList.add('pos-hidden');
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    function slideCreators(dir) {
+      creatorsIndex = (creatorsIndex + dir + creatorsImages.length) % creatorsImages.length;
+      updateSlider('creatorsSlider', 'creatorsDots', creatorsImages, creatorsIndex);
+    }
+
+    function slideSubscribers(dir) {
+      subscribersIndex = (subscribersIndex + dir + subscribersImages.length) % subscribersImages.length;
+      updateSlider('subscribersSlider', 'subscribersDots', subscribersImages, subscribersIndex);
+    }
+
+    // Auto-slide
+    setInterval(() => slideCreators(1), 5000);
+    setInterval(() => slideSubscribers(1), 4000);
+
+    // Initialize
+    initSlider('creatorsSlider', 'creatorsDots', creatorsImages, 0);
+    initSlider('subscribersSlider', 'subscribersDots', subscribersImages, 0);
+  </script>
+</body>
+</html>
