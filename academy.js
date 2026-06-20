@@ -1848,6 +1848,15 @@ async function addQuestion() {
             btn.className = 'chat-action-btn lesson-btn';
             btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(action.title || lesson.title);
             btn.onclick = () => {
+              // التحقق إذا الدرس في دورة مختلفة
+              if (lesson.section_id && CURSEC && lesson.section_id !== CURSEC.id) {
+                // الانتقال للدورة الصحيحة أولاً
+                const targetSection = SECTIONS.find(s => s.id === lesson.section_id);
+                if (targetSection) {
+                  CURSEC = targetSection;
+                  renderLessons();
+                }
+              }
               playLesson(lesson.id);
               // القفز للوقت المحدد
               if (action.timestamp && window.playerInstance) {
