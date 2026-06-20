@@ -1770,7 +1770,7 @@ async function addQuestion() {
 
     try {
       const lessonContext = getLessonContext();
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/rapid-function`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
