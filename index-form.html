@@ -644,7 +644,7 @@
         <div class="success-icon">✓</div>
         <h3>تم استلام طلبك!</h3>
         <p>راح نتواصل معك قريبًا على الواتساب أو الإيميل.</p>
-        <button class="btn btn-primary" id="leadAgain">تعبئة طلب جديد</button>
+        <button class="btn btn-primary" id="leadAgain">عدّل بياناتك</button>
         <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أواجه مشكلة" target="_blank" rel="noopener">
           تواجه مشكلة؟ تواصل معنا
         </a>
@@ -688,6 +688,9 @@
     const leadClose = document.getElementById("leadClose");
     const leadMsg = document.getElementById("leadMsg");
 
+    let currentLeadId = null;
+    let lastSubmittedData = {};
+
     function openLeadForm() {
       leadModal.removeAttribute("aria-hidden");
       leadModal.style.display = "flex";
@@ -705,7 +708,13 @@
     document.getElementById("leadAgain").addEventListener("click", () => {
       document.getElementById("leadSuccess").hidden = true;
       leadForm.style.display = "";
-      leadForm.reset();
+      // تعبئة البيانات السابقة
+      if (lastSubmittedData.name) document.getElementById("leadName").value = lastSubmittedData.name;
+      if (lastSubmittedData.email) document.getElementById("leadEmail").value = lastSubmittedData.email;
+      if (lastSubmittedData.phone) document.getElementById("leadPhone").value = lastSubmittedData.phone;
+      if (lastSubmittedData.country) document.getElementById("leadCountry").value = lastSubmittedData.country;
+      if (lastSubmittedData.notes) document.getElementById("leadNotes").value = lastSubmittedData.notes;
+      document.getElementById("leadConfirm").checked = true;
       leadMsg.textContent = "";
       document.getElementById("leadName").focus();
     });
@@ -755,13 +764,21 @@
       btn.textContent = "جارٍ الإرسال…";
 
       try {
-        const res = await fetch(SUPABASE_URL + "/rest/v1/leads", {
-          method: "POST",
+        // حفظ البيانات للتعديل لاحقاً
+        lastSubmittedData = { name, email, phone, country, notes };
+
+        const isUpdate = !!currentLeadId;
+        const url = isUpdate
+          ? SUPABASE_URL + "/rest/v1/leads?id=eq." + currentLeadId
+          : SUPABASE_URL + "/rest/v1/leads";
+
+        const res = await fetch(url, {
+          method: isUpdate ? "PATCH" : "POST",
           headers: {
             "Content-Type": "application/json",
             "apikey": SUPABASE_KEY,
             "Authorization": "Bearer " + SUPABASE_KEY,
-            "Prefer": "return=minimal"
+            "Prefer": isUpdate ? "return=minimal" : "return=representation"
           },
           body: JSON.stringify({ name, email, phone, country, notes, confirmed_payment: confirmed })
         });
@@ -772,7 +789,12 @@
           throw new Error(errData || "فشل الإرسال");
         }
 
-        leadForm.reset();
+        // حفظ ID الطلب للتعديل
+        if (!isUpdate) {
+          const data = await res.json();
+          if (data && data[0] && data[0].id) currentLeadId = data[0].id;
+        }
+
         leadForm.style.display = "none";
         document.getElementById("leadSuccess").hidden = false;
       } catch (err) {
