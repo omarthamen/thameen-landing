@@ -995,6 +995,8 @@
           localStorage.setItem("thameen_edit_count", updateData.edit_count);
         }
 
+        console.log("Sending lead:", { url, method: isUpdate ? "PATCH" : "POST", data: updateData });
+
         const res = await fetch(url, {
           method: isUpdate ? "PATCH" : "POST",
           headers: {
@@ -1006,15 +1008,19 @@
           body: JSON.stringify(updateData)
         });
 
+        console.log("Response status:", res.status);
+
         if (!res.ok) {
           const errData = await res.text();
           console.error("API Error:", res.status, errData);
+          alert("خطأ في الإرسال: " + res.status + " - " + errData);
           throw new Error(errData || "فشل الإرسال");
         }
 
         // حفظ ID الطلب للتعديل
         if (!isUpdate) {
           const data = await res.json();
+          console.log("Lead created:", data);
           if (data && data[0] && data[0].id) {
             currentLeadId = data[0].id;
             localStorage.setItem("thameen_lead_id", currentLeadId);
