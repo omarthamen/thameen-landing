@@ -839,12 +839,7 @@
   .chat-box { width: calc(100vw - 32px); right: 0; }
 }
 
-/* إلغاء الماوس المخفي من styles.css */
-@media (pointer: fine) {
-  * { cursor: auto !important; }
-  a, button, [role="button"], input[type="submit"], select, .btn, .login-tab { cursor: pointer !important; }
-  input, textarea { cursor: text !important; }
-}
+/* الماوس التفاعلي - نفس styles.css */
 
 /* تبويبات الدخول/التسجيل */
 .login-container{width:100%;max-width:420px}

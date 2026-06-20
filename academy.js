@@ -1798,6 +1798,42 @@ async function addQuestion() {
   }
 })();
 
+// ===== الماوس التفاعلي =====
+(function() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const cursor = document.getElementById('customCursor');
+  const dot = document.getElementById('cursorDot');
+  if (!cursor || !dot) return;
+
+  let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.12;
+    cursorY += (mouseY - cursorY) * 0.12;
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top = cursorY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  const hoverElements = document.querySelectorAll('a, button, .btn, .login-tab, .nav-tab, input, textarea, select');
+  hoverElements.forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  document.addEventListener('mousedown', () => cursor.classList.add('click'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('click'));
+})();
+
 // ====== تبويبات الدخول/التسجيل ======
 (function() {
   const tabs = document.querySelectorAll(".login-tab");
