@@ -842,8 +842,10 @@
 /* الماوس التفاعلي - نفس styles.css */
 
 /* تبويبات الدخول/التسجيل */
-.login-container{width:100%;max-width:420px}
+.login-container{width:100%;max-width:480px;margin:0 auto}
 .login-tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,.05);padding:4px;border-radius:14px}
+.lead-support{color:#25d366!important;text-decoration:none;font-size:13px;display:block;text-align:center;margin-top:16px}
+.lead-support:hover{text-decoration:underline}
 .login-tab{flex:1;padding:12px 16px;font-size:14px;font-weight:700;color:var(--text-muted);background:transparent;border:none;border-radius:10px;cursor:pointer;transition:all .2s}
 .login-tab:hover{color:#fff}
 .login-tab.active{color:#fff;background:rgba(91,184,232,.2)}
