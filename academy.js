@@ -1770,9 +1770,12 @@ async function addQuestion() {
 
     try {
       const lessonContext = getLessonContext();
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/rapid-function`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TOKEN || SUPABASE_KEY}`
+        },
         body: JSON.stringify({
           messages: messages.slice(-10),
           lesson: lessonContext
