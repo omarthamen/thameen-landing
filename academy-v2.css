@@ -925,6 +925,23 @@
   box-shadow: 0 4px 16px rgba(91,184,232,0.4);
 }
 
+/* زر واتساب */
+.whatsapp-btn {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(37,211,102,0.3);
+}
+.whatsapp-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+}
+.whatsapp-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 /* صندوق الكود */
 .chat-code-block {
   background: #0d1117;

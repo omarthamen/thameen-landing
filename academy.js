@@ -1827,12 +1827,23 @@ async function addQuestion() {
       actions.forEach(action => {
         if (action.type === 'open_lesson') {
           // زر فتح درس
-          const btn = document.createElement('button');
-          btn.className = 'chat-action-btn lesson-btn';
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(action.title);
-          btn.onclick = () => {
-            const lesson = LESSONS.find(l => l.id === action.lessonId);
-            if (lesson) {
+          const lesson = LESSONS.find(l => l.id === action.lessonId);
+          if (!lesson) {
+            // الدرس مو موجود — تجاهل الزر أو ابحث بالعنوان
+            const byTitle = LESSONS.find(l => l.title && action.title && l.title.includes(action.title));
+            if (byTitle) {
+              const btn = document.createElement('button');
+              btn.className = 'chat-action-btn lesson-btn';
+              btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(byTitle.title);
+              btn.onclick = () => openLesson(byTitle.id);
+              actionsDiv.appendChild(btn);
+            }
+            // إذا ما لقى بالعنوان أيضاً، ما يعرض زر
+          } else {
+            const btn = document.createElement('button');
+            btn.className = 'chat-action-btn lesson-btn';
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(action.title || lesson.title);
+            btn.onclick = () => {
               openLesson(lesson.id);
               // القفز للوقت المحدد
               if (action.timestamp && window.playerInstance) {
@@ -1840,9 +1851,9 @@ async function addQuestion() {
                   try { window.playerInstance.setCurrentTime(action.timestamp); } catch(e) {}
                 }, 1500);
               }
-            }
-          };
-          actionsDiv.appendChild(btn);
+            };
+            actionsDiv.appendChild(btn);
+          }
         }
 
         else if (action.type === 'code_block') {
@@ -1901,6 +1912,17 @@ async function addQuestion() {
           tipEl.className = 'chat-tip';
           tipEl.textContent = action.text;
           actionsDiv.appendChild(tipEl);
+        }
+
+        else if (action.type === 'open_whatsapp') {
+          // زر واتساب للتواصل
+          const waBtn = document.createElement('a');
+          waBtn.className = 'chat-action-btn whatsapp-btn';
+          waBtn.href = 'https://wa.me/9647518838203?text=' + encodeURIComponent('مرحباً، أريد الاستفسار عن الاشتراكات');
+          waBtn.target = '_blank';
+          waBtn.rel = 'noopener';
+          waBtn.innerHTML = ICONS.whatsapp + ' ' + esc(action.text || 'تواصل واتساب');
+          actionsDiv.appendChild(waBtn);
         }
       });
 
