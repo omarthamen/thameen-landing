@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=30" />
   <link rel="stylesheet" href="admin.css?v=15" />
-  <link rel="stylesheet" href="academy-v2.css?v=126" />
+  <link rel="stylesheet" href="academy-v2.css?v=127" />
 </head>
 <body>
   <div class="custom-cursor" id="customCursor"></div>
@@ -448,6 +448,9 @@
       <div class="chat-header">
         <span>مساعدك الشخصي</span>
         <span class="chat-badge">AI</span>
+        <button id="chatClose" class="chat-close" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
       <div id="chatMessages" class="chat-messages">
         <div class="chat-msg bot">أهلاً! كيف أقدر أساعدك؟</div>
@@ -455,7 +458,7 @@
       <form id="chatForm" class="chat-input-wrap">
         <input type="text" id="chatInput" class="chat-input" placeholder="اكتب سؤالك..." autocomplete="off" />
         <button type="submit" class="chat-send" aria-label="إرسال">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </form>
     </div>
@@ -463,6 +466,6 @@
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
   <script defer src="https://meet.jit.si/external_api.js"></script>
-  <script defer src="academy.js?v=78"></script>
+  <script defer src="academy.js?v=79"></script>
 </body>
 </html>

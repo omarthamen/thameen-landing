@@ -1747,6 +1747,13 @@ async function addQuestion() {
     }
   });
 
+  const closeBtn = document.getElementById('chatClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      widget.classList.remove('open');
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = input.value.trim();
