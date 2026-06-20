@@ -242,7 +242,7 @@ document.addEventListener("change", (e) => { if (e.target && e.target.id === "ca
 let lastLeadsCount = -1; // -1 = أول تحميل، لا يُطلق إشعار
 let leadsInterval = null;
 let selectedLeads = new Set();
-// صوت إشعار بسيط باستخدام Web Audio API
+// صوت إشعار باستخدام Web Audio API
 function playNotificationSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -250,12 +250,27 @@ function playNotificationSound() {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.frequency.value = 800;
+    // نغمتين للإشعار
+    osc.frequency.value = 880;
     osc.type = "sine";
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
     osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.15);
+    // نغمة ثانية
+    setTimeout(() => {
+      const ctx2 = new (window.AudioContext || window.webkitAudioContext)();
+      const osc2 = ctx2.createOscillator();
+      const gain2 = ctx2.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx2.destination);
+      osc2.frequency.value = 1100;
+      osc2.type = "sine";
+      gain2.gain.setValueAtTime(1, ctx2.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx2.currentTime + 0.2);
+      osc2.start(ctx2.currentTime);
+      osc2.stop(ctx2.currentTime + 0.2);
+    }, 150);
   } catch (e) { console.log("Sound error:", e); }
 }
 
