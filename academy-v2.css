@@ -839,6 +839,11 @@
   .chat-box { width: calc(100vw - 32px); right: 0; }
 }
 
+/* إلغاء الماوس المخفي من styles.css */
+* { cursor: auto !important; }
+a, button, [role="button"], input[type="submit"], select, .btn { cursor: pointer !important; }
+input, textarea { cursor: text !important; }
+
 /* تبويبات الدخول/التسجيل */
 .login-container{width:100%;max-width:420px}
 .login-tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,.05);padding:4px;border-radius:14px}
