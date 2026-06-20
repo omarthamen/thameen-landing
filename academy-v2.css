@@ -221,12 +221,9 @@
 @media(max-width:700px){.nav-name{display:none}.nav-right{gap:10px}}
 
 /* ===== الشبكة ثلاثية الأعمدة ===== */
-#viewCourses{display:flex;flex-direction:column;height:calc(100vh - 60px);overflow:hidden}
-.acad-grid{max-width:1640px;margin:0 auto;padding:26px clamp(16px,3vw,40px);display:grid;grid-template-columns:340px minmax(0,1fr) 360px;gap:24px;align-items:stretch;flex:1;min-height:0;overflow:hidden}
-.col-h{font-size:19px;font-weight:900;margin-bottom:16px;flex:none}
-.courses-col,.lessons-col{display:flex;flex-direction:column;min-height:0}
-.courses-col #coursesCol,.lessons-col #plList{flex:1;overflow-y:auto;min-height:0}
-.center-col{overflow-y:auto;min-height:0}
+.acad-grid{max-width:1640px;margin:0 auto;padding:26px clamp(16px,3vw,40px);display:grid;grid-template-columns:340px minmax(0,1fr) 360px;gap:24px;align-items:start}
+.col-h{font-size:19px;font-weight:900;margin-bottom:16px}
+.courses-col,.lessons-col{position:sticky;top:80px}
 .courses-col .col-h,.lessons-col .col-h{padding-inline-start:4px}
 /* مجلّد «قريبًا» داخل قائمة الدروس */
 .pl-soonf .soonf-ic{color:#c4b3ff;background:rgba(139,124,246,.18)}
@@ -379,10 +376,8 @@
 /* ===== الجوال ===== */
 /* لابتوب متوسط: قائمة الدروس تحت الفيديو، دوراتي على الجنب */
 @media(max-width:1200px){
-  #viewCourses{height:auto;overflow:visible}
-  .acad-grid{grid-template-columns:300px minmax(0,1fr);gap:20px;height:auto;overflow:visible}
-  .courses-col #coursesCol,.lessons-col #plList,.center-col{overflow:visible;max-height:none}
-  .lessons-col{grid-column:1 / -1;display:block}
+  .acad-grid{grid-template-columns:300px minmax(0,1fr);gap:20px}
+  .lessons-col{grid-column:1 / -1;position:static}
   .lessons-col #plList{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:10px;background:transparent;border:0;overflow:visible}
   .lessons-col #plList > .pl-item{border:1px solid rgba(255,255,255,.06);border-radius:12px}
   /* المجلّد يمتد بعرض كامل، وفيديوهاته بشبكة مرتبة */
@@ -392,7 +387,7 @@
   .lessons-col .pl-fold-end{grid-column:1 / -1;padding:2px 4px 6px}
 }
 /* ===== بانر تحدّي ٩٠ يوم ===== */
-.chal-banner{position:relative;display:flex;align-items:center;gap:20px;max-width:1640px;margin:18px auto 0;padding:20px 24px;background:linear-gradient(120deg,rgba(44,141,208,.16),rgba(91,184,232,.06),rgba(8,8,12,.2));border:1px solid rgba(91,184,232,.28);border-radius:20px;flex:none}
+.chal-banner{position:relative;display:flex;align-items:center;gap:20px;max-width:1640px;margin:18px auto 0;padding:20px 24px;background:linear-gradient(120deg,rgba(44,141,208,.16),rgba(91,184,232,.06),rgba(8,8,12,.2));border:1px solid rgba(91,184,232,.28);border-radius:20px}
 .chal-x{position:absolute;top:12px;inset-inline-start:14px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--text-muted);cursor:pointer;display:grid;place-items:center;transition:.2s}
 .chal-x:hover{background:rgba(255,255,255,.14);color:#fff}
 .chal-x svg{width:14px;height:14px}
@@ -414,10 +409,8 @@
 
 /* جوال: كل شي عمود واحد، الفيديو فوق */
 @media(max-width:760px){
-  #viewCourses{height:auto;overflow:visible}
-  .acad-grid{grid-template-columns:1fr;gap:22px;padding:16px;height:auto;overflow:visible}
-  .courses-col,.lessons-col{display:block}
-  .courses-col #coursesCol,.lessons-col #plList,.center-col{overflow:visible;max-height:none}
+  .acad-grid{grid-template-columns:1fr;gap:22px;padding:16px}
+  .courses-col,.lessons-col{position:static}
   .center-col{order:-1}
   #coursesCol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
   .lessons-col #plList{grid-template-columns:1fr}
@@ -850,18 +843,4 @@
   .chat-box { width: calc(100vw - 32px); right: 0; }
 }
 
-/* Independent scroll containers */
-.courses-col #coursesCol::-webkit-scrollbar,
-.lessons-col #plList::-webkit-scrollbar,
-.center-col::-webkit-scrollbar{width:6px}
-.courses-col #coursesCol::-webkit-scrollbar-track,
-.lessons-col #plList::-webkit-scrollbar-track,
-.center-col::-webkit-scrollbar-track{background:transparent}
-.courses-col #coursesCol::-webkit-scrollbar-thumb,
-.lessons-col #plList::-webkit-scrollbar-thumb,
-.center-col::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
-.courses-col #coursesCol::-webkit-scrollbar-thumb:hover,
-.lessons-col #plList::-webkit-scrollbar-thumb:hover,
-.center-col::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
-
-/* v61 */
+/* v60 */
