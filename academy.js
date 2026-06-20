@@ -1740,13 +1740,8 @@ async function addQuestion() {
   }
 
   toggle.addEventListener('click', () => {
-    const isOpen = widget.classList.contains('open');
+    const isOpen = widget.classList.toggle('open');
     if (isOpen) {
-      widget.classList.remove('open');
-      box.addEventListener('animationend', () => { box.hidden = true; }, { once: true });
-    } else {
-      box.hidden = false;
-      widget.classList.add('open');
       loadChatHistory();
       input.focus();
     }
