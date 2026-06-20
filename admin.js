@@ -611,15 +611,15 @@ async function showSubDetails(uid, name) {
     modal.id = "detailsModal";
     modal.className = "modal-overlay";
     modal.innerHTML = `<div class="modal-box">
-      <div class="modal-header"><h3 id="detailsTitle">تفاصيل</h3><button class="modal-close" onclick="$('detailsModal').hidden=true">✕</button></div>
+      <div class="modal-header"><h3 id="detailsTitle">تفاصيل</h3><button class="modal-close" onclick="$('detailsModal').classList.remove('show')">✕</button></div>
       <div class="modal-body" id="detailsBody"></div>
     </div>`;
     document.body.appendChild(modal);
-    modal.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
   }
   $("detailsTitle").textContent = `تفاصيل مشاهدات ${name}`;
   $("detailsBody").innerHTML = '<p class="hint">جارٍ التحميل…</p>';
-  modal.hidden = false;
+  modal.classList.add("show");
   try {
     const [progressData, lessonsData, sectionsData] = await Promise.all([
       dbGet(`progress?select=lesson_id,percent,completed,updated_at&user_id=eq.${uid}&order=updated_at.desc`),
