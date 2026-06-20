@@ -181,7 +181,7 @@ async function loadAcademy() {
   const guardP = guardAccess();
   const dataP = Promise.all([
     loadCourseData(),
-    dbGet("progress?select=lesson_id,percent,completed").catch(() => dbGet("progress?select=lesson_id,completed").catch(() => [])),
+    dbGet(`progress?select=lesson_id,percent,completed&user_id=eq.${USER.id}`).catch(() => dbGet(`progress?select=lesson_id,completed&user_id=eq.${USER.id}`).catch(() => [])),
     dbGet("members?select=calls_total,calls_used,created_at,call_at").catch(() => dbGet("members?select=calls_total,calls_used,created_at").catch(() => dbGet("members?select=calls_total,calls_used").catch(() => []))),
   ]);
   if (!(await guardP)) return;           // موقوف من الأدمن
