@@ -1740,12 +1740,15 @@ async function addQuestion() {
   }
 
   toggle.addEventListener('click', () => {
-    const isOpen = widget.classList.toggle('open');
-    if (isOpen) {
-      loadChatHistory();
-      input.focus();
-    }
+    widget.classList.add('open');
+    loadChatHistory();
+    input.focus();
   });
+
+  const closeBtn = document.getElementById('chatClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => widget.classList.remove('open'));
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
