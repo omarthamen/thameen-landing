@@ -1797,3 +1797,76 @@ async function addQuestion() {
     return div;
   }
 })();
+
+// ====== نموذج التسجيل ======
+(function() {
+  const modal = document.getElementById("registerModal");
+  const form = document.getElementById("registerForm");
+  const success = document.getElementById("regSuccess");
+  const openBtn = document.getElementById("openRegisterBtn");
+  const closeBtn = document.getElementById("regClose");
+  const doneBtn = document.getElementById("regDone");
+  const msg = document.getElementById("regMsg");
+
+  if (!modal || !openBtn) return;
+
+  openBtn.addEventListener("click", () => modal.classList.add("show"));
+  closeBtn.addEventListener("click", () => modal.classList.remove("show"));
+  doneBtn.addEventListener("click", () => modal.classList.remove("show"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const country = document.getElementById("regCountry").value;
+    const notes = document.getElementById("regNotes").value.trim();
+    const confirmed = document.getElementById("regConfirm").checked;
+
+    if (!name || !email || !phone || !country) {
+      msg.textContent = "عبّي كل الحقول المطلوبة";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
+
+    if (!phone.startsWith("+") || phone.length < 8) {
+      msg.textContent = "رقم الهاتف لازم يبدأ بـ + وكود الدولة";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
+
+    if (!confirmed) {
+      msg.textContent = "لازم تأكد قدرتك على الدفع";
+      msg.style.color = "#ff6b6b";
+      return;
+    }
+
+    const btn = document.getElementById("regSubmit");
+    btn.disabled = true;
+    btn.textContent = "جارٍ الإرسال…";
+
+    try {
+      const res = await fetch(SUPABASE_URL + "/rest/v1/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ name, email, phone, country, notes, confirmed_payment: confirmed, status: "new" })
+      });
+
+      if (!res.ok) throw new Error("فشل الإرسال");
+
+      form.style.display = "none";
+      success.hidden = false;
+    } catch (err) {
+      msg.textContent = "حدث خطأ، حاول مرة ثانية";
+      msg.style.color = "#ff6b6b";
+      btn.disabled = false;
+      btn.textContent = "إرسال الطلب";
+    }
+  });
+})();
