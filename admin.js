@@ -343,6 +343,7 @@ async function showLeadHistory(leadId) {
   const content = $("leadHistoryContent");
   if (!modal || !content) return;
   content.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  modal.removeAttribute("hidden");
   modal.classList.add("show");
   try {
     const [lead] = await dbGet(`leads?id=eq.${leadId}&select=*`);
@@ -390,7 +391,10 @@ async function showLeadHistory(leadId) {
 
 function closeLeadHistoryModal() {
   const modal = $("leadHistoryModal");
-  if (modal) modal.classList.remove("show");
+  if (modal) {
+    modal.classList.remove("show");
+    modal.setAttribute("hidden", "");
+  }
 }
 
 // ====== المشتركون ======
