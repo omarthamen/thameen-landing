@@ -242,7 +242,22 @@ document.addEventListener("change", (e) => { if (e.target && e.target.id === "ca
 let lastLeadsCount = -1; // -1 = أول تحميل، لا يُطلق إشعار
 let leadsInterval = null;
 let selectedLeads = new Set();
-const LEADS_SOUND = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYZNIBLmAAAAAAD/+9DEAAAIAANIAAAAEikAbSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//vQxFMAAADSAAAAAAAAANIAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=");
+// صوت إشعار بسيط باستخدام Web Audio API
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 800;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) { console.log("Sound error:", e); }
+}
 
 const COUNTRIES = {SA:"السعودية",AE:"الإمارات",KW:"الكويت",QA:"قطر",BH:"البحرين",OM:"عُمان",EG:"مصر",JO:"الأردن",IQ:"العراق",SY:"سوريا",LB:"لبنان",PS:"فلسطين",YE:"اليمن",SD:"السودان",LY:"ليبيا",TN:"تونس",DZ:"الجزائر",MA:"المغرب",MR:"موريتانيا",OTHER:"أخرى"};
 
@@ -352,7 +367,7 @@ async function loadLeads(silent = false) {
       const diff = newCount - lastLeadsCount;
       console.log("🔔 New lead detected! Diff:", diff);
       // صوت
-      try { LEADS_SOUND.play(); } catch (e) { console.log("Sound error:", e); }
+      playNotificationSound();
       // إشعار نظام
       if (Notification.permission === "granted") {
         new Notification("طلب جديد! 🔔", { body: `وصل ${diff} طلب جديد`, icon: "favicon-192.png" });
@@ -400,12 +415,8 @@ function stopLeadsAutoRefresh() {
 }
 
 async function enableNotifications() {
-  // تشغيل الصوت (يفعّل الصوت للمرات القادمة)
-  try {
-    LEADS_SOUND.volume = 0.1;
-    await LEADS_SOUND.play();
-    LEADS_SOUND.volume = 1;
-  } catch (_) {}
+  // تشغيل صوت تجريبي
+  playNotificationSound();
 
   // طلب إذن الإشعارات
   if ("Notification" in window && Notification.permission === "default") {
