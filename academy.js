@@ -1721,7 +1721,7 @@ async function addQuestion() {
     const loadingEl = appendMessage('جارٍ الكتابة...', 'bot loading');
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/rapid-function`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
         body: JSON.stringify({ messages }),
