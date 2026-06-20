@@ -600,7 +600,7 @@
     <div class="rmodal-card lead-card">
       <button class="rmodal-close" id="leadClose" type="button" aria-label="إغلاق">✕</button>
       <h3 class="rmodal-title">سجّل اهتمامك بالدورة</h3>
-      <p class="rmodal-sub">عبّي البيانات وراح نتواصل معك خلال ٢٤ ساعة</p>
+      <p class="rmodal-sub">عبّي البيانات وراح نتواصل معك قريبًا</p>
       <form id="leadForm" class="rform" novalidate>
         <input type="text" id="leadName" class="rfield" maxlength="60" placeholder="الاسم الكامل" autocomplete="name" required />
         <input type="email" id="leadEmail" class="rfield" maxlength="100" placeholder="الإيميل الشخصي" autocomplete="email" required />
@@ -643,7 +643,7 @@
       <div id="leadSuccess" class="lead-success" hidden>
         <div class="success-icon">✓</div>
         <h3>تم استلام طلبك!</h3>
-        <p>راح نتواصل معك خلال ٢٤ ساعة على الواتساب أو الإيميل.</p>
+        <p>راح نتواصل معك قريبًا على الواتساب أو الإيميل.</p>
         <button class="btn btn-primary" id="leadAgain">تعبئة طلب جديد</button>
         <a class="lead-support" href="https://wa.me/9647518838203" target="_blank" rel="noopener">
           أو تواصل معنا مباشرة على واتساب
@@ -704,8 +704,10 @@
 
     document.getElementById("leadAgain").addEventListener("click", () => {
       document.getElementById("leadSuccess").hidden = true;
-      leadForm.style.display = "block";
+      leadForm.style.display = "";
+      leadForm.reset();
       leadMsg.textContent = "";
+      document.getElementById("leadName").focus();
     });
 
     leadForm.addEventListener("submit", async (e) => {
