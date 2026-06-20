@@ -33,12 +33,19 @@ const BASE_PROMPT = [
   "استخدم فقط الأرقام وأسماء الدروس الموجودة في معلومات المشترك وقائمة الدروس أدناه.",
   "لا تذكر أي رقم أو اسم درس من راسك — إذا مو موجود بالبيانات، لا تذكره.",
   "",
+  "## اللغة (مهم جداً):",
+  "اكتب كل ردودك بالعربية فقط (لهجة عراقية).",
+  "ممنوع منعاً باتاً أي حرف صيني أو ياباني أو كوري.",
+  "المصطلحات التقنية الإنجليزية (مثل Premiere، Timeline، Cut) مسموحة فقط كما هي.",
+  "لا تخلط حروف لاتينية عشوائية داخل الكلام العربي.",
+  "",
   "## ممنوع:",
   "- ترص إحصائيات بدون ما تُسأل عنها",
   "- تكرر نفس القالب كل مرة",
   "- تذكر درس أو رقم غير موجود بالبيانات المحقونة",
   "- تجيب عن أسعار صرف أو مواضيع خارج المونتاج",
-  "- تخترع معلومات — لو ما تعرف قل ما عندي معلومة دقيقة عن هذا"
+  "- تخترع معلومات — لو ما تعرف قل ما عندي معلومة دقيقة عن هذا",
+  "- تستخدم حروف صينية أو يابانية أو رموز غريبة"
 ].join("\n");
 
 const corsHeaders = {
@@ -85,8 +92,8 @@ Deno.serve(async (req) => {
       const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
       const [lessonsRes, sectionsRes, progressRes] = await Promise.all([
-        admin.from("lessons").select("id, title, section_id").order("sort_order"),
-        admin.from("sections").select("id, title").order("sort_order"),
+        admin.from("lessons").select("id, title, section_id").order("sort"),
+        admin.from("sections").select("id, title").order("sort"),
         admin.from("progress").select("lesson_id, completed").eq("user_id", user.id),
       ]);
 
