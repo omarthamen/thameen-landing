@@ -698,28 +698,60 @@
     .status-badge.converted{background:rgba(80,200,120,.15);color:#74d99a}
 
     /* انميشن المودال */
-    #leadModal{opacity:0;transition:opacity 0.3s ease}
-    #leadModal[style*="flex"]{opacity:1}
-    #leadModal .rmodal-card{transform:scale(0.9) translateY(20px);opacity:0;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease}
-    #leadModal[style*="flex"] .rmodal-card{transform:scale(1) translateY(0);opacity:1}
-    #leadModal.closing{opacity:0;transition:opacity 0.25s ease}
-    #leadModal.closing .rmodal-card{transform:scale(0.9) translateY(20px);opacity:0;transition:transform 0.25s ease, opacity 0.2s ease}
+    #leadModal{
+      opacity:0;
+      visibility:hidden;
+      transition:opacity 0.35s ease, visibility 0s 0.35s;
+      background:rgba(0,0,0,0);
+    }
+    #leadModal.show{
+      opacity:1;
+      visibility:visible;
+      transition:opacity 0.35s ease, visibility 0s;
+      background:rgba(0,0,0,0.7);
+    }
+    #leadModal .rmodal-card{
+      transform:scale(0.7) translateY(50px);
+      opacity:0;
+      transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+    }
+    #leadModal.show .rmodal-card{
+      transform:scale(1) translateY(0);
+      opacity:1;
+    }
+    #leadModal.closing .rmodal-card{
+      transform:scale(0.8) translateY(30px);
+      opacity:0;
+      transition:transform 0.3s ease, opacity 0.25s ease;
+    }
 
     /* انميشن النجاح */
-    .lead-success .success-icon{animation:successPop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+    .lead-success .success-icon{
+      animation:successPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
     @keyframes successPop{
-      0%{transform:scale(0);opacity:0}
-      50%{transform:scale(1.2)}
-      100%{transform:scale(1);opacity:1}
+      0%{transform:scale(0) rotate(-45deg);opacity:0}
+      60%{transform:scale(1.3) rotate(10deg)}
+      80%{transform:scale(0.9) rotate(-5deg)}
+      100%{transform:scale(1) rotate(0deg);opacity:1}
     }
-    .lead-success h3{animation:fadeInUp 0.4s ease 0.2s both}
-    .lead-success p{animation:fadeInUp 0.4s ease 0.3s both}
-    .lead-success .btn{animation:fadeInUp 0.4s ease 0.4s both}
-    .lead-success .lead-support{animation:fadeInUp 0.4s ease 0.5s both}
-    @keyframes fadeInUp{
-      from{opacity:0;transform:translateY(15px)}
-      to{opacity:1;transform:translateY(0)}
+    .lead-success h3{animation:bounceIn 0.5s ease 0.15s both}
+    .lead-success p{animation:bounceIn 0.5s ease 0.25s both}
+    .lead-success .btn{animation:bounceIn 0.5s ease 0.35s both}
+    .lead-success .lead-support{animation:bounceIn 0.5s ease 0.45s both}
+    @keyframes bounceIn{
+      0%{opacity:0;transform:translateY(30px) scale(0.9)}
+      60%{transform:translateY(-5px) scale(1.02)}
+      100%{opacity:1;transform:translateY(0) scale(1)}
     }
+
+    /* انميشن عرض الحالة */
+    .lead-status-view .success-icon{animation:successPop 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+    .lead-status-view .status-badge{animation:bounceIn 0.5s ease 0.1s both}
+    .lead-status-view h3{animation:bounceIn 0.5s ease 0.2s both}
+    .lead-status-view p{animation:bounceIn 0.5s ease 0.3s both}
+    .lead-status-view .btn{animation:bounceIn 0.5s ease 0.4s both}
+    .lead-status-view .lead-support{animation:bounceIn 0.5s ease 0.5s both}
   </style>
 
   <script>
@@ -789,6 +821,12 @@
       leadModal.classList.remove("closing");
       leadModal.removeAttribute("aria-hidden");
       leadModal.style.display = "flex";
+      // تفعيل الانميشن
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          leadModal.classList.add("show");
+        });
+      });
 
       // التحقق من طلب سابق
       if (currentLeadId) {
@@ -802,16 +840,18 @@
       leadForm.style.display = "";
       document.getElementById("leadSuccess").hidden = true;
       document.getElementById("leadStatusView").hidden = true;
+      document.getElementById("leadSubmit").textContent = "أرسل طلبي";
       document.getElementById("leadName").focus();
     }
 
     function closeLeadForm() {
+      leadModal.classList.remove("show");
       leadModal.classList.add("closing");
       setTimeout(() => {
         leadModal.setAttribute("aria-hidden", "true");
         leadModal.style.display = "none";
         leadModal.classList.remove("closing");
-      }, 250);
+      }, 300);
     }
 
     leadClose.addEventListener("click", closeLeadForm);
@@ -828,6 +868,8 @@
       if (lastSubmittedData.country) document.getElementById("leadCountry").value = lastSubmittedData.country;
       if (lastSubmittedData.notes) document.getElementById("leadNotes").value = lastSubmittedData.notes;
       document.getElementById("leadConfirm").checked = true;
+      // تغيير نص الزر للتعديل
+      document.getElementById("leadSubmit").textContent = "حفظ التعديلات";
       leadMsg.textContent = "";
       document.getElementById("leadName").focus();
     }
