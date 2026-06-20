@@ -132,7 +132,7 @@ document.querySelectorAll(".tab").forEach((t) => {
     t.classList.add("on");
     const p = $("tab-" + t.dataset.tab); p.classList.add("on"); p.hidden = false;
     if (t.dataset.tab === "calls") loadCallsTab();
-    if (t.dataset.tab === "leads") { loadLeads(); startLeadsAutoRefresh(); }
+    if (t.dataset.tab === "leads") { loadLeads(); startLeadsAutoRefresh(); checkNotificationStatus(); }
     else { stopLeadsAutoRefresh(); }
   });
 });
@@ -429,6 +429,15 @@ function stopLeadsAutoRefresh() {
   if (leadsInterval) { clearInterval(leadsInterval); leadsInterval = null; }
 }
 
+function checkNotificationStatus() {
+  const btn = $("enableNotifBtn");
+  if (!btn) return;
+  if (localStorage.getItem("thameen_notif_enabled") === "1" || Notification.permission === "granted") {
+    btn.textContent = "✅ الإشعارات مفعّلة";
+    btn.disabled = true;
+  }
+}
+
 async function enableNotifications() {
   // تشغيل صوت تجريبي
   playNotificationSound();
@@ -440,6 +449,8 @@ async function enableNotifications() {
       new Notification("تم تفعيل الإشعارات ✅", { body: "راح يوصلك إشعار لكل طلب جديد", icon: "favicon-192.png" });
     }
   }
+
+  localStorage.setItem("thameen_notif_enabled", "1");
 
   const btn = $("enableNotifBtn");
   if (btn) {
