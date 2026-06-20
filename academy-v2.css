@@ -622,7 +622,7 @@
 .call-reminder{font-size:13.5px;line-height:1.85;color:var(--primary-soft);background:rgba(91,184,232,.08);border:1px solid rgba(91,184,232,.2);border-radius:13px;padding:12px 15px;margin-bottom:18px}
 .call-btn{width:100%}
 .call-card.call-group .call-btn{background:linear-gradient(135deg,#8B7CF6,#6c5ce7);color:#fff}
-.call-card.call-group .call-btn:disabled{background:rgba(255,255,255,.08);color:var(--text-subtle)}
+.call-card.call-group .call-btn:disabled{background:rgba(139,124,246,.15);border:1px solid rgba(139,124,246,.25);color:rgba(196,179,255,.5);cursor:not-allowed}
 /* صندوق الأسئلة */
 .qbox-head h3{margin:0 0 4px;font-size:17px}
 .q-add{display:flex;gap:9px;margin:14px 0}
