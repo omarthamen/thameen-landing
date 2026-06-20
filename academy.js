@@ -1835,7 +1835,7 @@ async function addQuestion() {
               const btn = document.createElement('button');
               btn.className = 'chat-action-btn lesson-btn';
               btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(byTitle.title);
-              btn.onclick = () => openLesson(byTitle.id);
+              btn.onclick = () => playLesson(byTitle.id);
               actionsDiv.appendChild(btn);
             }
             // إذا ما لقى بالعنوان أيضاً، ما يعرض زر
@@ -1844,7 +1844,7 @@ async function addQuestion() {
             btn.className = 'chat-action-btn lesson-btn';
             btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(action.title || lesson.title);
             btn.onclick = () => {
-              openLesson(lesson.id);
+              playLesson(lesson.id);
               // القفز للوقت المحدد
               if (action.timestamp && window.playerInstance) {
                 setTimeout(() => {
@@ -1898,7 +1898,7 @@ async function addQuestion() {
             card.textContent = l.title;
             card.onclick = () => {
               const lesson = LESSONS.find(x => x.id === l.lessonId);
-              if (lesson) openLesson(lesson.id);
+              if (lesson) playLesson(lesson.id);
             };
             lessonsWrap.appendChild(card);
           });
