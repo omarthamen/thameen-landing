@@ -609,7 +609,7 @@
 /* ===== صفحة المكالمات ===== */
 .calls-wrap{max-width:640px;margin:0 auto;padding:26px clamp(14px,3vw,30px);display:flex;flex-direction:column;gap:18px}
 .call-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px}
-.call-card.call-group{text-align:center;background:radial-gradient(120% 100% at 50% 0%,rgba(139,124,246,.14),transparent 62%),var(--bg-soft);border-color:rgba(139,124,246,.28)}
+.call-card.call-group{text-align:center;background:var(--bg-soft);border-color:rgba(139,124,246,.28)}
 .call-ic{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;margin:0 auto 14px;color:#c4b3ff;background:rgba(139,124,246,.16)}
 .call-ic svg{width:25px;height:25px}
 .call-card h3{margin:0 0 6px;font-size:19px;color:#fff}
