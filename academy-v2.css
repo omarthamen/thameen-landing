@@ -960,14 +960,15 @@
 .code-content {
   padding: 14px;
   margin: 0;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #e6edf3;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre;
+  overflow-x: auto;
   direction: ltr;
   text-align: left;
+  unicode-bidi: isolate;
 }
 .code-copy-btn {
   position: absolute;
