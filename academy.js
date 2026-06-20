@@ -1787,7 +1787,7 @@ async function addQuestion() {
 
       if (data.reply) {
         messages.push({ role: 'assistant', content: data.reply });
-        appendMessage(data.reply, 'bot');
+        appendMessageWithActions(data.reply, data.actions);
         saveMessage('assistant', data.reply);
       } else {
         appendMessage('عذراً، حدث خطأ. حاول مرة ثانية.', 'bot');
@@ -1798,6 +1798,7 @@ async function addQuestion() {
     }
   });
 
+  // رسالة بسيطة
   function appendMessage(text, type, scroll = true) {
     const div = document.createElement('div');
     div.className = `chat-msg ${type}`;
@@ -1805,6 +1806,110 @@ async function addQuestion() {
     messagesEl.appendChild(div);
     if (scroll) messagesEl.scrollTop = messagesEl.scrollHeight;
     return div;
+  }
+
+  // رسالة مع عناصر تفاعلية
+  function appendMessageWithActions(text, actions, scroll = true) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'chat-msg bot';
+
+    // النص الأساسي
+    const textDiv = document.createElement('div');
+    textDiv.className = 'chat-text';
+    textDiv.textContent = text;
+    wrapper.appendChild(textDiv);
+
+    // معالجة الـ actions
+    if (actions && actions.length > 0) {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'chat-actions';
+
+      actions.forEach(action => {
+        if (action.type === 'open_lesson') {
+          // زر فتح درس
+          const btn = document.createElement('button');
+          btn.className = 'chat-action-btn lesson-btn';
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> افتح: ' + esc(action.title);
+          btn.onclick = () => {
+            const lesson = LESSONS.find(l => l.id === action.lessonId);
+            if (lesson) {
+              openLesson(lesson.id);
+              // القفز للوقت المحدد
+              if (action.timestamp && window.playerInstance) {
+                setTimeout(() => {
+                  try { window.playerInstance.setCurrentTime(action.timestamp); } catch(e) {}
+                }, 1500);
+              }
+            }
+          };
+          actionsDiv.appendChild(btn);
+        }
+
+        else if (action.type === 'code_block') {
+          // صندوق كود
+          const codeWrap = document.createElement('div');
+          codeWrap.className = 'chat-code-block';
+
+          if (action.hint) {
+            const hint = document.createElement('div');
+            hint.className = 'code-hint';
+            hint.textContent = action.hint;
+            codeWrap.appendChild(hint);
+          }
+
+          const codeEl = document.createElement('pre');
+          codeEl.className = 'code-content';
+          codeEl.textContent = action.code;
+          codeWrap.appendChild(codeEl);
+
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'code-copy-btn';
+          copyBtn.textContent = 'نسخ';
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(action.code).then(() => {
+              copyBtn.textContent = 'تم النسخ!';
+              setTimeout(() => copyBtn.textContent = 'نسخ', 2000);
+            });
+          };
+          codeWrap.appendChild(copyBtn);
+
+          actionsDiv.appendChild(codeWrap);
+        }
+
+        else if (action.type === 'suggest_lessons') {
+          // بطاقات دروس مقترحة
+          const lessonsWrap = document.createElement('div');
+          lessonsWrap.className = 'chat-suggested-lessons';
+
+          action.lessons.forEach(l => {
+            const card = document.createElement('button');
+            card.className = 'suggested-lesson-card';
+            card.textContent = l.title;
+            card.onclick = () => {
+              const lesson = LESSONS.find(x => x.id === l.lessonId);
+              if (lesson) openLesson(lesson.id);
+            };
+            lessonsWrap.appendChild(card);
+          });
+
+          actionsDiv.appendChild(lessonsWrap);
+        }
+
+        else if (action.type === 'tip') {
+          // نصيحة
+          const tipEl = document.createElement('div');
+          tipEl.className = 'chat-tip';
+          tipEl.textContent = action.text;
+          actionsDiv.appendChild(tipEl);
+        }
+      });
+
+      wrapper.appendChild(actionsDiv);
+    }
+
+    messagesEl.appendChild(wrapper);
+    if (scroll) messagesEl.scrollTop = messagesEl.scrollHeight;
+    return wrapper;
   }
 })();
 
