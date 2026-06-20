@@ -649,6 +649,16 @@
           تواجه مشكلة؟ تواصل معنا
         </a>
       </div>
+      <div id="leadStatusView" class="lead-status-view" hidden>
+        <div id="statusIcon" class="success-icon">⏳</div>
+        <span id="statusBadge" class="status-badge pending">قيد المراجعة</span>
+        <h3 id="statusTitle">طلبك قيد المراجعة</h3>
+        <p id="statusDesc">سجّلت طلبك من قبل — راح نتواصل معك قريبًا.</p>
+        <button class="btn btn-primary" id="editMyLead">عدّل بياناتك</button>
+        <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener">
+          استفسار عن طلبك؟
+        </a>
+      </div>
     </div>
   </div>
 
@@ -677,6 +687,39 @@
     .lead-success h3{color:#fff;font-size:20px;margin:0 0 10px}
     .lead-success p{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.7}
     .lead-success .btn{margin-bottom:10px}
+
+    /* حالة الطلب */
+    .lead-status-view{text-align:center;padding:30px 20px}
+    .lead-status-view h3{color:#fff;font-size:18px;margin:0 0 10px}
+    .lead-status-view p{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.7}
+    .status-badge{display:inline-block;padding:8px 20px;border-radius:99px;font-size:14px;font-weight:700;margin-bottom:16px}
+    .status-badge.pending{background:rgba(91,184,232,.15);color:#5BB8E8}
+    .status-badge.contacted{background:rgba(241,198,107,.15);color:#f1c66b}
+    .status-badge.converted{background:rgba(80,200,120,.15);color:#74d99a}
+
+    /* انميشن المودال */
+    #leadModal{opacity:0;transition:opacity 0.3s ease}
+    #leadModal[style*="flex"]{opacity:1}
+    #leadModal .rmodal-card{transform:scale(0.9) translateY(20px);opacity:0;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease}
+    #leadModal[style*="flex"] .rmodal-card{transform:scale(1) translateY(0);opacity:1}
+    #leadModal.closing{opacity:0;transition:opacity 0.25s ease}
+    #leadModal.closing .rmodal-card{transform:scale(0.9) translateY(20px);opacity:0;transition:transform 0.25s ease, opacity 0.2s ease}
+
+    /* انميشن النجاح */
+    .lead-success .success-icon{animation:successPop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+    @keyframes successPop{
+      0%{transform:scale(0);opacity:0}
+      50%{transform:scale(1.2)}
+      100%{transform:scale(1);opacity:1}
+    }
+    .lead-success h3{animation:fadeInUp 0.4s ease 0.2s both}
+    .lead-success p{animation:fadeInUp 0.4s ease 0.3s both}
+    .lead-success .btn{animation:fadeInUp 0.4s ease 0.4s both}
+    .lead-success .lead-support{animation:fadeInUp 0.4s ease 0.5s both}
+    @keyframes fadeInUp{
+      from{opacity:0;transform:translateY(15px)}
+      to{opacity:1;transform:translateY(0)}
+    }
   </style>
 
   <script>
@@ -688,25 +731,95 @@
     const leadClose = document.getElementById("leadClose");
     const leadMsg = document.getElementById("leadMsg");
 
-    let currentLeadId = null;
-    let lastSubmittedData = {};
+    let currentLeadId = localStorage.getItem("thameen_lead_id") || null;
+    let lastSubmittedData = JSON.parse(localStorage.getItem("thameen_lead_data") || "{}");
 
-    function openLeadForm() {
+    // التحقق من حالة الطلب
+    async function checkLeadStatus() {
+      if (!currentLeadId) return null;
+      try {
+        const res = await fetch(SUPABASE_URL + "/rest/v1/leads?id=eq." + currentLeadId + "&select=*", {
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data && data[0] ? data[0] : null;
+      } catch (e) { return null; }
+    }
+
+    function showStatusView(lead) {
+      leadForm.style.display = "none";
+      document.getElementById("leadSuccess").hidden = true;
+      const statusView = document.getElementById("leadStatusView");
+      statusView.hidden = false;
+
+      const icon = document.getElementById("statusIcon");
+      const badge = document.getElementById("statusBadge");
+      const title = document.getElementById("statusTitle");
+      const desc = document.getElementById("statusDesc");
+
+      if (lead.status === "converted") {
+        icon.textContent = "🎉";
+        icon.style.background = "linear-gradient(135deg,#5fe08a,#2ecc71)";
+        badge.className = "status-badge converted";
+        badge.textContent = "تم القبول!";
+        title.textContent = "مبروك! تم قبول طلبك";
+        desc.textContent = "راح نرسل لك بيانات الدخول قريبًا على الواتساب أو الإيميل.";
+      } else if (lead.status === "contacted") {
+        icon.textContent = "📞";
+        icon.style.background = "linear-gradient(135deg,#f1c66b,#d4a23c)";
+        badge.className = "status-badge contacted";
+        badge.textContent = "تم التواصل";
+        title.textContent = "تواصلنا معك";
+        desc.textContent = "تحقق من الواتساب أو الإيميل للمتابعة.";
+      } else {
+        icon.textContent = "⏳";
+        icon.style.background = "linear-gradient(135deg,#5BB8E8,#3a9fd5)";
+        badge.className = "status-badge pending";
+        badge.textContent = "قيد المراجعة";
+        title.textContent = "طلبك قيد المراجعة";
+        desc.textContent = "سجّلت طلبك — راح نتواصل معك قريبًا.";
+      }
+
+      // حفظ البيانات للتعديل
+      lastSubmittedData = { name: lead.name, email: lead.email, phone: lead.phone, country: lead.country, notes: lead.notes || "" };
+    }
+
+    async function openLeadForm() {
+      leadModal.classList.remove("closing");
       leadModal.removeAttribute("aria-hidden");
       leadModal.style.display = "flex";
+
+      // التحقق من طلب سابق
+      if (currentLeadId) {
+        const lead = await checkLeadStatus();
+        if (lead) {
+          showStatusView(lead);
+          return;
+        }
+      }
+
+      leadForm.style.display = "";
+      document.getElementById("leadSuccess").hidden = true;
+      document.getElementById("leadStatusView").hidden = true;
       document.getElementById("leadName").focus();
     }
 
     function closeLeadForm() {
-      leadModal.setAttribute("aria-hidden", "true");
-      leadModal.style.display = "none";
+      leadModal.classList.add("closing");
+      setTimeout(() => {
+        leadModal.setAttribute("aria-hidden", "true");
+        leadModal.style.display = "none";
+        leadModal.classList.remove("closing");
+      }, 250);
     }
 
     leadClose.addEventListener("click", closeLeadForm);
     leadModal.addEventListener("click", (e) => { if (e.target === leadModal) closeLeadForm(); });
 
-    document.getElementById("leadAgain").addEventListener("click", () => {
+    function showEditForm() {
       document.getElementById("leadSuccess").hidden = true;
+      document.getElementById("leadStatusView").hidden = true;
       leadForm.style.display = "";
       // تعبئة البيانات السابقة
       if (lastSubmittedData.name) document.getElementById("leadName").value = lastSubmittedData.name;
@@ -717,7 +830,10 @@
       document.getElementById("leadConfirm").checked = true;
       leadMsg.textContent = "";
       document.getElementById("leadName").focus();
-    });
+    }
+
+    document.getElementById("leadAgain").addEventListener("click", showEditForm);
+    document.getElementById("editMyLead").addEventListener("click", showEditForm);
 
     leadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -789,10 +905,17 @@
         // حفظ ID الطلب للتعديل
         if (!isUpdate) {
           const data = await res.json();
-          if (data && data[0] && data[0].id) currentLeadId = data[0].id;
+          if (data && data[0] && data[0].id) {
+            currentLeadId = data[0].id;
+            localStorage.setItem("thameen_lead_id", currentLeadId);
+            localStorage.setItem("thameen_lead_data", JSON.stringify(lastSubmittedData));
+          }
+        } else {
+          localStorage.setItem("thameen_lead_data", JSON.stringify(lastSubmittedData));
         }
 
         leadForm.style.display = "none";
+        document.getElementById("leadStatusView").hidden = true;
         document.getElementById("leadSuccess").hidden = false;
       } catch (err) {
         console.error("Error:", err);
