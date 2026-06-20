@@ -606,23 +606,24 @@
 .login-wa:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .login-wa svg{width:19px;height:19px}
 
-/* ===== صفحة المكالمات ===== */
-.calls-wrap{max-width:640px;margin:0 auto;padding:26px clamp(14px,3vw,30px);display:flex;flex-direction:column;gap:18px}
-.call-card{background:var(--bg-soft);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px}
-.call-card.call-group{text-align:center;background:var(--bg-soft);border-color:rgba(139,124,246,.28)}
-.call-ic{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;margin:0 auto 14px;color:#c4b3ff;background:rgba(139,124,246,.16)}
-.call-ic svg{width:25px;height:25px}
-.call-card h3{margin:0 0 6px;font-size:19px;color:#fff}
-.call-sub{color:var(--text-muted);font-size:13.5px;line-height:1.7;margin:0 0 16px}
-.call-when{font-size:17px;font-weight:800;color:#fff;margin-bottom:10px}
-.call-countdown{font-size:14px;color:var(--text-muted);margin-bottom:10px;line-height:1.7}
-.call-countdown b{display:inline-block;font-size:21px;color:#c4b3ff;margin-top:3px;font-variant-numeric:tabular-nums}
-.cd-live{color:#5fe08a!important;font-size:17px!important}
-.cd-done{color:var(--text-subtle)}
-.call-reminder{font-size:13.5px;line-height:1.85;color:var(--primary-soft);background:rgba(91,184,232,.08);border:1px solid rgba(91,184,232,.2);border-radius:13px;padding:12px 15px;margin-bottom:18px}
-.call-btn{width:100%;border:none}
-.call-card.call-group .call-btn{background:linear-gradient(135deg,#22c55e,#16a34a)!important;color:#fff!important;box-shadow:0 10px 30px rgba(34,197,94,.35)!important;animation:none!important}
-.call-card.call-group .call-btn:disabled{background:#2a2a35!important;border:1px solid rgba(255,255,255,.12)!important;color:#5a5a68!important;cursor:not-allowed;animation:none!important;box-shadow:none!important}
+/* ===== صفحة المكالمات — تصميم جديد ===== */
+.calls-wrap{max-width:600px;margin:0 auto;padding:30px clamp(16px,4vw,32px);display:flex;flex-direction:column;gap:24px}
+.call-card{background:#111118;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px}
+.call-card.call-group{text-align:center}
+.call-ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;color:#fff;background:linear-gradient(135deg,#6366f1,#4f46e5)}
+.call-ic svg{width:26px;height:26px}
+.call-card h3{margin:0 0 8px;font-size:20px;font-weight:700;color:#fff}
+.call-sub{color:#888;font-size:14px;line-height:1.6;margin:0 0 20px}
+.call-when{font-size:15px;font-weight:600;color:#a5a5a5;margin-bottom:8px}
+.call-countdown{font-size:14px;color:#666;margin-bottom:12px}
+.call-countdown b{display:block;font-size:28px;color:#fff;margin-top:6px;font-weight:700;font-variant-numeric:tabular-nums}
+.cd-live{color:#22c55e!important;font-size:18px!important}
+.cd-done{color:#555}
+.call-reminder{font-size:13px;line-height:1.7;color:#7dd3fc;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.15);border-radius:10px;padding:14px 16px;margin-bottom:20px}
+.call-join-btn{width:100%;padding:16px 24px;font-family:inherit;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;transition:all .2s ease}
+.call-join-btn:not(:disabled){background:#22c55e;color:#fff}
+.call-join-btn:not(:disabled):hover{background:#16a34a}
+.call-join-btn:disabled{background:#1e1e28;color:#4a4a58;cursor:not-allowed}
 /* صندوق الأسئلة */
 .qbox-head h3{margin:0 0 4px;font-size:17px}
 .q-add{display:flex;gap:9px;margin:14px 0}
