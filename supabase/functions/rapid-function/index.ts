@@ -72,6 +72,12 @@ Deno.serve(async (req) => {
     // التحقق من المستخدم
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
+    // === تشخيص ===
+    console.log("=== DIAG 1: Auth ===");
+    console.log("user_id:", user?.id);
+    console.log("user_email:", user?.email);
+    console.log("auth_error:", userError?.message);
+
     let userContext = "";
 
     if (user && !userError) {
@@ -84,12 +90,29 @@ Deno.serve(async (req) => {
         admin.from("progress").select("lesson_id, completed").eq("user_id", user.id),
       ]);
 
+      // === تشخيص البيانات ===
+      console.log("=== DIAG 2: Data ===");
+      console.log("lessons_count:", lessonsRes.data?.length);
+      console.log("lessons_error:", lessonsRes.error?.message);
+      console.log("progress_raw:", JSON.stringify(progressRes.data));
+      console.log("progress_error:", progressRes.error?.message);
+
       const lessons = lessonsRes.data || [];
       const sections = sectionsRes.data || [];
       const progress = progressRes.data || [];
 
+      // === تشخيص الفلترة ===
+      console.log("=== DIAG 3: Filter ===");
+      console.log("progress_length:", progress.length);
+      console.log("completed_filter:", progress.filter((p: any) => p.completed));
+      console.log("completed_type_check:", progress.map((p: any) => ({ lesson_id: p.lesson_id, completed: p.completed, type: typeof p.completed })));
+
       const totalLessons = lessons.length;
       const completedLessons = progress.filter((p: any) => p.completed).length;
+
+      console.log("=== DIAG 4: Result ===");
+      console.log("totalLessons:", totalLessons);
+      console.log("completedLessons:", completedLessons);
       const percent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
       const completedIds = new Set(progress.filter((p: any) => p.completed).map((p: any) => p.lesson_id));
