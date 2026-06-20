@@ -270,7 +270,7 @@ function renderLeadCard(l) {
     <div class="lead-footer">
       <span class="lead-date">${dateStr}</span>
       <div class="lead-actions">
-        ${hasEdits ? `<button class="btn btn-sm btn-outline lead-history-btn" data-id="${l.id}">سجل التعديلات</button>` : ''}
+        <button class="btn btn-sm btn-outline lead-details-btn" data-id="${l.id}">${hasEdits ? `سجل التعديلات (${editCount})` : 'تفاصيل'}</button>
         ${l.status !== "contacted" ? `<button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>` : ""}
         ${l.status !== "converted" ? `<button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>` : ""}
       </div>
@@ -314,7 +314,7 @@ async function loadLeads(silent = false) {
 
     list.innerHTML = html || '<p class="empty">لا توجد طلبات بعد.</p>';
     list.querySelectorAll(".lead-status-btn").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
-    list.querySelectorAll(".lead-history-btn").forEach((b) => b.addEventListener("click", () => showLeadHistory(b.dataset.id)));
+    list.querySelectorAll(".lead-details-btn").forEach((b) => b.addEventListener("click", () => showLeadHistory(b.dataset.id)));
   } catch (e) { if (!silent) list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
 }
 
@@ -348,8 +348,15 @@ async function showLeadHistory(leadId) {
     const [lead] = await dbGet(`leads?id=eq.${leadId}&select=*`);
     const history = await dbGet(`lead_history?lead_id=eq.${leadId}&select=*&order=edited_at.desc`);
     if (!lead) { content.innerHTML = '<p class="empty">لم يتم العثور على الطلب</p>'; return; }
+    const createdDate = new Date(lead.created_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    const updatedDate = lead.updated_at ? new Date(lead.updated_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : null;
     let html = `<div class="lead-history-current">
       <h4>البيانات الحالية</h4>
+      <div class="history-meta">
+        <span>📅 تاريخ التسجيل: ${createdDate}</span>
+        ${updatedDate ? `<span>✏️ آخر تعديل: ${updatedDate}</span>` : ''}
+        <span>🔢 عدد التعديلات: ${lead.edit_count || 0}</span>
+      </div>
       <div class="history-item current">
         <div class="history-field"><b>الاسم:</b> ${esc(lead.name)}</div>
         <div class="history-field"><b>الإيميل:</b> ${esc(lead.email)}</div>

@@ -277,6 +277,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 /* Modal سجل التعديلات */
 .modal-overlay.show{display:flex}
 .lead-history-current h4,.lead-history-list h4{font-size:14px;font-weight:800;margin:0 0 12px;color:var(--primary-soft)}
+.history-meta{display:flex;flex-wrap:wrap;gap:12px 20px;font-size:12px;color:var(--text-muted);margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:8px}
 .lead-history-current{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
 .history-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:10px}
 .history-item.current{border-color:rgba(91,184,232,.4);background:rgba(91,184,232,.08)}
