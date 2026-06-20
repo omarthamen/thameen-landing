@@ -1798,22 +1798,35 @@ async function addQuestion() {
   }
 })();
 
-// ====== نموذج التسجيل ======
+// ====== تبويبات الدخول/التسجيل ======
 (function() {
-  const modal = document.getElementById("registerModal");
-  const form = document.getElementById("registerForm");
-  const success = document.getElementById("regSuccess");
-  const openBtn = document.getElementById("openRegisterBtn");
-  const closeBtn = document.getElementById("regClose");
-  const doneBtn = document.getElementById("regDone");
+  const tabs = document.querySelectorAll(".login-tab");
+  const loginForm = document.getElementById("loginForm");
+  const registerCard = document.getElementById("registerCard");
+
+  if (!tabs.length) return;
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      if (tab.dataset.tab === "login") {
+        loginForm.hidden = false;
+        registerCard.hidden = true;
+      } else {
+        loginForm.hidden = true;
+        registerCard.hidden = false;
+      }
+    });
+  });
+
+  // نموذج التسجيل
+  const form = document.getElementById("registerCard");
   const msg = document.getElementById("regMsg");
+  const success = document.getElementById("regSuccess");
 
-  if (!modal || !openBtn) return;
-
-  openBtn.addEventListener("click", () => modal.classList.add("show"));
-  closeBtn.addEventListener("click", () => modal.classList.remove("show"));
-  doneBtn.addEventListener("click", () => modal.classList.remove("show"));
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1860,7 +1873,8 @@ async function addQuestion() {
 
       if (!res.ok) throw new Error("فشل الإرسال");
 
-      form.style.display = "none";
+      // إخفاء الفورم وإظهار رسالة النجاح
+      document.querySelectorAll("#registerCard > *:not(#regSuccess)").forEach(el => el.style.display = "none");
       success.hidden = false;
     } catch (err) {
       msg.textContent = "حدث خطأ، حاول مرة ثانية";
