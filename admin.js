@@ -354,10 +354,10 @@ async function deleteLead(id) {
 async function showLeadHistory(leadId) {
   const modal = $("leadHistoryModal");
   const content = $("leadHistoryContent");
-  if (!modal || !content) return;
+  if (!modal || !content) { console.error("Modal not found"); return; }
   content.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
-  modal.removeAttribute("hidden");
   modal.classList.add("show");
+  console.log("Opening modal for lead:", leadId);
   try {
     const [lead] = await dbGet(`leads?id=eq.${leadId}&select=*`);
     const history = await dbGet(`lead_history?lead_id=eq.${leadId}&select=*&order=edited_at.desc`);
@@ -404,10 +404,7 @@ async function showLeadHistory(leadId) {
 
 function closeLeadHistoryModal() {
   const modal = $("leadHistoryModal");
-  if (modal) {
-    modal.classList.remove("show");
-    modal.setAttribute("hidden", "");
-  }
+  if (modal) modal.classList.remove("show");
 }
 
 // ====== المشتركون ======
