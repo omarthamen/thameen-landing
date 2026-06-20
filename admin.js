@@ -247,16 +247,16 @@ const COUNTRIES = {SA:"السعودية",AE:"الإمارات",KW:"الكويت"
 
 function renderLeadCard(l) {
   const date = new Date(l.created_at);
-  const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   const countryName = COUNTRIES[l.country] || l.country;
   const statusClass = l.status === "contacted" ? "contacted" : (l.status === "converted" ? "converted" : "new");
   const editCount = l.edit_count || 0;
   const hasEdits = editCount > 0;
   const updatedStr = l.updated_at ? new Date(l.updated_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
-  return `<div class="lead-card ${statusClass}${hasEdits ? ' has-edits' : ''}" data-id="${l.id}">
+  return `<div class="lead-card ${statusClass}" data-id="${l.id}">
     <div class="lead-header">
       <b class="lead-name">${esc(l.name)}</b>
-      ${hasEdits ? `<span class="lead-edit-badge" title="تم التعديل ${editCount} مرة">✏️ ${editCount}</span>` : ''}
+      ${hasEdits ? `<span class="lead-edit-badge">✏️ ${editCount}</span>` : ''}
       <span class="lead-status ${statusClass}">${l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد")}</span>
     </div>
     <div class="lead-info">
@@ -269,10 +269,11 @@ function renderLeadCard(l) {
     ${hasEdits ? `<div class="lead-updated">آخر تعديل: ${updatedStr}</div>` : ''}
     <div class="lead-footer">
       <span class="lead-date">${dateStr}</span>
-      <div class="lead-actions">
-        <button class="btn btn-sm btn-outline lead-details-btn" data-id="${l.id}">${hasEdits ? `سجل التعديلات (${editCount})` : 'تفاصيل'}</button>
-        ${l.status !== "contacted" ? `<button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>` : ""}
-        ${l.status !== "converted" ? `<button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>` : ""}
+      <div class="lead-actions-icons">
+        <button class="lead-icon-btn details" data-id="${l.id}" title="تفاصيل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button>
+        ${l.status !== "contacted" ? `<button class="lead-icon-btn call" data-id="${l.id}" data-status="contacted" title="تم التواصل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.35a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.75.34 1.54.57 2.35.7A2 2 0 0 1 22 16.92z"/></svg></button>` : `<button class="lead-icon-btn undo" data-id="${l.id}" data-status="new" title="إلغاء التواصل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>`}
+        ${l.status !== "converted" ? `<button class="lead-icon-btn convert" data-id="${l.id}" data-status="converted" title="تحويل لمشترك"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>` : `<button class="lead-icon-btn undo" data-id="${l.id}" data-status="contacted" title="إلغاء الاشتراك"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>`}
+        <button class="lead-icon-btn delete" data-id="${l.id}" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     </div>
   </div>`;
@@ -313,8 +314,9 @@ async function loadLeads(silent = false) {
     }
 
     list.innerHTML = html || '<p class="empty">لا توجد طلبات بعد.</p>';
-    list.querySelectorAll(".lead-status-btn").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
-    list.querySelectorAll(".lead-details-btn").forEach((b) => b.addEventListener("click", () => showLeadHistory(b.dataset.id)));
+    list.querySelectorAll(".lead-icon-btn.details").forEach((b) => b.addEventListener("click", () => showLeadHistory(b.dataset.id)));
+    list.querySelectorAll(".lead-icon-btn.call, .lead-icon-btn.convert, .lead-icon-btn.undo").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
+    list.querySelectorAll(".lead-icon-btn.delete").forEach((b) => b.addEventListener("click", () => deleteLead(b.dataset.id)));
   } catch (e) { if (!silent) list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
 }
 
@@ -333,6 +335,17 @@ async function updateLeadStatus(id, status) {
       method: "PATCH",
       headers: authHeaders({"Content-Type": "application/json", "Prefer": "return=minimal"}),
       body: JSON.stringify({ status })
+    });
+    loadLeads();
+  } catch (e) { alert("خطأ: " + e.message); }
+}
+
+async function deleteLead(id) {
+  if (!confirm("متأكد تريد حذف هذا الطلب؟")) return;
+  try {
+    await fetchT(`${SUPABASE_URL}/rest/v1/leads?id=eq.${id}`, {
+      method: "DELETE",
+      headers: authHeaders({"Prefer": "return=minimal"})
     });
     loadLeads();
   } catch (e) { alert("خطأ: " + e.message); }
