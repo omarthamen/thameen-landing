@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>ثَمين، احترف المونتاج خلال ٩٠ يوم</title>
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png" />
+  <link rel="apple-touch-icon" href="favicon-192.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="description" content="دورة ثَمين: من الصفر إلى محترف مونتاج خلال ٩٠ يوم. قص وإيقاع، تصحيح ألوان، موشن جرافيك، مؤثرات، صوت، وربح من مهارتك." />
+
+  <!-- Open Graph / مشاركة -->
+  <meta property="og:title" content="ثَمين، احترف المونتاج خلال ٩٠ يوم" />
+  <meta property="og:description" content="من الصفر إلى محترف مونتاج خلال ٩٠ يوم، خطة عملية تطبيقية." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://thameen.shop" />
+
+  <!-- خط الواجهة: IBM Plex Sans Arabic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css?v=64" />
+</head>
+<body>
+
+  <!-- الماوس التفاعلي -->
+  <div class="custom-cursor" id="customCursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- خلفية متوهجة -->
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- شريط علوي -->
+  <header class="topbar">
+    <a class="brand" href="./" onclick="location.href='./?r='+Date.now(); return false;" aria-label="تحديث الصفحة لآخر نسخة">
+      <span class="brand-diamond" aria-hidden="true">◆</span>
+      <span class="brand-name">ثَمين</span>
+    </a>
+    <div class="topbar-actions">
+      <a class="topbar-login" href="academy.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>
+        دخول المشتركين
+      </a>
+      <a class="topbar-cta" href="#" onclick="openLeadForm(); return false;">ابدأ الآن</a>
+    </div>
+  </header>
+
+  <!-- البطل -->
+  <section class="hero">
+    <p class="eyebrow">٣ دورات احترافية في باقة واحدة</p>
+    <h1 class="hero-title">احترف <span>المونتاج</span> من الصفر خلال <span class="countup" data-to="90" data-arabic="true">٩٠</span> يوم</h1>
+    <p class="hero-ai">واستخدم أحدث تقنيات <span>الذكاء الاصطناعي</span> لتسريع شغلك في ٢٠٢٦</p>
+  </section>
+
+  <!-- الفيديو الرئيسي -->
+  <section id="video" class="section">
+    <div class="video-frame reveal-scale" id="videoFrame">
+      <video
+        id="mainVideo"
+        preload="metadata"
+        playsinline
+        poster="assets/video/poster.jpg?v=7"
+      >
+        <source src="assets/video/main.mp4?v=6" type="video/mp4" />
+        متصفحك لا يدعم تشغيل الفيديو. <a href="assets/video/main.mp4">حمّل الفيديو</a>.
+      </video>
+      <button class="video-play" id="videoPlay" type="button" aria-label="تشغيل الفيديو">
+        <span class="vp-ring" aria-hidden="true"></span>
+        <span class="vp-ring vp-ring2" aria-hidden="true"></span>
+        <span class="vp-btn" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        </span>
+      </button>
+
+      <!-- كنترولز مخصّصة + شريط فصول داخل الفيديو (CHAPTERS في main.js) -->
+      <div class="vcontrols" id="vcontrols">
+        <button class="vc-btn" id="vcPlay" type="button" aria-label="تشغيل/إيقاف">
+          <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <div class="vc-progress" id="vcBar" role="slider" aria-label="شريط الفيديو"></div>
+        <span class="vc-time" id="vcTime">0:00 / 0:00</span>
+        <button class="vc-btn" id="vcFull" type="button" aria-label="ملء الشاشة">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="video-cta">
+      <a class="btn btn-primary btn-lg" href="#" onclick="openLeadForm(); return false;">ابدأ التحدّي الآن</a>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- المدرّب -->
+  <section id="instructor" class="section">
+    <div class="instructor-v2">
+      <img src="assets/images/omar-profile.png" alt="عمر ثمين" class="instructor-v2-img reveal-scale" />
+      <h2 class="reveal reveal-d1">أنا عمر ثمين</h2>
+      <p class="instructor-v2-role reveal reveal-d2">مونتير محترف</p>
+      <p class="instructor-v2-bio reveal reveal-d3">اشتغلت مع عشرات صنّاع المحتوى والشركات، ودرّبت مئات الطلاب على المونتاج الاحترافي.<br>صمّمت هذا البرنامج عشان أختصر عليك سنوات من التجربة والخطأ.</p>
+
+      <!-- Social Proof -->
+      <div class="social-proof reveal reveal-d4">
+        <div class="sp-avatars">
+          <div class="sp-avatar">
+            <img src="assets/clients/banderitax.jpg" alt="BanderitaX" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">BanderitaX <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">20.8M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/ocmz.jpg" alt="oCMz" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">oCMz <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">9.78M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/suhaib.jpg" alt="Suhaib" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Suhaib <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">8.11M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/ahmedshow.jpg" alt="Ahmed Show" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Ahmed Show <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">5.91M subscribers</span>
+            </div>
+          </div>
+          <div class="sp-avatar">
+            <img src="assets/clients/peaksbase.jpg" alt="Peaks" loading="lazy" />
+            <div class="sp-tooltip">
+              <span class="sp-tooltip-name">Peaks <svg class="sp-verified" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1d9bf0"/><path d="M10 15.17l-3.59-3.58L5 13l5 5 9-9-1.41-1.42L10 15.17z" fill="#fff"/></svg></span>
+              <span class="sp-tooltip-subs">1.14M subscribers</span>
+            </div>
+          </div>
+          <span class="sp-more">+50</span>
+        </div>
+        <div class="sp-info">
+          <span class="sp-text">اشتغلت مع أكثر من <strong>٥٠ صانع محتوى</strong></span>
+          <span class="sp-stars">★★★★★</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- مراحل البرنامج الثلاث -->
+  <section id="stages" class="section">
+    <h2 class="section-title reveal">خلال ٩٠ يوم… راح تبني مهارتك على <span>٣ مراحل</span> واضحة</h2>
+    <p class="stages-lead reveal reveal-d1">
+      هذا مو كورس يعلّمك تضغط أزرار وبس. هذا برنامج تدريبي مصمَّم ينقلك من التشتّت بين
+      دروس يوتيوب إلى مستوى واضح وقوي في المونتاج، بخطة مرتّبة، تطبيق عملي، وتصحيح مباشر.
+    </p>
+
+    <div class="stages">
+      <article class="stage glow reveal reveal-d1">
+        <span class="stage-num">١</span>
+        <h3>التأسيس التقني</h3>
+        <p>
+          راح تتخطّى الخوف من برامج أدوبي. بدل ما تفتح Premiere Pro وتحس كل شي معقّد وما
+          تعرف منين تبدأ، تتعلّم أساسيات البرنامج من الصفر، وتفهم شلون تبني فيديو من البداية
+          للنهاية: القص اللي يخلّي المشاهد يكمّل، الزومات، المؤثرات، الانتقالات، الساوند
+          إفكت، والتلوين، وكل شي عليه تطبيق عملي، مو شرح نظري وبس.
+        </p>
+        <p class="stage-result"><b>النتيجة:</b> قاعدة قوية تخلّيك تبدأ أي فيديو بثقة.</p>
+      </article>
+
+      <article class="stage glow reveal reveal-d2">
+        <span class="stage-num">٢</span>
+        <h3>الاحتراف البصري</h3>
+        <p>
+          هنا ترفع مستوى شغلك وتبدأ تفكّر مثل المحترفين. تتعلّم شلون تخلّي الفيديو يشدّ
+          الانتباه، شلون تبني الإيقاع، شلون تشتغل على أكثر من ٥ كاميرات، شلون تطلّع أفكار
+          رهيبة، وتغوص أكثر في الألوان وتعديل الإضاءة، حتى يشوف العميل أو المشاهد إنه
+          شغل متعوب عليه.
+        </p>
+        <p class="stage-result"><b>النتيجة:</b> مونتاجك يصير أقوى بصريًا وأوضح وأقرب لمستوى صنّاع المحتوى واليوتيوبرز.</p>
+      </article>
+
+      <article class="stage stage--featured glow reveal reveal-d3">
+        <span class="stage-num">٣</span>
+        <h3>الـ 3D والذكاء الاصطناعي</h3>
+        <p>
+          بدل ما تبقى تعتمد على القص والمؤثرات بس، تتعلّم شلون تسوّي مشاهد 3D احترافية
+          بالأفتر إفكت تجذب الانتباه وتحقّق مشاهدات، وتستخدم الذكاء الاصطناعي حتى تسرّع
+          شغلك وتطلّع أشياء مميّزة. وأهم شي: تقضي على خوف إن الـ AI ينهي المونتاج، 
+          لأنك ما راح تكون ممنتج عادي.
+        </p>
+        <p class="stage-result"><b>النتيجة:</b> ممنتج حديث يدمج المونتاج و3D والذكاء الاصطناعي، شغل أسرع، أقوى، وأصعب بالاستبدال.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- المشكلة <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> التحوّل -->
+  <section id="why" class="section">
+    <h2 class="section-title reveal">ليش لين الحين مونتاجك ما تطوّر؟</h2>
+    <p class="why-lead reveal reveal-d1">
+      تفتح يوتيوب… درس، وبعده درس، وبعده درس. تجمّع معلومات مبعثرة من كل مكان،
+      وبعد أشهر تكتشف إنك لسا بنفس النقطة، مونتاج يطلع عادي، وما عندك أساس واضح تبني عليه.
+      <b>المشكلة مو فيك، المشكلة إنك تتعلّم بدون مسار، ولا خطة، ولا أحد يصحّح لك.</b>
+    </p>
+
+    <div class="ba-grid">
+      <div class="ba-col ba-before reveal-left reveal-d1">
+        <h3>قبل ثَمين</h3>
+        <ul>
+          <li>دروس مبعثرة بلا ترتيب</li>
+          <li>مونتاج يطلع عادي</li>
+          <li>ما تعرف وش الخطوة الجاية</li>
+          <li>تتعلّم لحالك بدون تصحيح</li>
+          <li>تحبط وتوقف بالنص</li>
+        </ul>
+      </div>
+      <div class="ba-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></div>
+      <div class="ba-col ba-after reveal-right reveal-d2">
+        <h3>بعد ٩٠ يوم</h3>
+        <ul>
+          <li>مسار واضح من الصفر للاحتراف</li>
+          <li>مونتاج احترافي تفتخر فيه</li>
+          <li>تتقن بريمير وأفتر إفكتس بثقة</li>
+          <li>جلسات تصحّح فيها شغلك مباشرة</li>
+          <li>تكمّل بثبات لين توصل</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="why-close">
+      اللي تحتاجه مو درس يوتيوب ثاني، تحتاج <b>مسار منظّم + تطبيق عملي + متابعة مباشرة</b>.
+      وهذا بالضبط اللي بنينا عليه ثَمين.
+    </p>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- ردود فعل العملاء - Carousel -->
+  <section id="feedback-showcase" class="section">
+    <h2 class="section-title reveal">ردود فعل من <span>اشتغلت معهم</span></h2>
+    <p class="section-sub reveal reveal-d1">ثقة حقيقية من صنّاع محتوى وعملاء</p>
+    <div class="feedback-type-label" id="feedbackTypeLabel"></div>
+
+    <div class="feedback-slider reveal">
+      <button class="slider-btn slider-prev" id="sliderPrev" aria-label="السابق">‹</button>
+
+      <div class="slider-container">
+        <!-- صناع المحتوى -->
+        <div class="slider-item" data-index="0" data-type="creator">
+          <img src="assets/feedback/feedback-1.png" alt="بندريتا" />
+        </div>
+        <div class="slider-item" data-index="1" data-type="creator">
+          <img src="assets/feedback/feedback-2.png" alt="ريان أوسمز" />
+        </div>
+        <div class="slider-item" data-index="2" data-type="creator">
+          <img src="assets/feedback/feedback-3.png" alt="احمد شو" />
+        </div>
+        <!-- مشتركين الدورة -->
+        <div class="slider-item" data-index="3" data-type="subscriber">
+          <img src="assets/feedback/01-Ehab.png" alt="إيهاب" />
+        </div>
+        <div class="slider-item" data-index="4" data-type="subscriber">
+          <img src="assets/feedback/02-abdulsalam.png" alt="عبدالسلام" />
+        </div>
+        <div class="slider-item" data-index="5" data-type="subscriber">
+          <img src="assets/feedback/03-mortada.png" alt="مرتضى" />
+        </div>
+        <div class="slider-item" data-index="6" data-type="subscriber">
+          <img src="assets/feedback/04-Anonymous.png" alt="مشترك" />
+        </div>
+        <div class="slider-item" data-index="7" data-type="subscriber">
+          <img src="assets/feedback/05-Ali-Yas.png" alt="علي ياس" />
+        </div>
+        <div class="slider-item" data-index="8" data-type="subscriber">
+          <img src="assets/feedback/06-mohamed-kaito.png" alt="محمد كايتو" />
+        </div>
+        <div class="slider-item" data-index="9" data-type="subscriber">
+          <img src="assets/feedback/07-Ehab-2.png" alt="إيهاب" />
+        </div>
+      </div>
+
+      <button class="slider-btn slider-next" id="sliderNext" aria-label="التالي">›</button>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- جدار الشهادات -->
+  <!-- ملاحظة: هذي نماذج مؤقتة، استبدلها بشهادات طلابك الحقيقية -->
+  <section id="reviews" class="section">
+    <h2 class="section-title reveal">وش يقولون المتدربين</h2>
+    <p class="section-sub reveal reveal-d1">تجارب ناس بدأوا من الصفر مثلك بالضبط.</p>
+
+    <!-- تقييم مجمّع، ضع رقمك الحقيقي قبل النشر -->
+    <div class="rating-bar">
+      <span class="rating-stars" aria-hidden="true">★★★★★</span>
+      <span class="rating-score"><span class="countup" data-to="4.1" data-decimals="1">4.1</span> / 5</span>
+      <span class="rating-count" id="ratingCount">27 مراجعة</span>
+    </div>
+
+    <div class="add-review-wrap">
+      <button type="button" class="btn btn-ghost" id="openReview">أضف تعليقك <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    </div>
+
+    <div class="reviews-marquee">
+      <div class="reviews-track" id="reviewsTrack"></div>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- الباقة الكاملة -->
+  <section id="offer" class="section">
+    <div class="offer reveal-scale">
+      <span class="offer-badge">باقة ثَمين الكاملة</span>
+      <h2 class="offer-title">كل شي تحتاجه لتصير محترف</h2>
+
+      <p class="offer-stack-lead">كل اللي راح تحصل عليه لما تشترك اليوم</p>
+
+      <!-- المنظومة الكاملة -->
+      <div class="value-stack">
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9.5 12 5 2 9.5l10 4.5 10-4.5z"/><path d="M6 11.5v4.5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-4.5"/></svg></span><div><b>المنظومة التدريبية المتكاملة</b><small>Premiere Pro + After Effects + 3D + AI، مسار كامل من الصفر للاحتراف يختصر عليك سنوات تشتّت.</small></div></div>
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></span><div><b>جلسات توجيه جماعية لمدة ٣ أشهر</b><small>كل شهر جلسة تسأل فيها، تعرض شغلك، وتاخذ ملاحظات مباشرة تعرف بيها أخطاءك.</small></div></div>
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></span><div><b>الدعم الشخصي المباشر</b><small>نرافقك عبر الرسائل ونجاوبك وقت ما تحتاج، حتى ما توقف بالنص بسبب مشكلة بسيطة.</small></div></div>
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="11" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18M10 13v2M14 13v2"/></svg></span><div><b>صندوق أدوات الممنتج</b><small>مكتبة ملفات جاهزة: انتقالات، ساوند إفكتس، زومات، جرافات، اختصارات، وماتيريال تطبّق عليه مباشرة.</small></div></div>
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><circle cx="9" cy="13" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.2" fill="currentColor" stroke="none"/><path d="M12 4v4M2 13h2M20 13h2M9 19v2M15 19v2"/></svg></span><div><b>ورك-فلو الذكاء الاصطناعي</b><small>تتعلّم تستخدم أحدث أدوات الـ AI حتى تسرّع شغلك وتطلّع أفكار أقوى، تصير ممنتج أسرع وأصعب بالاستبدال.</small></div></div>
+        <div class="vstack-item"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 9a3 3 0 1 0 0 6c2.2 0 3-2.2 4.5-3s2.3-3 4.5-3a3 3 0 1 1 0 6c-2.2 0-3-2.2-4.5-3s-2.3-3-4.5-3z"/></svg></span><div><b>وصول مدى الحياة</b><small>المحتوى يبقى معك للأبد، ترجع للدروس والملفات والتطبيقات بأي وقت تحتاج.</small></div></div>
+      </div>
+
+      <!-- داخل كل دورة -->
+      <div class="inside-course">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg> ملفات تدريب جاهزة للتطبيق</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> ماتيريال تنزله وتشتغل عليه مباشرة</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/></svg> فيديوهات ممنتجة باحتراف، مو تسجيل شاشة عادي</span>
+      </div>
+
+      <!-- زر يكشف "شنو راح تتعلّم" بأنميشن -->
+      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="learnReveal" data-open-text="إخفاء القائمة" data-close-text="شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة">
+        <span class="js-toggle-label">شنو راح تتعلّم وتاخذ؟ افتح القائمة الكاملة</span>
+        <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
+      </button>
+
+      <div class="learn-reveal" id="learnReveal" role="region" aria-label="محتوى الدورات">
+        <div class="learn-reveal-inner">
+          <div class="course-grid">
+
+            <article class="course-card">
+              <div class="course-head">
+                <span class="course-tag">مبتدئين</span>
+                <h3>المونتاج من الصفر</h3>
+                <p class="course-meta">Premiere Pro · ١س ٥٠د · ٦ دروس</p>
+                <p class="course-pitch">الأساسيات من الصفر، تبدأ من لا شيء وتطلّع أول فيديو احترافي لك.</p>
+              </div>
+              <ul class="topic-list">
+                <li>أساسيات البرنامج والتعرّف عليه</li>
+                <li>اختصارات الكيبورد للتحكّم بسهولة</li>
+                <li>مزامنة المقاطع</li>
+                <li>القصقصة الاحترافية وأنواعها</li>
+                <li>التأثيرات البصرية للفيديو</li>
+                <li>الزومات الاحترافية</li>
+                <li>الموسيقى والساوند إيفكتس</li>
+                <li>تلوين الفيديو</li>
+              </ul>
+            </article>
+
+            <article class="course-card course-card--featured">
+              <div class="course-head">
+                <span class="course-tag">محترفين</span>
+                <h3>تطوير المحترفين</h3>
+                <p class="course-meta">Premiere Pro · ٣س ٣٥د · ١١ درس</p>
+                <p class="course-pitch">ترفع مستواك وتبدأ تفهم كيف المحترفين يفكرون ويشتغلون.</p>
+              </div>
+              <ul class="topic-list">
+                <li>المزامنة لأكثر من ٥ كامات</li>
+                <li>القصقصة السريعة</li>
+                <li>اختصارات الكيبورد وترتيب الواجهة للسرعة</li>
+                <li>حل مشاكل الأصوات الكثيرة والمزعجة</li>
+                <li>تفكّر مثل المحترفين وتطلع أفكار رهيبة</li>
+                <li>القرافات الاحترافية والزومات السلسة</li>
+                <li>اختيار الموسيقى وطريقة استخدامها</li>
+                <li>الألوان والإضاءة والبشرة وتصفية لون واحد</li>
+                <li>تطبيقات ضرورية لكل ممنتج</li>
+              </ul>
+            </article>
+
+            <article class="course-card">
+              <div class="course-head">
+                <span class="course-tag">3D</span>
+                <h3>الـ 3D في أفتر إفكتس</h3>
+                <p class="course-meta">After Effects · ٢س ٥د · يتوسّع قريبًا</p>
+                <p class="course-pitch">تضيف بُعدًا جديدًا واحترافية تميّز شغلك عن الكل.</p>
+              </div>
+              <ul class="topic-list">
+                <li>أساسيات الكاميرا 3D وكل إعداداتها</li>
+                <li>التعديل على المودلز وتغيير ألوانها (Blender)</li>
+                <li>توزيع الإضاءات بكل أنواعها</li>
+                <li>إضافة المؤثرات البصرية المشهورة</li>
+                <li>تجهيز مشاهد كاملة حسب فكرتك</li>
+                <li>الأنميشن بأنواعه باحتراف</li>
+                <li>تعديل الألوان في أفتر وبريمير</li>
+                <li>إنشاء مجسم 3D بالذكاء الاصطناعي</li>
+                <li>استخدام مجسمات 3D على أرض الواقع</li>
+              </ul>
+            </article>
+
+          </div>
+
+          <!-- الهدايا داخل نفس القائمة -->
+          <h3 class="reveal-subtitle">وكمان راح تحصل على <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M12 8v13"/><path d="M12 8S10.5 4 8 4a2 2 0 1 0 0 4zM12 8s1.5-4 4-4a2 2 0 1 1 0 4z"/></svg></h3>
+          <div class="bonus-grid">
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M7 7V5a1 1 0 0 1 1-1h3l2 2"/></svg></span> ملف جميع الانتقالات السلسة (جاهزة الاستخدام)</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></span> ملف اختصارات الكيبورد</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/></svg></span> بريستات أنميشن وزومات سلسة</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></svg></span> عداد نقود + أعلام + إيموجيات بأنميشن (قابلة للتعديل)</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10"/></svg></span> ساوند إيفكتات + مواقع موسيقى</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg></span> بكجات ضرورية لكل ممنتج</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 10.5 21 7v10l-6-3.5z"/></svg></span> مقطع جاهز تتدرّب عليه</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 16-5-5-9 8"/></svg></span> ملف إطار كاميرا جاهز</div>
+            <div class="bonus"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></span> خدمة ما بعد الشراء، استفسر عن أي موضوع</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="price-label">قيمة الدورات الأصلية</p>
+      <div class="offer-price">
+        <span class="price-old"><span class="countup" data-to="220" data-prefix="$">$220</span></span>
+        <span class="price-now"><span class="countup" data-to="179" data-prefix="$">$179</span></span>
+      </div>
+      <p class="offer-save">يشمل: الدورات الثلاث + ماتيريال التطبيق + الجلسة الشهرية</p>
+      <p class="offer-limited"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12M8 3c0 4 8 5 8 9s-8 5-8 9M16 3c0 4-8 5-8 9s8 5 8 9"/></svg> العرض لفترة محدودة</p>
+      <a class="btn btn-primary btn-lg" href="#" onclick="openLeadForm(); return false;">احجز مكانك الآن</a>
+      <p class="offer-quote">تخيّل نفسك بعد الدورة مميّز عن غيرك، جرأتك باتخاذ الخطوة ما راح يسوّيها الكثير <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3 6 9l6 12M15 3l3 6-6 12"/></svg></p>
+    </div>
+  </section>
+
+  <div class="section-divider-wide"></div>
+
+  <!-- الأسئلة الشائعة -->
+  <section id="faq" class="section">
+    <h2 class="section-title reveal">أسئلة شائعة</h2>
+    <!-- ٤ أسئلة ظاهرة دائمًا -->
+    <div class="faq reveal reveal-d1">
+      <details>
+        <summary>هدفي أزيد دخلي وأحترف المونتاج، هل التدريب يساعدني؟</summary>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          <p>نعم. التدريب ما يعلّمك بس شلون تضغط أزرار داخل Premiere وAfter Effects، هذا موجود باليوتيوب. داخل البرنامج تتعلّم مهارة مطلوبة بالسوق، ونوريك شلون تتعامل مع العملاء وتقفل الصفقات: شنو الأخطاء اللي تخلّي العميل يرفضك حتى لو مونتاجك جيد، وشلون تعرض قيمة شغلك بطريقة تقرّبك من قفل الصفقة.</p>
+        </div></div>
+      </details>
+      <details>
+        <summary>عندي أساسيات وأعتبر نفسي متوسط، هل البرنامج يفيدني؟</summary>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          <p>أكيد. حتى لو عندك أساسيات، مرحلة الاحتراف البصري وقسم 3D والذكاء الاصطناعي راح ينقلونك لمستوى ثاني: تتعلّم شلون تسرّع شغلك، تخلّي الفيديو يشدّ الانتباه، تطلّع جودة أعلى، وتستخدم أدوات حديثة تخلّيك تتميّز عن الممنتج العادي.</p>
+        </div></div>
+      </details>
+      <details>
+        <summary>أخاف أشترك وأوقف بالنص أو تواجهني مشكلة وما ألقى أحد يساعدني</summary>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          <p>لهذا البرنامج مو مجرد فيديوهات مسجّلة. عندك دعم عبر الرسائل، وجلسات جماعية شهرية لمدة ٣ أشهر تسأل فيها، تعرض شغلك، وتاخذ ملاحظات مباشرة. الفكرة إنك ما تبقى وحدك مثل اليوتيوب.</p>
+        </div></div>
+      </details>
+      <details>
+        <summary>أنا طالب أو موظف وما عندي وقت طويل يوميًا، أقدر أستفيد؟</summary>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          <p>نعم. ساعة إلى ساعتين يوميًا تكفي جدًا إذا التزمت وطبّقت. والمحتوى عندك مدى الحياة، يعني ترجع له وتكمّل بالسرعة اللي تناسبك.</p>
+        </div></div>
+      </details>
+    </div>
+
+    <!-- بقية الأسئلة، تنكشف بزر「عرض المزيد」 -->
+    <div class="learn-reveal" id="faqReveal">
+      <div class="learn-reveal-inner">
+        <div class="faq faq-more">
+          <details>
+            <summary>اليوتيوب مجاني، ليش أدفع؟</summary>
+            <div class="faq-answer"><div class="faq-answer-inner">
+              <p>اليوتيوب يعطيك الأداة، لكنه ما يعلّمك المهارة كاملة. مثال: لو عطينا نفس أدوات الطبخ لشخص عادي، ونفسها لشيف خبرته أكثر من ٥ سنوات، منو راح يطلّع أفضل طبخة؟ المشكلة مو بالأدوات، المشكلة بالخبرة والترتيب والتطبيق والتصحيح. هنا ما تتعلّم Premiere وAfter Effects فقط، تتعلّم مهارة مونتاج كاملة تمشي عليها خطوة بخطوة.</p>
+            </div></div>
+          </details>
+          <details>
+            <summary>هل أحتاج كمبيوتر بمواصفات خارقة؟</summary>
+            <div class="faq-answer"><div class="faq-answer-inner">
+              <p>للمونتاج الأساسي مواصفات متوسطة تكفي للبدء. أما قسم الـ 3D فيُفضّل جهاز متوسط إلى قوي، خصوصًا مع After Effects نسخة ٢٤ أو أحدث. ابدأ باللي عندك وطوّر أدواتك تدريجيًا.</p>
+            </div></div>
+          </details>
+          <details>
+            <summary>كيف طريقة الدفع إذا ما عندي بطاقة بنكية دولية؟</summary>
+            <div class="faq-answer"><div class="faq-answer-inner">
+              <p>وفّرنا طرق دفع تناسب الجميع. إذا واجهت أي مشكلة بالدفع من خلال الموقع، أو ما عندك بطاقة، تواصل معنا على الواتساب وراح نرتّب لك أسهل طريقة دفع تناسب بلدك حتى تبدأ مباشرة.</p>
+            </div></div>
+          </details>
+          <details>
+            <summary>هل أكو شهادة موثّقة بعد إتمام الدورة؟</summary>
+            <div class="faq-answer"><div class="faq-answer-inner">
+              <p>تستلم شهادة إتمام من ثَمين بعد إنهاء الدورة.</p>
+            </div></div>
+          </details>
+          <details>
+            <summary>هل أحتاج إلى بلوقنات خارجية؟</summary>
+            <div class="faq-answer"><div class="faq-answer-inner">
+              <p>لا، ما تحتاج أي إضافات خارجية (PLUG-IN). بس انتبه يكون عندك أفتر إفكتس نسخة ٢٤ أو أحدث لقسم الـ 3D.</p>
+            </div></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-toggle-wrap">
+      <button type="button" class="learn-toggle js-toggle" aria-expanded="false" aria-controls="faqReveal" data-open-text="عرض أقل ▴" data-close-text="عرض المزيد من الأسئلة">
+        <span class="js-toggle-label">عرض المزيد من الأسئلة</span>
+        <span class="learn-toggle-arrow" aria-hidden="true">▾</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- دعوة لاتخاذ إجراء -->
+  <section class="cta">
+    <h2 class="cta-title">الآن معاك خيارين</h2>
+    <p class="cta-lead">القرار اليوم هو اللي يحدّد وين راح تكون بعد ٩٠ يوم.</p>
+
+    <div class="choices">
+      <div class="choice choice--bad">
+        <span class="choice-tag">بدوننا</span>
+        <h3>تضيّع الوقت</h3>
+        <ul>
+          <li>تضيع ٩٠ يوم بين شروحات يوتيوب متفرقة</li>
+          <li>تتعلّم أدوات بس ما تعرف تطلّع فيديو كامل</li>
+          <li>تطبّق وحدك بدون أي تصحيح</li>
+          <li>تخاف الذكاء الاصطناعي يستبدلك</li>
+          <li>تبقى بنفس المستوى وتحبط</li>
+        </ul>
+      </div>
+
+      <div class="choice-vs" aria-hidden="true">أو</div>
+
+      <div class="choice choice--good">
+        <span class="choice-tag">معنا</span>
+        <h3>تبدأ اليوم</h3>
+        <ul>
+          <li>مسار واضح خطوة بخطوة لمدة ٩٠ يوم</li>
+          <li>تبني فيديو احترافي من الصفر للنهاية</li>
+          <li>تصحيح وملاحظات مباشرة بالجلسات</li>
+          <li>تستخدم الـ AI لصالحك بدل ما تخاف منه</li>
+          <li>تطلّع شغل أقوى ومهارة تبني عليها</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="cta-sub2">
+      إذا أنت جاد وتريد ترفع مستواك، تطلّع شغل أقوى، وتستخدم الذكاء الاصطناعي لصالحك
+      بدل ما تخاف منه…
+    </p>
+    <a class="btn btn-primary btn-lg" href="#" onclick="openLeadForm(); return false;">
+      ابدأ الآن
+    </a>
+    <p class="cta-note">راح تحصل على وصولك مباشرة، وتبدأ اليوم.</p>
+  </section>
+
+  <footer class="footer">
+    <span class="brand-diamond" aria-hidden="true">◆</span>
+    <p>ثَمين · thameen.shop</p>
+    <p class="footer-muted">© جميع الحقوق محفوظة</p>
+  </footer>
+
+  <!-- بوكس إضافة تعليق -->
+  <div id="reviewModal" class="rmodal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="rmodal-card">
+      <button class="rmodal-close" id="reviewClose" type="button" aria-label="إغلاق">✕</button>
+      <h3 class="rmodal-title">أضف تعليقك</h3>
+      <p class="rmodal-sub">بدون حساب، بس اكتب اسمك ورأيك</p>
+      <form id="reviewForm" class="rform" novalidate>
+        <input type="text" id="rName" class="rfield" maxlength="40" placeholder="اسمك" autocomplete="name" required />
+        <textarea id="rComment" class="rfield" maxlength="300" rows="4" placeholder="اكتب تجربتك مع الدورة…" required></textarea>
+        <div class="rstars" id="rStars" role="radiogroup" aria-label="التقييم">
+          <button type="button" data-v="1" aria-label="نجمة">★</button>
+          <button type="button" data-v="2" aria-label="نجمتان">★</button>
+          <button type="button" data-v="3" aria-label="٣ نجوم">★</button>
+          <button type="button" data-v="4" aria-label="٤ نجوم">★</button>
+          <button type="button" data-v="5" aria-label="٥ نجوم">★</button>
+        </div>
+        <input type="text" id="rHoney" class="rhoney" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="btn btn-primary" id="rSubmit">نشر التعليق</button>
+        <p class="rform-msg" id="rMsg" role="status"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- فورم التسجيل -->
+  <div id="leadModal" class="rmodal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="rmodal-card lead-card">
+      <button class="rmodal-close" id="leadClose" type="button" aria-label="إغلاق">✕</button>
+      <h3 class="rmodal-title">سجّل اهتمامك بالدورة</h3>
+      <p class="rmodal-sub">عبّي البيانات وراح نتواصل معك خلال ٢٤ ساعة</p>
+      <form id="leadForm" class="rform" novalidate>
+        <input type="text" id="leadName" class="rfield" maxlength="60" placeholder="الاسم الكامل" autocomplete="name" required />
+        <input type="email" id="leadEmail" class="rfield" maxlength="100" placeholder="الإيميل الشخصي" autocomplete="email" required />
+        <input type="tel" id="leadPhone" class="rfield" maxlength="20" placeholder="رقم الهاتف مع كود الدولة (مثال: +964...)" autocomplete="tel" required />
+        <select id="leadCountry" class="rfield" required>
+          <option value="">اختر بلدك</option>
+          <option value="SA">السعودية</option>
+          <option value="AE">الإمارات</option>
+          <option value="KW">الكويت</option>
+          <option value="QA">قطر</option>
+          <option value="BH">البحرين</option>
+          <option value="OM">عُمان</option>
+          <option value="EG">مصر</option>
+          <option value="JO">الأردن</option>
+          <option value="IQ">العراق</option>
+          <option value="SY">سوريا</option>
+          <option value="LB">لبنان</option>
+          <option value="PS">فلسطين</option>
+          <option value="YE">اليمن</option>
+          <option value="SD">السودان</option>
+          <option value="LY">ليبيا</option>
+          <option value="TN">تونس</option>
+          <option value="DZ">الجزائر</option>
+          <option value="MA">المغرب</option>
+          <option value="MR">موريتانيا</option>
+          <option value="OTHER">دولة أخرى</option>
+        </select>
+        <textarea id="leadNotes" class="rfield" maxlength="300" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+        <label class="lead-check">
+          <input type="checkbox" id="leadConfirm" required />
+          <span>أؤكد قدرتي على دفع <b>١٧٩$</b> للاشتراك في الدورة</span>
+        </label>
+        <input type="text" id="leadHoney" class="rhoney" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="btn btn-primary" id="leadSubmit">أرسل طلبي</button>
+        <p class="rform-msg" id="leadMsg" role="status"></p>
+        <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أواجه مشكلة في تعبئة نموذج التسجيل" target="_blank" rel="noopener">
+          تواجه مشكلة؟ تواصل معنا على واتساب
+        </a>
+      </form>
+      <div id="leadSuccess" class="lead-success" hidden>
+        <div class="success-icon">✓</div>
+        <h3>تم استلام طلبك!</h3>
+        <p>راح نتواصل معك خلال ٢٤ ساعة على الواتساب أو الإيميل.</p>
+        <button class="btn btn-primary" id="leadAgain">تعبئة طلب جديد</button>
+        <a class="lead-support" href="https://wa.me/9647518838203" target="_blank" rel="noopener">
+          أو تواصل معنا مباشرة على واتساب
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+    <button class="lightbox-close" aria-label="إغلاق">✕</button>
+    <button class="lightbox-nav lightbox-prev" aria-label="السابق">‹</button>
+    <img class="lightbox-img" src="" alt="" />
+    <button class="lightbox-nav lightbox-next" aria-label="التالي">›</button>
+  </div>
+
+  <script src="gallery.js?v=2"></script>
+  <script src="reviews.js?v=10"></script>
+  <script src="main.js?v=36"></script>
+
+  <style>
+    .lead-card{max-width:420px}
+    .lead-check{display:flex;align-items:flex-start;gap:10px;margin:14px 0;font-size:14px;color:var(--text-muted);cursor:pointer;text-align:right}
+    .lead-check input{margin-top:4px;width:18px;height:18px;accent-color:#5BB8E8;flex:none}
+    .lead-check b{color:#5BB8E8;font-weight:700}
+    #leadForm select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999'%3E%3Cpath d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center;padding-left:36px}
+    .lead-support{display:block;text-align:center;margin-top:14px;font-size:13px;color:#25d366;text-decoration:none}
+    .lead-support:hover{text-decoration:underline}
+    .lead-success{text-align:center;padding:30px 20px}
+    .lead-success .success-icon{width:70px;height:70px;margin:0 auto 16px;background:linear-gradient(135deg,#5fe08a,#2ecc71);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff}
+    .lead-success h3{color:#fff;font-size:20px;margin:0 0 10px}
+    .lead-success p{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.7}
+    .lead-success .btn{margin-bottom:10px}
+  </style>
+
+  <script>
+    const SUPABASE_URL = "https://hwzpjxxfdqsjymxbjokv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mcKOUcVtNy5BkLEd5UcRDA_foJbp3YK";
+
+    const leadModal = document.getElementById("leadModal");
+    const leadForm = document.getElementById("leadForm");
+    const leadClose = document.getElementById("leadClose");
+    const leadMsg = document.getElementById("leadMsg");
+
+    function openLeadForm() {
+      leadModal.removeAttribute("aria-hidden");
+      leadModal.style.display = "flex";
+      document.getElementById("leadName").focus();
+    }
+
+    function closeLeadForm() {
+      leadModal.setAttribute("aria-hidden", "true");
+      leadModal.style.display = "none";
+    }
+
+    leadClose.addEventListener("click", closeLeadForm);
+    leadModal.addEventListener("click", (e) => { if (e.target === leadModal) closeLeadForm(); });
+
+    document.getElementById("leadAgain").addEventListener("click", () => {
+      document.getElementById("leadSuccess").hidden = true;
+      leadForm.style.display = "block";
+      leadMsg.textContent = "";
+    });
+
+    leadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Honeypot check
+      if (document.getElementById("leadHoney").value) return;
+
+      const name = document.getElementById("leadName").value.trim();
+      const email = document.getElementById("leadEmail").value.trim();
+      const phone = document.getElementById("leadPhone").value.trim();
+      const country = document.getElementById("leadCountry").value;
+      const notes = document.getElementById("leadNotes").value.trim();
+      const confirmed = document.getElementById("leadConfirm").checked;
+
+      if (!name || !email || !phone || !country) {
+        leadMsg.textContent = "عبّي كل الحقول المطلوبة";
+        leadMsg.style.color = "#ff6b6b";
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        leadMsg.textContent = "الإيميل غير صحيح";
+        leadMsg.style.color = "#ff6b6b";
+        return;
+      }
+
+      // Phone validation - must start with +
+      if (!phone.startsWith("+") || phone.length < 8) {
+        leadMsg.textContent = "رقم الهاتف لازم يبدأ بـ + وكود الدولة (مثال: +964)";
+        leadMsg.style.color = "#ff6b6b";
+        return;
+      }
+
+      if (!confirmed) {
+        leadMsg.textContent = "لازم تأكد قدرتك على الدفع ✓";
+        leadMsg.style.color = "#ff6b6b";
+        return;
+      }
+
+      const btn = document.getElementById("leadSubmit");
+      btn.disabled = true;
+      btn.textContent = "جارٍ الإرسال…";
+
+      try {
+        const res = await fetch(SUPABASE_URL + "/rest/v1/leads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({ name, email, phone, country, notes, confirmed_payment: confirmed })
+        });
+
+        if (!res.ok) {
+          const errData = await res.text();
+          console.error("API Error:", res.status, errData);
+          throw new Error(errData || "فشل الإرسال");
+        }
+
+        leadForm.reset();
+        leadForm.style.display = "none";
+        document.getElementById("leadSuccess").hidden = false;
+      } catch (err) {
+        console.error("Error:", err);
+        leadMsg.textContent = "خطأ: " + (err.message || "حاول مرة ثانية");
+        leadMsg.style.color = "#ff6b6b";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "أرسل طلبي";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -119,6 +119,7 @@ document.querySelectorAll(".tab").forEach((t) => {
     t.classList.add("on");
     const p = $("tab-" + t.dataset.tab); p.classList.add("on"); p.hidden = false;
     if (t.dataset.tab === "calls") loadCallsTab();
+    if (t.dataset.tab === "leads") loadLeads();
   });
 });
 
@@ -223,6 +224,57 @@ async function scheduleStage(btn) {
 }
 document.addEventListener("change", (e) => { if (e.target && e.target.id === "callsJoinFilter") renderCallsTab(); });
 
+// ====== طلبات التسجيل (Leads) ======
+async function loadLeads() {
+  const list = $("leadsList"); if (!list) return;
+  list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  try {
+    const leads = await dbGet("leads?select=*&order=created_at.desc&limit=200");
+    $("leadsCount").textContent = (leads?.length || 0) + " طلب";
+    if (!leads || !leads.length) { list.innerHTML = '<p class="empty">لا توجد طلبات بعد.</p>'; return; }
+    const countries = {SA:"السعودية",AE:"الإمارات",KW:"الكويت",QA:"قطر",BH:"البحرين",OM:"عُمان",EG:"مصر",JO:"الأردن",IQ:"العراق",SY:"سوريا",LB:"لبنان",PS:"فلسطين",YE:"اليمن",SD:"السودان",LY:"ليبيا",TN:"تونس",DZ:"الجزائر",MA:"المغرب",MR:"موريتانيا",OTHER:"أخرى"};
+    list.innerHTML = leads.map((l) => {
+      const date = new Date(l.created_at);
+      const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      const countryName = countries[l.country] || l.country;
+      const statusClass = l.status === "contacted" ? "contacted" : (l.status === "converted" ? "converted" : "new");
+      const statusText = l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد");
+      return `<div class="lead-card" data-id="${l.id}">
+        <div class="lead-header">
+          <b class="lead-name">${esc(l.name)}</b>
+          <span class="lead-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="lead-info">
+          <span class="lead-item">📧 <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></span>
+          <span class="lead-item">📱 <a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank">${esc(l.phone)}</a></span>
+          <span class="lead-item">🌍 ${esc(countryName)}</span>
+          <span class="lead-item">💵 ${l.confirmed_payment ? "مؤكد الدفع ✓" : "غير مؤكد"}</span>
+        </div>
+        ${l.notes ? `<div class="lead-notes">${esc(l.notes)}</div>` : ""}
+        <div class="lead-footer">
+          <span class="lead-date">${dateStr}</span>
+          <div class="lead-actions">
+            <button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>
+            <button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+    list.querySelectorAll(".lead-status-btn").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
+  } catch (e) { list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
+}
+
+async function updateLeadStatus(id, status) {
+  try {
+    await fetchT(`${SUPABASE_URL}/rest/v1/leads?id=eq.${id}`, {
+      method: "PATCH",
+      headers: authHeaders({"Content-Type": "application/json", "Prefer": "return=minimal"}),
+      body: JSON.stringify({ status })
+    });
+    loadLeads();
+  } catch (e) { alert("خطأ: " + e.message); }
+}
+
 // ====== المشتركون ======
 async function loadSubscribers() {
   const list = $("subsList"); if (!list) return;
@@ -251,6 +303,7 @@ async function loadSubscribers() {
           <div class="sub-name">${esc(p.name || "—")}</div>
           <span class="sub-status ${statusClass}">${statusText}</span>
         </div>
+        ${p.email ? `<div class="sub-email">${esc(p.email)}</div>` : ""}
         <div class="sub-date">اشترك ${fmtJoin(p.joined)}</div>
         <div class="sub-progress-section">
           <div class="sub-progress-header">
