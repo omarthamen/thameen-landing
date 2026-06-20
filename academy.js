@@ -1702,9 +1702,15 @@ async function addQuestion() {
   let messages = [];
 
   toggle.addEventListener('click', () => {
-    const isOpen = widget.classList.toggle('open');
-    box.hidden = !isOpen;
-    if (isOpen) input.focus();
+    const isOpen = widget.classList.contains('open');
+    if (isOpen) {
+      widget.classList.remove('open');
+      box.addEventListener('animationend', () => { box.hidden = true; }, { once: true });
+    } else {
+      box.hidden = false;
+      widget.classList.add('open');
+      input.focus();
+    }
   });
 
   form.addEventListener('submit', async (e) => {
