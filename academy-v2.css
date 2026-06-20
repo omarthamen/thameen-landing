@@ -844,6 +844,7 @@
 /* تبويبات الدخول/التسجيل */
 .login-wrap{padding:60px 20px}
 .login-container{max-width:460px;margin:0 auto}
+.custom-cursor.hidden,.cursor-dot.hidden{opacity:0!important}
 .login-tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,.05);padding:4px;border-radius:14px}
 .login-card.lead-card{max-width:100%}
 .lead-support{color:#25d366!important;text-decoration:none;font-size:13px;display:block;text-align:center;margin-top:16px}

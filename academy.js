@@ -1826,8 +1826,18 @@ async function addQuestion() {
 
   const hoverElements = document.querySelectorAll('a, button, .btn, .login-tab, .nav-tab, input, textarea, select');
   hoverElements.forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    el.addEventListener('mouseenter', () => {
+      if (el.disabled) {
+        cursor.classList.add('hidden');
+        dot.classList.add('hidden');
+      } else {
+        cursor.classList.add('hover');
+      }
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.classList.remove('hover', 'hidden');
+      dot.classList.remove('hidden');
+    });
   });
 
   document.addEventListener('mousedown', () => cursor.classList.add('click'));
