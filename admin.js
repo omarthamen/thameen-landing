@@ -239,7 +239,7 @@ async function scheduleStage(btn) {
 document.addEventListener("change", (e) => { if (e.target && e.target.id === "callsJoinFilter") renderCallsTab(); });
 
 // ====== طلبات التسجيل (Leads) ======
-let lastLeadsCount = 0;
+let lastLeadsCount = -1; // -1 = أول تحميل، لا يُطلق إشعار
 let leadsInterval = null;
 let selectedLeads = new Set();
 const LEADS_SOUND = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYZNIBLmAAAAAAD/+9DEAAAIAANIAAAAEikAbSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//vQxFMAAADSAAAAAAAAANIAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=");
@@ -346,10 +346,13 @@ async function loadLeads(silent = false) {
 
     // إشعار صوتي + نظام للطلبات الجديدة
     const newCount = leads.filter(l => l.status === "new" || !l.status).length;
-    if (silent && newCount > lastLeadsCount) {
+    console.log("Leads check:", { silent, newCount, lastLeadsCount, shouldNotify: newCount > lastLeadsCount });
+
+    if (newCount > lastLeadsCount && lastLeadsCount !== -1) {
       const diff = newCount - lastLeadsCount;
+      console.log("🔔 New lead detected! Diff:", diff);
       // صوت
-      try { LEADS_SOUND.play(); } catch (_) {}
+      try { LEADS_SOUND.play(); } catch (e) { console.log("Sound error:", e); }
       // إشعار نظام
       if (Notification.permission === "granted") {
         new Notification("طلب جديد! 🔔", { body: `وصل ${diff} طلب جديد`, icon: "favicon-192.png" });
@@ -389,7 +392,8 @@ async function loadLeads(silent = false) {
 // تحديث تلقائي كل ٣٠ ثانية
 function startLeadsAutoRefresh() {
   if (leadsInterval) clearInterval(leadsInterval);
-  leadsInterval = setInterval(() => loadLeads(true), 10000); // كل 10 ثواني
+  leadsInterval = setInterval(() => loadLeads(true), 5000); // كل 5 ثواني
+  console.log("Auto-refresh started (every 5s)");
 }
 function stopLeadsAutoRefresh() {
   if (leadsInterval) { clearInterval(leadsInterval); leadsInterval = null; }
