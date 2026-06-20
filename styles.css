@@ -587,6 +587,9 @@ body {
 .slider-item img {
   width: 100%;
   display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 .slider-item.pos-left {
   transform: translateX(-115%) scale(0.8);

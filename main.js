@@ -670,9 +670,15 @@
   });
 
   container.addEventListener('mousedown', (e) => {
+    e.preventDefault();
     startX = e.clientX;
     isDragging = true;
     container.style.cursor = 'grabbing';
+  });
+
+  container.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
   });
 
   document.addEventListener('mouseup', (e) => {
@@ -681,6 +687,12 @@
     if (Math.abs(diff) > 40) slide(diff > 0 ? 1 : -1);
     isDragging = false;
     container.style.cursor = 'grab';
+  });
+
+  // منع سحب الصور
+  container.querySelectorAll('img').forEach(img => {
+    img.draggable = false;
+    img.style.pointerEvents = 'none';
   });
 
   container.style.cursor = 'grab';
