@@ -344,12 +344,21 @@ async function loadLeads(silent = false) {
     const total = leads?.length || 0;
     $("leadsCount").textContent = total + " طلب";
 
-    // إشعار صوتي للطلبات الجديدة
+    // إشعار صوتي + نظام للطلبات الجديدة
     const newCount = leads.filter(l => l.status === "new" || !l.status).length;
     if (silent && newCount > lastLeadsCount) {
+      const diff = newCount - lastLeadsCount;
+      // صوت
       try { LEADS_SOUND.play(); } catch (_) {}
+      // إشعار نظام
+      if (Notification.permission === "granted") {
+        new Notification("طلب جديد! 🔔", { body: `وصل ${diff} طلب جديد`, icon: "favicon-192.png" });
+      }
+      // تحديث العنوان
+      document.title = `(${newCount}) طلبات جديدة — ثَمين`;
     }
     lastLeadsCount = newCount;
+    if (newCount === 0) document.title = "لوحة تحكّم ثَمين";
 
     if (!leads || !leads.length) { list.innerHTML = '<p class="empty">لا توجد طلبات بعد.</p>'; return; }
 
@@ -380,10 +389,33 @@ async function loadLeads(silent = false) {
 // تحديث تلقائي كل ٣٠ ثانية
 function startLeadsAutoRefresh() {
   if (leadsInterval) clearInterval(leadsInterval);
-  leadsInterval = setInterval(() => loadLeads(true), 30000);
+  leadsInterval = setInterval(() => loadLeads(true), 10000); // كل 10 ثواني
 }
 function stopLeadsAutoRefresh() {
   if (leadsInterval) { clearInterval(leadsInterval); leadsInterval = null; }
+}
+
+async function enableNotifications() {
+  // تشغيل الصوت (يفعّل الصوت للمرات القادمة)
+  try {
+    LEADS_SOUND.volume = 0.1;
+    await LEADS_SOUND.play();
+    LEADS_SOUND.volume = 1;
+  } catch (_) {}
+
+  // طلب إذن الإشعارات
+  if ("Notification" in window && Notification.permission === "default") {
+    const perm = await Notification.requestPermission();
+    if (perm === "granted") {
+      new Notification("تم تفعيل الإشعارات ✅", { body: "راح يوصلك إشعار لكل طلب جديد", icon: "favicon-192.png" });
+    }
+  }
+
+  const btn = $("enableNotifBtn");
+  if (btn) {
+    btn.textContent = "✅ الإشعارات مفعّلة";
+    btn.disabled = true;
+  }
 }
 
 async function updateLeadStatus(id, status) {
