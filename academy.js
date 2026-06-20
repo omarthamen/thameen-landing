@@ -1822,7 +1822,7 @@ async function addQuestion() {
   });
 
   // نموذج التسجيل
-  const form = document.getElementById("registerCard");
+  const form = document.getElementById("regForm");
   const msg = document.getElementById("regMsg");
   const success = document.getElementById("regSuccess");
 
@@ -1837,21 +1837,31 @@ async function addQuestion() {
     const notes = document.getElementById("regNotes").value.trim();
     const confirmed = document.getElementById("regConfirm").checked;
 
+    msg.textContent = "";
+    msg.className = "rform-msg";
+
     if (!name || !email || !phone || !country) {
       msg.textContent = "عبّي كل الحقول المطلوبة";
-      msg.style.color = "#ff6b6b";
+      msg.className = "rform-msg err";
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      msg.textContent = "الإيميل غير صحيح";
+      msg.className = "rform-msg err";
       return;
     }
 
     if (!phone.startsWith("+") || phone.length < 8) {
       msg.textContent = "رقم الهاتف لازم يبدأ بـ + وكود الدولة";
-      msg.style.color = "#ff6b6b";
+      msg.className = "rform-msg err";
       return;
     }
 
     if (!confirmed) {
       msg.textContent = "لازم تأكد قدرتك على الدفع";
-      msg.style.color = "#ff6b6b";
+      msg.className = "rform-msg err";
       return;
     }
 
@@ -1874,13 +1884,13 @@ async function addQuestion() {
       if (!res.ok) throw new Error("فشل الإرسال");
 
       // إخفاء الفورم وإظهار رسالة النجاح
-      document.querySelectorAll("#registerCard > *:not(#regSuccess)").forEach(el => el.style.display = "none");
+      form.style.display = "none";
       success.hidden = false;
     } catch (err) {
       msg.textContent = "حدث خطأ، حاول مرة ثانية";
-      msg.style.color = "#ff6b6b";
+      msg.className = "rform-msg err";
       btn.disabled = false;
-      btn.textContent = "إرسال الطلب";
+      btn.textContent = "أرسل طلبي";
     }
   });
 })();

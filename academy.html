@@ -19,8 +19,9 @@
   <link rel="preconnect" href="https://iframe.mediadelivery.net" />
   <link rel="dns-prefetch" href="https://cdn.embed.ly" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=30" />
   <link rel="stylesheet" href="admin.css?v=15" />
-  <link rel="stylesheet" href="academy-v2.css?v=8" />
+  <link rel="stylesheet" href="academy-v2.css?v=9" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -46,48 +47,54 @@
       </form>
 
       <!-- كارد التسجيل -->
-      <form id="registerCard" class="login-card" hidden>
+      <div id="registerCard" class="login-card lead-card" hidden>
         <span class="brand-diamond">◆</span>
-        <h1>سجّل اهتمامك</h1>
-        <p class="login-sub">عبّي بياناتك وراح نتواصل معك</p>
-        <input type="text" id="regName" class="fld" placeholder="الاسم الكامل" required>
-        <input type="email" id="regEmail" class="fld" placeholder="الإيميل" required>
-        <input type="tel" id="regPhone" class="fld" placeholder="رقم الهاتف مع + وكود الدولة" required>
-        <select id="regCountry" class="fld" required>
-          <option value="">اختر دولتك</option>
-          <option value="SA">السعودية</option>
-          <option value="AE">الإمارات</option>
-          <option value="KW">الكويت</option>
-          <option value="QA">قطر</option>
-          <option value="BH">البحرين</option>
-          <option value="OM">عُمان</option>
-          <option value="EG">مصر</option>
-          <option value="JO">الأردن</option>
-          <option value="IQ">العراق</option>
-          <option value="SY">سوريا</option>
-          <option value="LB">لبنان</option>
-          <option value="PS">فلسطين</option>
-          <option value="YE">اليمن</option>
-          <option value="SD">السودان</option>
-          <option value="LY">ليبيا</option>
-          <option value="TN">تونس</option>
-          <option value="DZ">الجزائر</option>
-          <option value="MA">المغرب</option>
-          <option value="OTHER">أخرى</option>
-        </select>
-        <textarea id="regNotes" class="fld" rows="2" placeholder="ملاحظات (اختياري)"></textarea>
-        <label class="reg-check">
-          <input type="checkbox" id="regConfirm" required>
-          <span>أقدر أدفع <b>179$</b> للاشتراك</span>
-        </label>
-        <button type="submit" class="btn btn-cta-green" id="regSubmit">إرسال الطلب</button>
-        <p class="msg" id="regMsg"></p>
-        <div id="regSuccess" class="reg-success" hidden>
+        <h1>سجّل اهتمامك بالدورة</h1>
+        <p class="login-sub">عبّي البيانات وراح نتواصل معك قريبًا</p>
+        <form id="regForm" class="rform" novalidate>
+          <input type="text" id="regName" class="rfield" maxlength="60" placeholder="الاسم الكامل" autocomplete="name" required />
+          <input type="email" id="regEmail" class="rfield" maxlength="100" placeholder="الإيميل الشخصي" autocomplete="email" required />
+          <input type="tel" id="regPhone" class="rfield" maxlength="20" placeholder="رقم الهاتف مع كود الدولة (مثال: +964...)" autocomplete="tel" required />
+          <select id="regCountry" class="rfield" required>
+            <option value="">اختر بلدك</option>
+            <option value="SA">السعودية</option>
+            <option value="AE">الإمارات</option>
+            <option value="KW">الكويت</option>
+            <option value="QA">قطر</option>
+            <option value="BH">البحرين</option>
+            <option value="OM">عُمان</option>
+            <option value="EG">مصر</option>
+            <option value="JO">الأردن</option>
+            <option value="IQ">العراق</option>
+            <option value="SY">سوريا</option>
+            <option value="LB">لبنان</option>
+            <option value="PS">فلسطين</option>
+            <option value="YE">اليمن</option>
+            <option value="SD">السودان</option>
+            <option value="LY">ليبيا</option>
+            <option value="TN">تونس</option>
+            <option value="DZ">الجزائر</option>
+            <option value="MA">المغرب</option>
+            <option value="MR">موريتانيا</option>
+            <option value="OTHER">دولة أخرى</option>
+          </select>
+          <textarea id="regNotes" class="rfield" maxlength="300" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+          <label class="lead-check">
+            <input type="checkbox" id="regConfirm" required />
+            <span>أؤكد قدرتي على دفع <b>١٧٩$</b> للاشتراك في الدورة</span>
+          </label>
+          <button type="submit" class="btn btn-primary" id="regSubmit">أرسل طلبي</button>
+          <p class="rform-msg" id="regMsg" role="status"></p>
+          <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أواجه مشكلة في تعبئة نموذج التسجيل" target="_blank" rel="noopener">
+            تواجه مشكلة؟ تواصل معنا على واتساب
+          </a>
+        </form>
+        <div id="regSuccess" class="lead-success" hidden>
           <div class="success-icon">✓</div>
           <h3>تم استلام طلبك!</h3>
-          <p>راح نتواصل معك قريبًا</p>
+          <p>راح نتواصل معك قريبًا على الواتساب أو الإيميل.</p>
         </div>
-      </form>
+      </div>
     </div>
   </section>
 
@@ -433,6 +440,6 @@
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
   <script defer src="https://meet.jit.si/external_api.js"></script>
-  <script defer src="academy.js?v=69"></script>
+  <script defer src="academy.js?v=70"></script>
 </body>
 </html>
