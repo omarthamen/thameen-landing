@@ -840,9 +840,11 @@
 }
 
 /* إلغاء الماوس المخفي من styles.css */
-* { cursor: auto !important; }
-a, button, [role="button"], input[type="submit"], select, .btn { cursor: pointer !important; }
-input, textarea { cursor: text !important; }
+@media (pointer: fine) {
+  * { cursor: auto !important; }
+  a, button, [role="button"], input[type="submit"], select, .btn, .login-tab { cursor: pointer !important; }
+  input, textarea { cursor: text !important; }
+}
 
 /* تبويبات الدخول/التسجيل */
 .login-container{width:100%;max-width:420px}
