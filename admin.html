@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=23" />
+  <link rel="stylesheet" href="admin.css?v=24" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -227,6 +227,18 @@
       <section class="panel" id="tab-leads" hidden>
         <div class="panel-head"><h2><span class="ph-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> طلبات التسجيل</h2><span class="hint" id="leadsCount">…</span></div>
         <p class="hint">طلبات من صفحة الهبوط — الأحدث أولاً.</p>
+        <!-- شريط التحديد -->
+        <div class="bulk-bar" id="leadsBulkBar">
+          <span class="bulk-info"><b id="selectedCount">0</b> محدد</span>
+          <div class="bulk-actions">
+            <button class="bulk-btn" onclick="selectAllLeads()">تحديد الكل</button>
+            <button class="bulk-btn" onclick="clearSelection()">إلغاء التحديد</button>
+            <span class="bulk-sep"></span>
+            <button class="bulk-btn call" onclick="bulkAction('contacted')">📞 تم التواصل</button>
+            <button class="bulk-btn convert" onclick="bulkAction('converted')">✅ تحويل لمشتركين</button>
+            <button class="bulk-btn delete" onclick="bulkAction('delete')">🗑️ حذف</button>
+          </div>
+        </div>
         <div id="leadsList" class="leads-list"></div>
       </section>
     </main>
@@ -243,6 +255,6 @@
     </div>
   </div>
 
-  <script src="admin.js?v=40"></script>
+  <script src="admin.js?v=41"></script>
 </body>
 </html>

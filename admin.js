@@ -241,9 +241,65 @@ document.addEventListener("change", (e) => { if (e.target && e.target.id === "ca
 // ====== طلبات التسجيل (Leads) ======
 let lastLeadsCount = 0;
 let leadsInterval = null;
+let selectedLeads = new Set();
 const LEADS_SOUND = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYZNIBLmAAAAAAD/+9DEAAAIAANIAAAAEikAbSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//vQxFMAAADSAAAAAAAAANIAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=");
 
 const COUNTRIES = {SA:"السعودية",AE:"الإمارات",KW:"الكويت",QA:"قطر",BH:"البحرين",OM:"عُمان",EG:"مصر",JO:"الأردن",IQ:"العراق",SY:"سوريا",LB:"لبنان",PS:"فلسطين",YE:"اليمن",SD:"السودان",LY:"ليبيا",TN:"تونس",DZ:"الجزائر",MA:"المغرب",MR:"موريتانيا",OTHER:"أخرى"};
+
+function updateBulkBar() {
+  const bar = $("leadsBulkBar");
+  if (!bar) return;
+  if (selectedLeads.size > 0) {
+    bar.classList.add("show");
+    $("selectedCount").textContent = selectedLeads.size;
+  } else {
+    bar.classList.remove("show");
+  }
+}
+
+function toggleLeadSelect(id, checked) {
+  if (checked) selectedLeads.add(id);
+  else selectedLeads.delete(id);
+  updateBulkBar();
+}
+
+function selectAllLeads() {
+  document.querySelectorAll(".lead-checkbox").forEach(cb => {
+    cb.checked = true;
+    selectedLeads.add(cb.dataset.id);
+  });
+  updateBulkBar();
+}
+
+function clearSelection() {
+  selectedLeads.clear();
+  document.querySelectorAll(".lead-checkbox").forEach(cb => cb.checked = false);
+  updateBulkBar();
+}
+
+async function bulkAction(action) {
+  if (selectedLeads.size === 0) return;
+  const ids = Array.from(selectedLeads);
+
+  if (action === "delete") {
+    if (!confirm(`متأكد تريد حذف ${ids.length} طلب؟`)) return;
+    for (const id of ids) {
+      await fetchT(`${SUPABASE_URL}/rest/v1/leads?id=eq.${id}`, {
+        method: "DELETE", headers: authHeaders({"Prefer": "return=minimal"})
+      });
+    }
+  } else {
+    for (const id of ids) {
+      await fetchT(`${SUPABASE_URL}/rest/v1/leads?id=eq.${id}`, {
+        method: "PATCH",
+        headers: authHeaders({"Content-Type": "application/json", "Prefer": "return=minimal"}),
+        body: JSON.stringify({ status: action })
+      });
+    }
+  }
+  clearSelection();
+  loadLeads();
+}
 
 function renderLeadCard(l) {
   const date = new Date(l.created_at);
@@ -255,6 +311,7 @@ function renderLeadCard(l) {
   const updatedStr = l.updated_at ? new Date(l.updated_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
   return `<div class="lead-card ${statusClass}" data-id="${l.id}">
     <div class="lead-header">
+      <input type="checkbox" class="lead-checkbox" data-id="${l.id}" onchange="toggleLeadSelect('${l.id}', this.checked)">
       <b class="lead-name">${esc(l.name)}</b>
       ${hasEdits ? `<span class="lead-edit-badge">✏️ ${editCount}</span>` : ''}
       <span class="lead-status ${statusClass}">${l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد")}</span>
