@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=19" />
+  <link rel="stylesheet" href="admin.css?v=20" />
 </head>
 <body>
   <div class="bg-glow" aria-hidden="true"></div>
@@ -232,6 +232,17 @@
     </main>
   </section>
 
-  <script src="admin.js?v=36"></script>
+  <!-- Modal سجل التعديلات -->
+  <div class="modal-overlay" id="leadHistoryModal" hidden onclick="if(event.target===this)closeLeadHistoryModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>سجل التعديلات</h3>
+        <button class="modal-close" onclick="closeLeadHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="leadHistoryContent"></div>
+    </div>
+  </div>
+
+  <script src="admin.js?v=37"></script>
 </body>
 </html>

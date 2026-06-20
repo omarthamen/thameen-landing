@@ -250,9 +250,13 @@ function renderLeadCard(l) {
   const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
   const countryName = COUNTRIES[l.country] || l.country;
   const statusClass = l.status === "contacted" ? "contacted" : (l.status === "converted" ? "converted" : "new");
-  return `<div class="lead-card ${statusClass}" data-id="${l.id}">
+  const editCount = l.edit_count || 0;
+  const hasEdits = editCount > 0;
+  const updatedStr = l.updated_at ? new Date(l.updated_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+  return `<div class="lead-card ${statusClass}${hasEdits ? ' has-edits' : ''}" data-id="${l.id}">
     <div class="lead-header">
       <b class="lead-name">${esc(l.name)}</b>
+      ${hasEdits ? `<span class="lead-edit-badge" title="تم التعديل ${editCount} مرة">✏️ ${editCount}</span>` : ''}
       <span class="lead-status ${statusClass}">${l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد")}</span>
     </div>
     <div class="lead-info">
@@ -262,9 +266,11 @@ function renderLeadCard(l) {
       <span class="lead-item">💵 ${l.confirmed_payment ? "مؤكد الدفع ✓" : "غير مؤكد"}</span>
     </div>
     ${l.notes ? `<div class="lead-notes">${esc(l.notes)}</div>` : ""}
+    ${hasEdits ? `<div class="lead-updated">آخر تعديل: ${updatedStr}</div>` : ''}
     <div class="lead-footer">
       <span class="lead-date">${dateStr}</span>
       <div class="lead-actions">
+        ${hasEdits ? `<button class="btn btn-sm btn-outline lead-history-btn" data-id="${l.id}">سجل التعديلات</button>` : ''}
         ${l.status !== "contacted" ? `<button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>` : ""}
         ${l.status !== "converted" ? `<button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>` : ""}
       </div>
@@ -308,6 +314,7 @@ async function loadLeads(silent = false) {
 
     list.innerHTML = html || '<p class="empty">لا توجد طلبات بعد.</p>';
     list.querySelectorAll(".lead-status-btn").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
+    list.querySelectorAll(".lead-history-btn").forEach((b) => b.addEventListener("click", () => showLeadHistory(b.dataset.id)));
   } catch (e) { if (!silent) list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
 }
 
@@ -329,6 +336,54 @@ async function updateLeadStatus(id, status) {
     });
     loadLeads();
   } catch (e) { alert("خطأ: " + e.message); }
+}
+
+async function showLeadHistory(leadId) {
+  const modal = $("leadHistoryModal");
+  const content = $("leadHistoryContent");
+  if (!modal || !content) return;
+  content.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  modal.classList.add("show");
+  try {
+    const [lead] = await dbGet(`leads?id=eq.${leadId}&select=*`);
+    const history = await dbGet(`lead_history?lead_id=eq.${leadId}&select=*&order=edited_at.desc`);
+    if (!lead) { content.innerHTML = '<p class="empty">لم يتم العثور على الطلب</p>'; return; }
+    let html = `<div class="lead-history-current">
+      <h4>البيانات الحالية</h4>
+      <div class="history-item current">
+        <div class="history-field"><b>الاسم:</b> ${esc(lead.name)}</div>
+        <div class="history-field"><b>الإيميل:</b> ${esc(lead.email)}</div>
+        <div class="history-field"><b>الهاتف:</b> ${esc(lead.phone)}</div>
+        <div class="history-field"><b>الدولة:</b> ${esc(COUNTRIES[lead.country] || lead.country)}</div>
+        ${lead.notes ? `<div class="history-field"><b>ملاحظات:</b> ${esc(lead.notes)}</div>` : ''}
+        <div class="history-field"><b>تأكيد الدفع:</b> ${lead.confirmed_payment ? '✅ مؤكد' : '❌ غير مؤكد'}</div>
+      </div>
+    </div>`;
+    if (history && history.length) {
+      html += `<div class="lead-history-list"><h4>النسخ السابقة (${history.length})</h4>`;
+      history.forEach((h, i) => {
+        const editDate = new Date(h.edited_at).toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+        html += `<div class="history-item old">
+          <div class="history-version">النسخة ${history.length - i} — ${editDate}</div>
+          <div class="history-field"><b>الاسم:</b> ${esc(h.name || '—')}</div>
+          <div class="history-field"><b>الإيميل:</b> ${esc(h.email || '—')}</div>
+          <div class="history-field"><b>الهاتف:</b> ${esc(h.phone || '—')}</div>
+          <div class="history-field"><b>الدولة:</b> ${esc(COUNTRIES[h.country] || h.country || '—')}</div>
+          ${h.notes ? `<div class="history-field"><b>ملاحظات:</b> ${esc(h.notes)}</div>` : ''}
+          <div class="history-field"><b>تأكيد الدفع:</b> ${h.confirmed_payment ? '✅' : '❌'}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<p class="empty">لا توجد نسخ سابقة محفوظة</p>`;
+    }
+    content.innerHTML = html;
+  } catch (e) { content.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
+}
+
+function closeLeadHistoryModal() {
+  const modal = $("leadHistoryModal");
+  if (modal) modal.classList.remove("show");
 }
 
 // ====== المشتركون ======

@@ -268,3 +268,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .lead-date{font-size:11.5px;color:var(--text-subtle)}
 .lead-actions{display:flex;gap:6px}
 .lead-status-btn{font-size:11px!important;padding:5px 10px!important}
+.lead-card.has-edits{border-color:rgba(241,198,107,.4)}
+.lead-edit-badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(241,198,107,.18);color:#f1c66b}
+.lead-updated{font-size:12px;color:#f1c66b;margin-bottom:10px}
+.lead-history-btn{font-size:11px!important;padding:5px 10px!important;color:#f1c66b!important;border-color:rgba(241,198,107,.4)!important}
+.lead-history-btn:hover{background:rgba(241,198,107,.15)!important}
+
+/* Modal سجل التعديلات */
+.modal-overlay.show{display:flex}
+.lead-history-current h4,.lead-history-list h4{font-size:14px;font-weight:800;margin:0 0 12px;color:var(--primary-soft)}
+.lead-history-current{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.history-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:10px}
+.history-item.current{border-color:rgba(91,184,232,.4);background:rgba(91,184,232,.08)}
+.history-item.old{opacity:.85}
+.history-version{font-size:12px;font-weight:700;color:#f1c66b;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}
+.history-field{font-size:13px;color:var(--text-muted);margin-bottom:4px}
+.history-field b{color:var(--text);font-weight:600}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff}
+.btn-outline:hover{background:rgba(255,255,255,.08)}
