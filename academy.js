@@ -1741,9 +1741,16 @@ async function addQuestion() {
 
   toggle.addEventListener('click', () => {
     const isOpen = widget.classList.toggle('open');
+    const isMobile = window.innerWidth <= 600;
     if (isOpen) {
       loadChatHistory();
-      input.focus();
+      if (isMobile) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        input.focus();
+      }
+    } else {
+      document.body.style.overflow = '';
     }
   });
 
