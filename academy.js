@@ -1687,3 +1687,67 @@ async function addQuestion() {
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
   reveals.forEach(el => observer.observe(el));
 })();
+
+// ===== AI Chatbot =====
+(function () {
+  const widget = document.getElementById('chatWidget');
+  const toggle = document.getElementById('chatToggle');
+  const box = document.getElementById('chatBox');
+  const form = document.getElementById('chatForm');
+  const input = document.getElementById('chatInput');
+  const messagesEl = document.getElementById('chatMessages');
+
+  if (!widget || !toggle || !box) return;
+
+  let messages = [];
+
+  toggle.addEventListener('click', () => {
+    const isOpen = widget.classList.toggle('open');
+    box.hidden = !isOpen;
+    if (isOpen) input.focus();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    // إضافة رسالة المستخدم
+    messages.push({ role: 'user', content: text });
+    appendMessage(text, 'user');
+    input.value = '';
+
+    // إظهار "جارٍ الكتابة"
+    const loadingEl = appendMessage('جارٍ الكتابة...', 'bot loading');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ messages }),
+      });
+
+      const data = await res.json();
+      loadingEl.remove();
+
+      if (data.reply) {
+        messages.push({ role: 'assistant', content: data.reply });
+        appendMessage(data.reply, 'bot');
+      } else {
+        appendMessage('عذراً، حدث خطأ. حاول مرة ثانية.', 'bot');
+      }
+    } catch (err) {
+      loadingEl.remove();
+      appendMessage('تعذر الاتصال. تأكد من اتصالك بالإنترنت.', 'bot');
+    }
+  });
+
+  function appendMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${type}`;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+  }
+})();
