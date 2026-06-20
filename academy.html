@@ -49,8 +49,10 @@
       <!-- كارد التسجيل -->
       <div id="registerCard" class="login-card lead-card" hidden>
         <span class="brand-diamond">◆</span>
-        <h1>سجّل اهتمامك بالدورة</h1>
-        <p class="login-sub">عبّي البيانات وراح نتواصل معك قريبًا</p>
+        <h1 id="regTitle">سجّل اهتمامك بالدورة</h1>
+        <p class="login-sub" id="regSubtitle">عبّي البيانات وراح نتواصل معك قريبًا</p>
+
+        <!-- نموذج التسجيل -->
         <form id="regForm" class="rform" novalidate>
           <input type="text" id="regName" class="rfield" maxlength="60" placeholder="الاسم الكامل" autocomplete="name" required />
           <input type="email" id="regEmail" class="rfield" maxlength="100" placeholder="الإيميل الشخصي" autocomplete="email" required />
@@ -89,6 +91,25 @@
             تواجه مشكلة؟ تواصل معنا على واتساب
           </a>
         </form>
+
+        <!-- حالة الانتظار -->
+        <div id="regStatusView" class="lead-status-view" hidden>
+          <div id="regStatusIcon" class="status-icon-wrap">
+            <svg class="status-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" opacity="0.2"/>
+              <path d="M12 6v6l4 2" class="status-icon-hand"/>
+            </svg>
+          </div>
+          <span id="regStatusBadge" class="status-badge pending">قيد المراجعة</span>
+          <h3 id="regStatusTitle">طلبك قيد المراجعة</h3>
+          <p id="regStatusDesc">سجّلت طلبك — راح نتواصل معك قريبًا.</p>
+          <button class="btn btn-primary" id="regEditBtn">عدّل بياناتك</button>
+          <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener">
+            استفسار عن طلبك؟
+          </a>
+        </div>
+
+        <!-- رسالة النجاح -->
         <div id="regSuccess" class="lead-success" hidden>
           <div class="success-icon">✓</div>
           <h3>تم استلام طلبك!</h3>
@@ -440,6 +461,6 @@
 
   <script defer src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
   <script defer src="https://meet.jit.si/external_api.js"></script>
-  <script defer src="academy.js?v=70"></script>
+  <script defer src="academy.js?v=71"></script>
 </body>
 </html>

@@ -1803,11 +1803,91 @@ async function addQuestion() {
   const tabs = document.querySelectorAll(".login-tab");
   const loginForm = document.getElementById("loginForm");
   const registerCard = document.getElementById("registerCard");
+  const form = document.getElementById("regForm");
+  const statusView = document.getElementById("regStatusView");
+  const success = document.getElementById("regSuccess");
+  const msg = document.getElementById("regMsg");
 
-  if (!tabs.length) return;
+  if (!tabs.length || !form) return;
 
+  // نفس الـ keys المستخدمة في index.html
+  let currentLeadId = localStorage.getItem("thameen_lead_id") || null;
+  let lastSubmittedData = JSON.parse(localStorage.getItem("thameen_lead_data") || "{}");
+
+  // التحقق من حالة الطلب
+  async function checkLeadStatus() {
+    if (!currentLeadId) return null;
+    try {
+      const res = await fetch(SUPABASE_URL + "/rest/v1/leads?id=eq." + currentLeadId + "&select=*", {
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data && data[0] ? data[0] : null;
+    } catch (e) { return null; }
+  }
+
+  // عرض حالة الطلب
+  function showStatusView(lead) {
+    form.style.display = "none";
+    success.hidden = true;
+    statusView.hidden = false;
+
+    const icon = document.getElementById("regStatusIcon");
+    const badge = document.getElementById("regStatusBadge");
+    const title = document.getElementById("regStatusTitle");
+    const desc = document.getElementById("regStatusDesc");
+
+    if (lead.status === "converted") {
+      icon.innerHTML = `<svg class="status-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" opacity="0.2"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+      icon.style.background = "linear-gradient(135deg,rgba(80,200,120,.15),rgba(80,200,120,.05))";
+      icon.style.borderColor = "rgba(80,200,120,.3)";
+      badge.className = "status-badge converted";
+      badge.textContent = "تم القبول!";
+      title.textContent = "مبروك! تم قبول طلبك";
+      desc.textContent = "راح نرسل لك بيانات الدخول قريبًا.";
+    } else if (lead.status === "contacted") {
+      icon.innerHTML = `<svg class="status-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.1.8.3 1.6.6 2.3a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.7.3 1.5.5 2.3.6a2 2 0 0 1 1.7 2z"/></svg>`;
+      icon.style.background = "linear-gradient(135deg,rgba(241,198,107,.15),rgba(241,198,107,.05))";
+      icon.style.borderColor = "rgba(241,198,107,.3)";
+      badge.className = "status-badge contacted";
+      badge.textContent = "تم التواصل";
+      title.textContent = "تواصلنا معك";
+      desc.textContent = "تحقق من الواتساب أو الإيميل.";
+    } else {
+      icon.innerHTML = `<svg class="status-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 6v6l4 2"/></svg>`;
+      icon.style.background = "linear-gradient(135deg,rgba(91,184,232,.15),rgba(91,184,232,.05))";
+      icon.style.borderColor = "rgba(91,184,232,.25)";
+      badge.className = "status-badge pending";
+      badge.textContent = "قيد المراجعة";
+      title.textContent = "طلبك قيد المراجعة";
+      desc.textContent = "سجّلت طلبك — راح نتواصل معك قريبًا.";
+    }
+
+    lastSubmittedData = { name: lead.name, email: lead.email, phone: lead.phone, country: lead.country, notes: lead.notes || "" };
+  }
+
+  // عرض النموذج مع البيانات السابقة للتعديل
+  function showFormForEdit() {
+    statusView.hidden = true;
+    success.hidden = true;
+    form.style.display = "grid";
+
+    if (lastSubmittedData.name) document.getElementById("regName").value = lastSubmittedData.name;
+    if (lastSubmittedData.email) document.getElementById("regEmail").value = lastSubmittedData.email;
+    if (lastSubmittedData.phone) document.getElementById("regPhone").value = lastSubmittedData.phone;
+    if (lastSubmittedData.country) document.getElementById("regCountry").value = lastSubmittedData.country;
+    if (lastSubmittedData.notes) document.getElementById("regNotes").value = lastSubmittedData.notes;
+
+    document.getElementById("regSubmit").textContent = currentLeadId ? "حفظ التعديلات" : "أرسل طلبي";
+  }
+
+  // زر تعديل البيانات
+  document.getElementById("regEditBtn")?.addEventListener("click", showFormForEdit);
+
+  // التبويبات
   tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
+    tab.addEventListener("click", async () => {
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
 
@@ -1817,17 +1897,26 @@ async function addQuestion() {
       } else {
         loginForm.hidden = true;
         registerCard.hidden = false;
+
+        // التحقق من طلب سابق
+        if (currentLeadId) {
+          const lead = await checkLeadStatus();
+          if (lead) {
+            showStatusView(lead);
+            return;
+          } else {
+            // الطلب محذوف
+            currentLeadId = null;
+            localStorage.removeItem("thameen_lead_id");
+            localStorage.removeItem("thameen_lead_data");
+          }
+        }
+        showFormForEdit();
       }
     });
   });
 
-  // نموذج التسجيل
-  const form = document.getElementById("regForm");
-  const msg = document.getElementById("regMsg");
-  const success = document.getElementById("regSuccess");
-
-  if (!form) return;
-
+  // إرسال النموذج
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("regName").value.trim();
@@ -1869,28 +1958,52 @@ async function addQuestion() {
     btn.disabled = true;
     btn.textContent = "جارٍ الإرسال…";
 
+    const isUpdate = !!currentLeadId;
+
     try {
-      const res = await fetch(SUPABASE_URL + "/rest/v1/leads", {
-        method: "POST",
+      const url = isUpdate
+        ? SUPABASE_URL + "/rest/v1/leads?id=eq." + currentLeadId
+        : SUPABASE_URL + "/rest/v1/leads";
+
+      const res = await fetch(url, {
+        method: isUpdate ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY,
           "Authorization": "Bearer " + SUPABASE_KEY,
-          "Prefer": "return=minimal"
+          "Prefer": isUpdate ? "return=minimal" : "return=representation"
         },
         body: JSON.stringify({ name, email, phone, country, notes, confirmed_payment: confirmed, status: "new" })
       });
 
       if (!res.ok) throw new Error("فشل الإرسال");
 
-      // إخفاء الفورم وإظهار رسالة النجاح
+      // حفظ البيانات في localStorage
+      lastSubmittedData = { name, email, phone, country, notes };
+      localStorage.setItem("thameen_lead_data", JSON.stringify(lastSubmittedData));
+
+      if (!isUpdate) {
+        const data = await res.json();
+        if (data && data[0] && data[0].id) {
+          currentLeadId = data[0].id;
+          localStorage.setItem("thameen_lead_id", currentLeadId);
+        }
+      }
+
+      // عرض رسالة النجاح ثم حالة الانتظار
       form.style.display = "none";
       success.hidden = false;
+
+      setTimeout(async () => {
+        const lead = await checkLeadStatus();
+        if (lead) showStatusView(lead);
+      }, 2000);
+
     } catch (err) {
       msg.textContent = "حدث خطأ، حاول مرة ثانية";
       msg.className = "rform-msg err";
       btn.disabled = false;
-      btn.textContent = "أرسل طلبي";
+      btn.textContent = isUpdate ? "حفظ التعديلات" : "أرسل طلبي";
     }
   });
 })();
