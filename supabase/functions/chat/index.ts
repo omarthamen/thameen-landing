@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, lesson } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "messages required" }), {
@@ -66,9 +66,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // إضافة سياق الدرس الحالي
+    let contextPrompt = SYSTEM_PROMPT;
+    if (lesson && lesson.title) {
+      contextPrompt += `\n\n## السياق الحالي
+المستخدم يشاهد حالياً درس: "${lesson.title}"${lesson.section ? ` من قسم "${lesson.section}"` : ''}
+- إذا سأل سؤال متعلق بالدرس، ساعده فيه
+- بعد إجابتك، اقترح عليه يضيف ملاحظاته على الدرس بكتابة "ملاحظة:" متبوعة بالنص
+- كن مفيداً ومحدداً بناءً على محتوى الدرس`;
+    }
+
     const groqMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...messages.slice(-10), // آخر 10 رسائل فقط
+      { role: "system", content: contextPrompt },
+      ...messages.slice(-10),
     ];
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {

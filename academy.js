@@ -1700,6 +1700,44 @@ async function addQuestion() {
   if (!widget || !toggle || !box) return;
 
   let messages = [];
+  let chatLoaded = false;
+
+  // تحميل المحادثات السابقة
+  async function loadChatHistory() {
+    if (chatLoaded || !USER) return;
+    try {
+      const history = await dbGet(`chat_messages?select=role,content&user_id=eq.${USER.id}&order=created_at.desc&limit=20`);
+      if (history && history.length) {
+        messagesEl.innerHTML = '';
+        history.reverse().forEach(m => {
+          messages.push({ role: m.role, content: m.content });
+          appendMessage(m.content, m.role === 'user' ? 'user' : 'bot', false);
+        });
+      }
+      chatLoaded = true;
+    } catch (e) { console.log('Chat history load failed:', e); }
+  }
+
+  // حفظ رسالة
+  async function saveMessage(role, content) {
+    if (!USER) return;
+    const lessonId = window.CURLESSON || null;
+    try {
+      await dbSend('POST', 'chat_messages', { user_id: USER.id, role, content, lesson_id: lessonId }, 'return=minimal');
+    } catch (e) { console.log('Save message failed:', e); }
+  }
+
+  // الحصول على سياق الدرس الحالي
+  function getLessonContext() {
+    if (!window.CURLESSON || !window.LESSONS) return null;
+    const lesson = window.LESSONS.find(l => l.id === window.CURLESSON);
+    if (!lesson) return null;
+    return {
+      id: lesson.id,
+      title: lesson.title,
+      section: lesson.section_title || '',
+    };
+  }
 
   toggle.addEventListener('click', () => {
     const isOpen = widget.classList.contains('open');
@@ -1709,6 +1747,7 @@ async function addQuestion() {
     } else {
       box.hidden = false;
       widget.classList.add('open');
+      loadChatHistory();
       input.focus();
     }
   });
@@ -1721,16 +1760,21 @@ async function addQuestion() {
     // إضافة رسالة المستخدم
     messages.push({ role: 'user', content: text });
     appendMessage(text, 'user');
+    saveMessage('user', text);
     input.value = '';
 
     // إظهار "جارٍ الكتابة"
     const loadingEl = appendMessage('جارٍ الكتابة...', 'bot loading');
 
     try {
+      const lessonContext = getLessonContext();
       const res = await fetch(`${SUPABASE_URL}/functions/v1/rapid-function`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({
+          messages: messages.slice(-10),
+          lesson: lessonContext
+        }),
       });
 
       const data = await res.json();
@@ -1739,6 +1783,7 @@ async function addQuestion() {
       if (data.reply) {
         messages.push({ role: 'assistant', content: data.reply });
         appendMessage(data.reply, 'bot');
+        saveMessage('assistant', data.reply);
       } else {
         appendMessage('عذراً، حدث خطأ. حاول مرة ثانية.', 'bot');
       }
@@ -1748,12 +1793,12 @@ async function addQuestion() {
     }
   });
 
-  function appendMessage(text, type) {
+  function appendMessage(text, type, scroll = true) {
     const div = document.createElement('div');
     div.className = `chat-msg ${type}`;
     div.textContent = text;
     messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    if (scroll) messagesEl.scrollTop = messagesEl.scrollHeight;
     return div;
   }
 })();
