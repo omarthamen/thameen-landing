@@ -242,7 +242,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-ar);line-heig
 .detail-row.done .detail-fill{background:#5fe08a}
 
 /* طلبات التسجيل */
-.leads-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-top:14px}
+.leads-section{margin-bottom:24px}
+.leads-section-title{font-size:16px;font-weight:800;margin:0 0 12px;padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:8px}
+.leads-section-title span{font-size:13px;font-weight:700;padding:2px 10px;border-radius:99px;margin-inline-start:auto}
+.leads-section-title.new{background:rgba(91,184,232,.1);color:#5BB8E8}
+.leads-section-title.new span{background:rgba(91,184,232,.2)}
+.leads-section-title.contacted{background:rgba(241,198,107,.1);color:#f1c66b}
+.leads-section-title.contacted span{background:rgba(241,198,107,.2)}
+.leads-section-title.converted{background:rgba(80,200,120,.1);color:#74d99a}
+.leads-section-title.converted span{background:rgba(80,200,120,.2)}
+.leads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
 .lead-card{background:var(--bg-panel);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px}
 .lead-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .lead-name{font-size:16px;font-weight:800}

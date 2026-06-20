@@ -94,7 +94,10 @@ $("loginForm").addEventListener("submit", async (e) => {
       const m = data.msg || data.error_description || data.error || "بيانات غير صحيحة";
       setMsg($("loginMsg"), "فشل الدخول: " + m, false); btn.disabled = false; return;
     }
-    TOKEN = data.access_token;            // في الذاكرة فقط — يضيع عند الإغلاق/التحديث
+    TOKEN = data.access_token;
+    // حفظ الجلسة لمدة ٦ ساعات
+    const expiry = Date.now() + (6 * 60 * 60 * 1000);
+    try { localStorage.setItem("thameen_admin_token", TOKEN); localStorage.setItem("thameen_admin_exp", expiry); } catch (_) {}
     setMsg($("loginMsg"), "", true);
     showDash(true);
   } catch (err) {
@@ -105,9 +108,19 @@ $("loginForm").addEventListener("submit", async (e) => {
 
 $("logoutBtn").addEventListener("click", logout);
 
-// لا حفظ للجلسة — يطلب كلمة السر كل مرة (أقصى حماية)
-(function noPersist() {
-  try { localStorage.removeItem("thameen_admin_token"); localStorage.removeItem("thameen_admin_exp"); } catch (_) {}
+// استعادة الجلسة المحفوظة (صالحة لـ ٦ ساعات)
+(function restoreSession() {
+  try {
+    const savedToken = localStorage.getItem("thameen_admin_token");
+    const savedExp = localStorage.getItem("thameen_admin_exp");
+    if (savedToken && savedExp && Date.now() < parseInt(savedExp)) {
+      TOKEN = savedToken;
+      showDash(true);
+      return;
+    }
+    localStorage.removeItem("thameen_admin_token");
+    localStorage.removeItem("thameen_admin_exp");
+  } catch (_) {}
   showDash(false);
 })();
 
@@ -119,7 +132,8 @@ document.querySelectorAll(".tab").forEach((t) => {
     t.classList.add("on");
     const p = $("tab-" + t.dataset.tab); p.classList.add("on"); p.hidden = false;
     if (t.dataset.tab === "calls") loadCallsTab();
-    if (t.dataset.tab === "leads") loadLeads();
+    if (t.dataset.tab === "leads") { loadLeads(); startLeadsAutoRefresh(); }
+    else { stopLeadsAutoRefresh(); }
   });
 });
 
@@ -225,43 +239,85 @@ async function scheduleStage(btn) {
 document.addEventListener("change", (e) => { if (e.target && e.target.id === "callsJoinFilter") renderCallsTab(); });
 
 // ====== طلبات التسجيل (Leads) ======
-async function loadLeads() {
+let lastLeadsCount = 0;
+let leadsInterval = null;
+const LEADS_SOUND = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYZNIBLmAAAAAAD/+9DEAAAIAANIAAAAEikAbSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//vQxFMAAADSAAAAAAAAANIAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=");
+
+const COUNTRIES = {SA:"السعودية",AE:"الإمارات",KW:"الكويت",QA:"قطر",BH:"البحرين",OM:"عُمان",EG:"مصر",JO:"الأردن",IQ:"العراق",SY:"سوريا",LB:"لبنان",PS:"فلسطين",YE:"اليمن",SD:"السودان",LY:"ليبيا",TN:"تونس",DZ:"الجزائر",MA:"المغرب",MR:"موريتانيا",OTHER:"أخرى"};
+
+function renderLeadCard(l) {
+  const date = new Date(l.created_at);
+  const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const countryName = COUNTRIES[l.country] || l.country;
+  const statusClass = l.status === "contacted" ? "contacted" : (l.status === "converted" ? "converted" : "new");
+  return `<div class="lead-card ${statusClass}" data-id="${l.id}">
+    <div class="lead-header">
+      <b class="lead-name">${esc(l.name)}</b>
+      <span class="lead-status ${statusClass}">${l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد")}</span>
+    </div>
+    <div class="lead-info">
+      <span class="lead-item">📧 <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></span>
+      <span class="lead-item">📱 <a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank">${esc(l.phone)}</a></span>
+      <span class="lead-item">🌍 ${esc(countryName)}</span>
+      <span class="lead-item">💵 ${l.confirmed_payment ? "مؤكد الدفع ✓" : "غير مؤكد"}</span>
+    </div>
+    ${l.notes ? `<div class="lead-notes">${esc(l.notes)}</div>` : ""}
+    <div class="lead-footer">
+      <span class="lead-date">${dateStr}</span>
+      <div class="lead-actions">
+        ${l.status !== "contacted" ? `<button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>` : ""}
+        ${l.status !== "converted" ? `<button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>` : ""}
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadLeads(silent = false) {
   const list = $("leadsList"); if (!list) return;
-  list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
+  if (!silent) list.innerHTML = '<p class="hint">جارٍ التحميل…</p>';
   try {
     const leads = await dbGet("leads?select=*&order=created_at.desc&limit=200");
-    $("leadsCount").textContent = (leads?.length || 0) + " طلب";
+    const total = leads?.length || 0;
+    $("leadsCount").textContent = total + " طلب";
+
+    // إشعار صوتي للطلبات الجديدة
+    const newCount = leads.filter(l => l.status === "new" || !l.status).length;
+    if (silent && newCount > lastLeadsCount) {
+      try { LEADS_SOUND.play(); } catch (_) {}
+    }
+    lastLeadsCount = newCount;
+
     if (!leads || !leads.length) { list.innerHTML = '<p class="empty">لا توجد طلبات بعد.</p>'; return; }
-    const countries = {SA:"السعودية",AE:"الإمارات",KW:"الكويت",QA:"قطر",BH:"البحرين",OM:"عُمان",EG:"مصر",JO:"الأردن",IQ:"العراق",SY:"سوريا",LB:"لبنان",PS:"فلسطين",YE:"اليمن",SD:"السودان",LY:"ليبيا",TN:"تونس",DZ:"الجزائر",MA:"المغرب",MR:"موريتانيا",OTHER:"أخرى"};
-    list.innerHTML = leads.map((l) => {
-      const date = new Date(l.created_at);
-      const dateStr = date.toLocaleDateString("ar-EG", {day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
-      const countryName = countries[l.country] || l.country;
-      const statusClass = l.status === "contacted" ? "contacted" : (l.status === "converted" ? "converted" : "new");
-      const statusText = l.status === "contacted" ? "تم التواصل" : (l.status === "converted" ? "مشترك" : "جديد");
-      return `<div class="lead-card" data-id="${l.id}">
-        <div class="lead-header">
-          <b class="lead-name">${esc(l.name)}</b>
-          <span class="lead-status ${statusClass}">${statusText}</span>
-        </div>
-        <div class="lead-info">
-          <span class="lead-item">📧 <a href="mailto:${esc(l.email)}">${esc(l.email)}</a></span>
-          <span class="lead-item">📱 <a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank">${esc(l.phone)}</a></span>
-          <span class="lead-item">🌍 ${esc(countryName)}</span>
-          <span class="lead-item">💵 ${l.confirmed_payment ? "مؤكد الدفع ✓" : "غير مؤكد"}</span>
-        </div>
-        ${l.notes ? `<div class="lead-notes">${esc(l.notes)}</div>` : ""}
-        <div class="lead-footer">
-          <span class="lead-date">${dateStr}</span>
-          <div class="lead-actions">
-            <button class="btn btn-sm lead-status-btn" data-id="${l.id}" data-status="contacted">تم التواصل</button>
-            <button class="btn btn-sm btn-primary lead-status-btn" data-id="${l.id}" data-status="converted">تحويل لمشترك</button>
-          </div>
-        </div>
-      </div>`;
-    }).join("");
+
+    // تقسيم حسب الحالة
+    const newLeads = leads.filter(l => l.status === "new" || !l.status);
+    const contactedLeads = leads.filter(l => l.status === "contacted");
+    const convertedLeads = leads.filter(l => l.status === "converted");
+
+    let html = "";
+
+    if (newLeads.length) {
+      html += `<div class="leads-section"><h3 class="leads-section-title new">🆕 طلبات جديدة <span>${newLeads.length}</span></h3><div class="leads-grid">${newLeads.map(renderLeadCard).join("")}</div></div>`;
+    }
+    if (contactedLeads.length) {
+      html += `<div class="leads-section"><h3 class="leads-section-title contacted">📞 تم التواصل <span>${contactedLeads.length}</span></h3><div class="leads-grid">${contactedLeads.map(renderLeadCard).join("")}</div></div>`;
+    }
+    if (convertedLeads.length) {
+      html += `<div class="leads-section"><h3 class="leads-section-title converted">✅ تم التحويل لمشترك <span>${convertedLeads.length}</span></h3><div class="leads-grid">${convertedLeads.map(renderLeadCard).join("")}</div></div>`;
+    }
+
+    list.innerHTML = html || '<p class="empty">لا توجد طلبات بعد.</p>';
     list.querySelectorAll(".lead-status-btn").forEach((b) => b.addEventListener("click", () => updateLeadStatus(b.dataset.id, b.dataset.status)));
-  } catch (e) { list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
+  } catch (e) { if (!silent) list.innerHTML = `<p class="empty">خطأ: ${esc(e.message)}</p>`; }
+}
+
+// تحديث تلقائي كل ٣٠ ثانية
+function startLeadsAutoRefresh() {
+  if (leadsInterval) clearInterval(leadsInterval);
+  leadsInterval = setInterval(() => loadLeads(true), 30000);
+}
+function stopLeadsAutoRefresh() {
+  if (leadsInterval) { clearInterval(leadsInterval); leadsInterval = null; }
 }
 
 async function updateLeadStatus(id, status) {
