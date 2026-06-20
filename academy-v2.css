@@ -620,9 +620,9 @@
 .cd-live{color:#5fe08a!important;font-size:17px!important}
 .cd-done{color:var(--text-subtle)}
 .call-reminder{font-size:13.5px;line-height:1.85;color:var(--primary-soft);background:rgba(91,184,232,.08);border:1px solid rgba(91,184,232,.2);border-radius:13px;padding:12px 15px;margin-bottom:18px}
-.call-btn{width:100%}
-.call-card.call-group .call-btn{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 10px 30px rgba(34,197,94,.35)}
-.call-card.call-group .call-btn:disabled{background:#2a2a35;border:1px solid rgba(255,255,255,.1);color:#6b6b7a;cursor:not-allowed;animation:none!important;box-shadow:none!important}
+.call-btn{width:100%;border:none}
+.call-card.call-group .call-btn{background:linear-gradient(135deg,#22c55e,#16a34a)!important;color:#fff!important;box-shadow:0 10px 30px rgba(34,197,94,.35)!important;animation:none!important}
+.call-card.call-group .call-btn:disabled{background:#2a2a35!important;border:1px solid rgba(255,255,255,.12)!important;color:#5a5a68!important;cursor:not-allowed;animation:none!important;box-shadow:none!important}
 /* صندوق الأسئلة */
 .qbox-head h3{margin:0 0 4px;font-size:17px}
 .q-add{display:flex;gap:9px;margin:14px 0}
