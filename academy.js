@@ -1782,7 +1782,10 @@ async function addQuestion() {
         }),
       });
 
-      const data = await res.json();
+      console.log('[Chat] Response status:', res.status);
+      const text = await res.text();
+      console.log('[Chat] Response body:', text.slice(0, 500));
+      const data = JSON.parse(text);
       loadingEl.remove();
 
       if (data.reply) {
@@ -1794,6 +1797,7 @@ async function addQuestion() {
       }
     } catch (err) {
       loadingEl.remove();
+      console.error('[Chat Error]', err);
       appendMessage('تعذر الاتصال. تأكد من اتصالك بالإنترنت.', 'bot');
     }
   });
