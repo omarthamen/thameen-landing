@@ -633,19 +633,40 @@
 
   // سحب بالماوس والإصبع
   let startX = 0;
+  let startY = 0;
   let isDragging = false;
+  let isHorizontalSwipe = null;
 
   container.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
     isDragging = true;
+    isHorizontalSwipe = null;
   }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const diffX = Math.abs(e.touches[0].clientX - startX);
+    const diffY = Math.abs(e.touches[0].clientY - startY);
+
+    if (isHorizontalSwipe === null && (diffX > 10 || diffY > 10)) {
+      isHorizontalSwipe = diffX > diffY;
+    }
+
+    if (isHorizontalSwipe) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 
   container.addEventListener('touchend', (e) => {
     if (!isDragging) return;
     const endX = e.changedTouches[0].clientX;
     const diff = startX - endX;
-    if (Math.abs(diff) > 50) slide(diff > 0 ? 1 : -1);
+    if (isHorizontalSwipe && Math.abs(diff) > 40) {
+      slide(diff > 0 ? 1 : -1);
+    }
     isDragging = false;
+    isHorizontalSwipe = null;
   });
 
   container.addEventListener('mousedown', (e) => {
@@ -657,12 +678,14 @@
   document.addEventListener('mouseup', (e) => {
     if (!isDragging) return;
     const diff = startX - e.clientX;
-    if (Math.abs(diff) > 50) slide(diff > 0 ? 1 : -1);
+    if (Math.abs(diff) > 40) slide(diff > 0 ? 1 : -1);
     isDragging = false;
     container.style.cursor = 'grab';
   });
 
   container.style.cursor = 'grab';
+  container.style.userSelect = 'none';
+  container.style.webkitUserSelect = 'none';
 
   // أوتو سلايد كل 4 ثواني
   function startAutoSlide() {
