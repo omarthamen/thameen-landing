@@ -2014,9 +2014,11 @@ async function addQuestion() {
   function showStatusView(lead) {
     form.style.display = "none";
     statusView.hidden = false;
-    // إخفاء العنوان العلوي
+    // إخفاء العنوان العلوي والألماسة
+    const regDiamond = document.getElementById("regDiamond");
     const regTitle = document.getElementById("regTitle");
     const regSubtitle = document.getElementById("regSubtitle");
+    if (regDiamond) regDiamond.style.display = "none";
     if (regTitle) regTitle.style.display = "none";
     if (regSubtitle) regSubtitle.style.display = "none";
 
@@ -2048,9 +2050,11 @@ async function addQuestion() {
   function showFormForEdit() {
     statusView.hidden = true;
     form.style.display = "grid";
-    // إعادة إظهار العنوان
+    // إعادة إظهار العنوان والألماسة
+    const regDiamond = document.getElementById("regDiamond");
     const regTitle = document.getElementById("regTitle");
     const regSubtitle = document.getElementById("regSubtitle");
+    if (regDiamond) regDiamond.style.display = "";
     if (regTitle) regTitle.style.display = "";
     if (regSubtitle) regSubtitle.style.display = "";
 

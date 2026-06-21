@@ -50,7 +50,7 @@
 
       <!-- كارد التسجيل -->
       <div id="registerCard" class="login-card lead-card" hidden>
-        <span class="brand-diamond" style="font-size:28px">◆</span>
+        <span id="regDiamond" class="brand-diamond" style="font-size:28px">◆</span>
         <h1 id="regTitle" style="font-size:20px;margin:8px 0 4px">سجّل اهتمامك بالدورة</h1>
         <p class="login-sub" id="regSubtitle">عبّي البيانات وراح نتواصل معك قريبًا</p>
 
@@ -96,16 +96,16 @@
 
         <!-- حالة الانتظار -->
         <style>
-          #regStatusView{text-align:center;padding:20px 16px;max-width:280px;margin:0 auto;box-sizing:border-box}
-          .ios-check{width:56px;height:56px;margin:0 auto 14px;display:block}
-          .ios-check-circle{fill:none;stroke:#34c759;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:151;animation:drawCircle 0.6s cubic-bezier(0.65,0,0.35,1) forwards}
-          .ios-check-tick{fill:none;stroke:#34c759;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:32;stroke-dashoffset:32;animation:drawTick 0.4s cubic-bezier(0.65,0,0.35,1) 0.5s forwards}
-          @keyframes drawCircle{to{stroke-dashoffset:0}}
-          @keyframes drawTick{to{stroke-dashoffset:0}}
-          #regStatusDesc{color:#bbb;font-size:15px;margin:0 0 14px;line-height:1.6}
-          #regStatusBadge{display:inline-block;margin-bottom:12px}
-          #regEditBtn{margin-top:8px;width:100%}
-          #regStatusView .lead-support{display:block;text-align:center;margin-top:10px;font-size:13px;color:#25d366}
+          #regStatusView{text-align:center;padding:32px 20px;max-width:280px;margin:0 auto;box-sizing:border-box}
+          .ios-check{width:64px;height:64px;margin:0 auto 20px;display:block;will-change:stroke-dashoffset}
+          .ios-check-circle{fill:none;stroke:#34c759;stroke-width:2;stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:151;animation:drawCircle 0.65s cubic-bezier(0.22,0.61,0.36,1) forwards}
+          .ios-check-tick{fill:none;stroke:#34c759;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:32;stroke-dashoffset:32;animation:drawTick 0.3s cubic-bezier(0.22,0.61,0.36,1) 0.5s forwards}
+          @keyframes drawCircle{0%{stroke-dashoffset:151}100%{stroke-dashoffset:0}}
+          @keyframes drawTick{0%{stroke-dashoffset:32}100%{stroke-dashoffset:0}}
+          #regStatusDesc{color:#ccc;font-size:15px;margin:0 0 20px;line-height:1.7}
+          #regStatusBadge{display:inline-block;margin-bottom:20px}
+          #regEditBtn{width:100%}
+          #regStatusView .lead-support{display:block;text-align:center;margin-top:16px;font-size:13px;color:#25d366}
         </style>
         <div id="regStatusView" class="lead-status-view" hidden>
           <svg class="ios-check" viewBox="0 0 52 52">
