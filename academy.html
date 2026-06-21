@@ -50,8 +50,8 @@
 
       <!-- كارد التسجيل -->
       <div id="registerCard" class="login-card lead-card" hidden>
-        <span class="brand-diamond">◆</span>
-        <h1 id="regTitle">سجّل اهتمامك بالدورة</h1>
+        <span class="brand-diamond" style="font-size:28px">◆</span>
+        <h1 id="regTitle" style="font-size:20px;margin:8px 0 4px">سجّل اهتمامك بالدورة</h1>
         <p class="login-sub" id="regSubtitle">عبّي البيانات وراح نتواصل معك قريبًا</p>
 
         <!-- نموذج التسجيل -->
@@ -95,27 +95,14 @@
         </form>
 
         <!-- حالة الانتظار -->
-        <div id="regStatusView" class="lead-status-view" hidden>
-          <div id="regStatusIcon" class="status-icon-wrap">
-            <svg class="status-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" opacity="0.2"/>
-              <path d="M12 6v6l4 2" class="status-icon-hand"/>
-            </svg>
-          </div>
+        <div id="regStatusView" class="lead-status-view" hidden style="text-align:center;padding:24px 20px">
+          <div class="status-check" style="width:40px;height:40px;margin:0 auto 12px;background:linear-gradient(135deg,#5fe08a,#2ecc71);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">✓</div>
+          <p id="regStatusDesc" style="color:#aab;font-size:14px;margin:0 0 14px;line-height:1.6">سجّلت اهتمامك بالدورة. الفريق يراجع طلبك وراح نتواصل معك قريباً.</p>
           <span id="regStatusBadge" class="status-badge pending">قيد المراجعة</span>
-          <h3 id="regStatusTitle">طلبك قيد المراجعة</h3>
-          <p id="regStatusDesc">سجّلت طلبك — راح نتواصل معك قريبًا.</p>
-          <button class="btn btn-primary" id="regEditBtn">عدّل بياناتك</button>
-          <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener">
-            استفسار عن طلبك؟
+          <button class="btn btn-primary" id="regEditBtn" style="margin-top:14px">عدّل بياناتك</button>
+          <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:12px;font-size:13px;color:#25d366">
+            استفسر عن طلبك
           </a>
-        </div>
-
-        <!-- رسالة النجاح -->
-        <div id="regSuccess" class="lead-success" hidden>
-          <div class="success-icon">✓</div>
-          <h3>تم استلام طلبك!</h3>
-          <p>راح نتواصل معك قريبًا على الواتساب أو الإيميل.</p>
         </div>
       </div>
     </div>
