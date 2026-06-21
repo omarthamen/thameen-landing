@@ -808,6 +808,9 @@
     function showStatusView(lead) {
       leadForm.style.display = "none";
       document.getElementById("leadSuccess").hidden = true;
+      // إخفاء header الفورم
+      document.querySelector("#leadModal .rmodal-title").style.display = "none";
+      document.querySelector("#leadModal .rmodal-sub").style.display = "none";
       const statusView = document.getElementById("leadStatusView");
       statusView.hidden = false;
 
@@ -893,6 +896,9 @@
     function showEditForm() {
       document.getElementById("leadSuccess").hidden = true;
       document.getElementById("leadStatusView").hidden = true;
+      // إظهار header الفورم
+      document.querySelector("#leadModal .rmodal-title").style.display = "";
+      document.querySelector("#leadModal .rmodal-sub").style.display = "";
       leadForm.style.display = "";
       // تعبئة البيانات السابقة
       if (lastSubmittedData.name) document.getElementById("leadName").value = lastSubmittedData.name;
