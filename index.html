@@ -658,8 +658,8 @@
       <div id="leadStatusView" class="lead-status-view" hidden>
         <h3 id="statusTitle">وصلنا طلبك!</h3>
         <p id="statusDesc">سيتم التواصل معك قريبًا</p>
-        <div id="statusIcon" class="status-icon-wrap">
-          <svg class="status-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <div id="statusIcon" class="status-icon-wrap" style="width:44px;height:44px">
+          <svg class="status-icon-svg" width="20" height="20" style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" opacity="0.2"/>
             <path d="M12 6v6l4 2" class="status-icon-hand"/>
           </svg>
@@ -1050,9 +1050,8 @@
               localStorage.setItem("thameen_lead_id", currentLeadId);
               localStorage.setItem("thameen_lead_data", JSON.stringify(lastSubmittedData));
             }
-            leadForm.style.display = "none";
-            document.getElementById("leadStatusView").hidden = true;
-            document.getElementById("leadSuccess").hidden = false;
+            // عرض حالة الطلب مباشرة
+            showStatusView({ status: "pending", ...lastSubmittedData });
             return;
           }
         }
@@ -1077,9 +1076,8 @@
           localStorage.setItem("thameen_lead_data", JSON.stringify(lastSubmittedData));
         }
 
-        leadForm.style.display = "none";
-        document.getElementById("leadStatusView").hidden = true;
-        document.getElementById("leadSuccess").hidden = false;
+        // عرض حالة الطلب مباشرة
+        showStatusView({ status: "pending", ...lastSubmittedData });
       } catch (err) {
         console.error("Error:", err);
         leadMsg.textContent = "خطأ: " + (err.message || "حاول مرة ثانية");
