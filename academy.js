@@ -2014,6 +2014,11 @@ async function addQuestion() {
   function showStatusView(lead) {
     form.style.display = "none";
     statusView.hidden = false;
+    // إخفاء العنوان العلوي
+    const regTitle = document.getElementById("regTitle");
+    const regSubtitle = document.getElementById("regSubtitle");
+    if (regTitle) regTitle.style.display = "none";
+    if (regSubtitle) regSubtitle.style.display = "none";
 
     const badge = document.getElementById("regStatusBadge");
     const desc = document.getElementById("regStatusDesc");
@@ -2033,7 +2038,7 @@ async function addQuestion() {
       svgPaths.forEach(el => el.style.stroke = "#34c759");
       badge.className = "status-badge pending";
       badge.textContent = "قيد المراجعة";
-      desc.textContent = "سجّلت اهتمامك بالدورة. الفريق يراجع طلبك وراح نتواصل معك قريباً.";
+      desc.textContent = "تم تسجيل معلوماتك، سيتم التواصل معك في أقرب وقت";
     }
 
     if (lead.name) lastSubmittedData = { name: lead.name, email: lead.email, phone: lead.phone, country: lead.country, notes: lead.notes || "" };
@@ -2043,6 +2048,11 @@ async function addQuestion() {
   function showFormForEdit() {
     statusView.hidden = true;
     form.style.display = "grid";
+    // إعادة إظهار العنوان
+    const regTitle = document.getElementById("regTitle");
+    const regSubtitle = document.getElementById("regSubtitle");
+    if (regTitle) regTitle.style.display = "";
+    if (regSubtitle) regSubtitle.style.display = "";
 
     if (lastSubmittedData.name) document.getElementById("regName").value = lastSubmittedData.name;
     if (lastSubmittedData.email) document.getElementById("regEmail").value = lastSubmittedData.email;

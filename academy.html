@@ -96,23 +96,23 @@
 
         <!-- حالة الانتظار -->
         <style>
-          #regStatusView{text-align:center;padding:16px 12px;max-width:100%;box-sizing:border-box}
-          .ios-check{width:48px;height:48px;margin:0 auto 10px;display:block}
-          .ios-check-circle{fill:none;stroke:#34c759;stroke-width:3;stroke-linecap:round;stroke-dasharray:157;stroke-dashoffset:157;animation:drawCircle 0.5s ease forwards}
-          .ios-check-tick{fill:none;stroke:#34c759;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:drawTick 0.3s ease forwards 0.4s}
+          #regStatusView{text-align:center;padding:20px 16px;max-width:280px;margin:0 auto;box-sizing:border-box}
+          .ios-check{width:56px;height:56px;margin:0 auto 14px;display:block}
+          .ios-check-circle{fill:none;stroke:#34c759;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:151;animation:drawCircle 0.6s cubic-bezier(0.65,0,0.35,1) forwards}
+          .ios-check-tick{fill:none;stroke:#34c759;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:32;stroke-dashoffset:32;animation:drawTick 0.4s cubic-bezier(0.65,0,0.35,1) 0.5s forwards}
           @keyframes drawCircle{to{stroke-dashoffset:0}}
-          @keyframes drawTick{0%{stroke-dashoffset:30}80%{stroke-dashoffset:-2}100%{stroke-dashoffset:0}}
-          #regStatusDesc{color:#ccc;font-size:15px;margin:0 0 12px;line-height:1.5}
-          #regStatusBadge{margin-bottom:10px}
-          #regEditBtn{margin-top:10px;width:100%}
+          @keyframes drawTick{to{stroke-dashoffset:0}}
+          #regStatusDesc{color:#bbb;font-size:15px;margin:0 0 14px;line-height:1.6}
+          #regStatusBadge{display:inline-block;margin-bottom:12px}
+          #regEditBtn{margin-top:8px;width:100%}
           #regStatusView .lead-support{display:block;text-align:center;margin-top:10px;font-size:13px;color:#25d366}
         </style>
         <div id="regStatusView" class="lead-status-view" hidden>
           <svg class="ios-check" viewBox="0 0 52 52">
             <circle class="ios-check-circle" cx="26" cy="26" r="24"/>
-            <path class="ios-check-tick" d="M15 27l7 7 15-15"/>
+            <path class="ios-check-tick" d="M14 27l8 8 16-16"/>
           </svg>
-          <p id="regStatusDesc">سجّلت اهتمامك بالدورة. الفريق يراجع طلبك وراح نتواصل معك قريباً.</p>
+          <p id="regStatusDesc">تم تسجيل معلوماتك، سيتم التواصل معك في أقرب وقت</p>
           <span id="regStatusBadge" class="status-badge pending">قيد المراجعة</span>
           <button class="btn btn-primary" id="regEditBtn">عدّل بياناتك</button>
           <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener">
