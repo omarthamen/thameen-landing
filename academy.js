@@ -2017,20 +2017,20 @@ async function addQuestion() {
 
     const badge = document.getElementById("regStatusBadge");
     const desc = document.getElementById("regStatusDesc");
-    const checkIcon = statusView.querySelector(".status-check");
+    const svgPaths = statusView.querySelectorAll(".ios-check circle, .ios-check path");
 
     if (lead.status === "converted") {
-      if (checkIcon) checkIcon.style.background = "linear-gradient(135deg,#5fe08a,#2ecc71)";
+      svgPaths.forEach(el => el.style.stroke = "#34c759");
       badge.className = "status-badge converted";
       badge.textContent = "تم القبول!";
       desc.textContent = "مبروك! تم قبول طلبك. راح نرسل لك بيانات الدخول قريبًا.";
     } else if (lead.status === "contacted") {
-      if (checkIcon) { checkIcon.style.background = "linear-gradient(135deg,#f1c66b,#e6b54a)"; checkIcon.textContent = "📞"; }
+      svgPaths.forEach(el => el.style.stroke = "#f1c66b");
       badge.className = "status-badge contacted";
       badge.textContent = "تم التواصل";
       desc.textContent = "تواصلنا معك — تحقق من الواتساب أو الإيميل.";
     } else {
-      if (checkIcon) checkIcon.style.background = "linear-gradient(135deg,#5fe08a,#2ecc71)";
+      svgPaths.forEach(el => el.style.stroke = "#34c759");
       badge.className = "status-badge pending";
       badge.textContent = "قيد المراجعة";
       desc.textContent = "سجّلت اهتمامك بالدورة. الفريق يراجع طلبك وراح نتواصل معك قريباً.";
