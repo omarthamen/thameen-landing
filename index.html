@@ -23,9 +23,13 @@
   <!-- خط الواجهة: IBM Plex Sans Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://hwzpjxxfdqsjymxbjokv.supabase.co" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=66" />
+  <!-- Preload LCP image -->
+  <link rel="preload" as="image" href="assets/video/poster.jpg?v=7" fetchpriority="high" />
+
+  <link rel="stylesheet" href="styles.css?v=67" />
 </head>
 <body>
 
@@ -63,9 +67,11 @@
     <div class="video-frame reveal-scale" id="videoFrame">
       <video
         id="mainVideo"
-        preload="metadata"
+        preload="none"
         playsinline
         poster="assets/video/poster.jpg?v=7"
+        width="1920"
+        height="1080"
       >
         <source src="assets/video/main.mp4?v=6" type="video/mp4" />
         متصفحك لا يدعم تشغيل الفيديو. <a href="assets/video/main.mp4">حمّل الفيديو</a>.
