@@ -656,18 +656,18 @@
         </a>
       </div>
       <div id="leadStatusView" class="lead-status-view" hidden>
+        <h3 id="statusTitle">وصلنا طلبك!</h3>
+        <p id="statusDesc">سيتم التواصل معك قريبًا</p>
         <div id="statusIcon" class="status-icon-wrap">
-          <svg class="status-icon-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="status-icon-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" opacity="0.2"/>
             <path d="M12 6v6l4 2" class="status-icon-hand"/>
           </svg>
         </div>
         <span id="statusBadge" class="status-badge pending">قيد المراجعة</span>
-        <h3 id="statusTitle">طلبك قيد المراجعة</h3>
-        <p id="statusDesc">سجّلت طلبك من قبل — راح نتواصل معك قريبًا.</p>
         <button class="btn btn-primary" id="editMyLead">عدّل بياناتك</button>
         <a class="lead-support" href="https://wa.me/9647518838203?text=مرحباً، أريد الاستفسار عن طلبي" target="_blank" rel="noopener">
-          استفسار عن طلبك؟
+          استفسر عن طلبك
         </a>
       </div>
     </div>
@@ -700,17 +700,17 @@
     .lead-success .btn{margin-bottom:10px}
 
     /* حالة الطلب */
-    .lead-status-view{text-align:center;padding:30px 20px}
-    .lead-status-view h3{color:#fff;font-size:18px;margin:0 0 10px}
-    .lead-status-view p{color:var(--text-muted);font-size:14px;margin:0 0 20px;line-height:1.7}
-    .status-badge{display:inline-block;padding:8px 20px;border-radius:99px;font-size:14px;font-weight:700;margin-bottom:16px}
+    .lead-status-view{text-align:center;padding:24px 20px}
+    .lead-status-view h3{color:#fff;font-size:17px;margin:0 0 6px;font-weight:600}
+    .lead-status-view p{color:var(--text-muted);font-size:13px;margin:0 0 14px}
+    .status-badge{display:inline-block;padding:6px 16px;border-radius:99px;font-size:13px;font-weight:600;margin-bottom:14px}
     .status-badge.pending{background:rgba(91,184,232,.15);color:#5BB8E8}
     .status-badge.contacted{background:rgba(241,198,107,.15);color:#f1c66b}
     .status-badge.converted{background:rgba(80,200,120,.15);color:#74d99a}
 
     /* أيقونة الحالة */
-    .status-icon-wrap{width:72px;height:72px;min-width:72px;max-width:72px;margin:0 auto 18px;border:1px solid rgba(91,184,232,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.3s,border-color 0.3s}
-    .status-icon-svg{width:36px;height:36px;min-width:36px;max-width:36px;color:#5BB8E8;transition:color 0.3s}
+    .status-icon-wrap{width:52px;height:52px;min-width:52px;max-width:52px;margin:0 auto 12px;border:1px solid rgba(91,184,232,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(91,184,232,.08)}
+    .status-icon-svg{width:24px;height:24px;min-width:24px;max-width:24px;color:#5BB8E8}
     .status-icon-hand{stroke-dasharray:20;stroke-dashoffset:20;animation:iconDraw 0.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards 0.3s}
     .status-icon-check{stroke-dasharray:30;stroke-dashoffset:30;animation:iconDraw 0.6s cubic-bezier(0.25,0.46,0.45,0.94) forwards 0.2s}
     .status-icon-phone{stroke-dasharray:100;stroke-dashoffset:100;animation:iconDraw 0.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards 0.2s}
@@ -814,7 +814,7 @@
       const desc = document.getElementById("statusDesc");
 
       if (lead.status === "converted") {
-        iconWrap.innerHTML = `<svg class="status-icon-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" opacity="0.2"/><polyline points="22 4 12 14.01 9 11.01" class="status-icon-check"/></svg>`;
+        iconWrap.innerHTML = `<svg class="status-icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" opacity="0.2"/><polyline points="22 4 12 14.01 9 11.01" class="status-icon-check"/></svg>`;
         iconWrap.style.background = "linear-gradient(135deg,rgba(80,200,120,.15),rgba(80,200,120,.05))";
         iconWrap.style.borderColor = "rgba(80,200,120,.3)";
         iconWrap.querySelector("svg").style.color = "#74d99a";
@@ -823,7 +823,7 @@
         title.textContent = "مبروك! تم قبول طلبك";
         desc.textContent = "راح نرسل لك بيانات الدخول قريبًا على الواتساب أو الإيميل.";
       } else if (lead.status === "contacted") {
-        iconWrap.innerHTML = `<svg class="status-icon-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" class="status-icon-phone"/></svg>`;
+        iconWrap.innerHTML = `<svg class="status-icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" class="status-icon-phone"/></svg>`;
         iconWrap.style.background = "linear-gradient(135deg,rgba(241,198,107,.15),rgba(241,198,107,.05))";
         iconWrap.style.borderColor = "rgba(241,198,107,.3)";
         iconWrap.querySelector("svg").style.color = "#f1c66b";
@@ -832,7 +832,7 @@
         title.textContent = "تواصلنا معك";
         desc.textContent = "تحقق من الواتساب أو الإيميل للمتابعة.";
       } else {
-        iconWrap.innerHTML = `<svg class="status-icon-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 6v6l4 2" class="status-icon-hand"/></svg>`;
+        iconWrap.innerHTML = `<svg class="status-icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 6v6l4 2" class="status-icon-hand"/></svg>`;
         iconWrap.style.background = "linear-gradient(135deg,rgba(91,184,232,.15),rgba(91,184,232,.05))";
         iconWrap.style.borderColor = "rgba(91,184,232,.25)";
         iconWrap.querySelector("svg").style.color = "#5BB8E8";
