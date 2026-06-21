@@ -23,9 +23,13 @@
   <!-- خط الواجهة: IBM Plex Sans Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet" /></noscript>
 
-  <link rel="stylesheet" href="styles.css?v=64" />
+  <!-- Preload critical assets -->
+  <link rel="preload" as="image" href="assets/video/poster.jpg?v=7" />
+
+  <link rel="stylesheet" href="styles.css?v=65" />
 </head>
 <body>
 
@@ -101,7 +105,7 @@
   <!-- المدرّب -->
   <section id="instructor" class="section">
     <div class="instructor-v2">
-      <img src="assets/images/omar-profile.png" alt="عمر ثمين" class="instructor-v2-img reveal-scale" />
+      <img src="assets/images/omar-profile.jpg" alt="عمر ثمين" class="instructor-v2-img reveal-scale" />
       <h2 class="reveal reveal-d1">أنا عمر ثمين</h2>
       <p class="instructor-v2-role reveal reveal-d2">مونتير محترف</p>
       <p class="instructor-v2-bio reveal reveal-d3">اشتغلت مع عشرات صنّاع المحتوى والشركات، ودرّبت مئات الطلاب على المونتاج الاحترافي.<br>صمّمت هذا البرنامج عشان أختصر عليك سنوات من التجربة والخطأ.</p>
@@ -258,35 +262,35 @@
       <div class="slider-container">
         <!-- صناع المحتوى -->
         <div class="slider-item" data-index="0" data-type="creator">
-          <img src="assets/feedback/feedback-1.png" alt="بندريتا" />
+          <img src="assets/feedback/feedback-1.jpg" alt="بندريتا" />
         </div>
         <div class="slider-item" data-index="1" data-type="creator">
-          <img src="assets/feedback/feedback-2.png" alt="ريان أوسمز" />
+          <img src="assets/feedback/feedback-2.jpg" alt="ريان أوسمز" />
         </div>
         <div class="slider-item" data-index="2" data-type="creator">
-          <img src="assets/feedback/feedback-3.png" alt="احمد شو" />
+          <img src="assets/feedback/feedback-3.jpg" alt="احمد شو" />
         </div>
         <!-- مشتركين الدورة -->
         <div class="slider-item" data-index="3" data-type="subscriber">
-          <img src="assets/feedback/01-Ehab.png" alt="إيهاب" />
+          <img src="assets/feedback/01-Ehab.jpg" alt="إيهاب" />
         </div>
         <div class="slider-item" data-index="4" data-type="subscriber">
-          <img src="assets/feedback/02-abdulsalam.png" alt="عبدالسلام" />
+          <img src="assets/feedback/02-abdulsalam.jpg" alt="عبدالسلام" />
         </div>
         <div class="slider-item" data-index="5" data-type="subscriber">
-          <img src="assets/feedback/03-mortada.png" alt="مرتضى" />
+          <img src="assets/feedback/03-mortada.jpg" alt="مرتضى" />
         </div>
         <div class="slider-item" data-index="6" data-type="subscriber">
-          <img src="assets/feedback/04-Anonymous.png" alt="مشترك" />
+          <img src="assets/feedback/04-Anonymous.jpg" alt="مشترك" />
         </div>
         <div class="slider-item" data-index="7" data-type="subscriber">
-          <img src="assets/feedback/05-Ali-Yas.png" alt="علي ياس" />
+          <img src="assets/feedback/05-Ali-Yas.jpg" alt="علي ياس" />
         </div>
         <div class="slider-item" data-index="8" data-type="subscriber">
-          <img src="assets/feedback/06-mohamed-kaito.png" alt="محمد كايتو" />
+          <img src="assets/feedback/06-mohamed-kaito.jpg" alt="محمد كايتو" />
         </div>
         <div class="slider-item" data-index="9" data-type="subscriber">
-          <img src="assets/feedback/07-Ehab-2.png" alt="إيهاب" />
+          <img src="assets/feedback/07-Ehab-2.jpg" alt="إيهاب" />
         </div>
       </div>
 
@@ -675,9 +679,9 @@
     <button class="lightbox-nav lightbox-next" aria-label="التالي">›</button>
   </div>
 
-  <script src="gallery.js?v=2"></script>
-  <script src="reviews.js?v=10"></script>
-  <script src="main.js?v=36"></script>
+  <script src="gallery.js?v=2" defer></script>
+  <script src="reviews.js?v=10" defer></script>
+  <script src="main.js?v=37" defer></script>
 
   <style>
     .lead-card{max-width:420px}
